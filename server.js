@@ -182,7 +182,6 @@ io.on('connection', socket => {
     let add_init_ = data.initiative
     let sort = data.sort
     myredis.add_new_init(room,data.initiative.id,add_init_)
-    console.log(init_data)
     init_p.add_init(room,add_init_)
     logger.info(room,'server add init')
     logger.info(data.initiative,'server add init')
@@ -333,9 +332,7 @@ app.get('/dungeon-bot/api/spell_list',async (req,res) => {
 
 app.get('/dungeon-bot/api/roundstart',async (req,res) => {
   let session_id = req.query.session_id
-  console.log(session_id)
   let init_data = await init_p.get_all(session_id,'initiative')
-  console.log(init_data)
   
   let get_initial = await init_p.get_initial(session_id)
   let sorted_list = sort_init(init_data,false)
