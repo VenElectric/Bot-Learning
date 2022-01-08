@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-function parse_args(msg) {
+exports.addBash = exports.parseRoll = void 0;
+function parseRoll(msg) {
     let comment = "";
     let rollex = "";
     let length = msg.length;
@@ -30,4 +31,17 @@ function parse_args(msg) {
     }
     return { comment: comment, rollex: rollex };
 }
-exports.default = parse_args;
+exports.parseRoll = parseRoll;
+function addBash(item, color) {
+    let final = "";
+    switch (color.toLowerCase()) {
+        case "green":
+            final = '```bash\n' + '"' + item + '"' + '```';
+            break;
+        case "blue":
+            final = '```ini\n' + '[' + item + ']' + '```';
+            break;
+    }
+    return final;
+}
+exports.addBash = addBash;

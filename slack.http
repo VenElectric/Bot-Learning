@@ -1,0 +1,4 @@
+GET https://content.googleapis.com/admin/directory/v1/users
+?domain=acme.com
+&maxResults=2
+Authorization: Bearer 

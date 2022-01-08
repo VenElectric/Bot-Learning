@@ -1,4 +1,6 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.db = void 0;
 const admin = require("firebase-admin");
 require('dotenv').config();
 //@ts-ignore
@@ -8,5 +10,4 @@ if (!googleServiceAccountCreds)
 admin.initializeApp({
     credential: admin.credential.cert(googleServiceAccountCreds),
 });
-const db = admin.firestore();
-module.exports = { db };
+exports.db = admin.firestore();

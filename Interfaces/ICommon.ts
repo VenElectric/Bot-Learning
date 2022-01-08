@@ -1,4 +1,5 @@
-
+import { IInit } from "./IInit";
+import { ISpell } from "./ISpell";
 export interface IScores {
     str?: number
     dex?: number
@@ -41,3 +42,12 @@ export interface ISenses {
     sense: string
     range: string
 }
+
+export interface ISessionData {
+    onDeck: number;
+    isSorted: boolean;
+    sessionSize: number;
+    initiativeList: IInit[] | IInit | [];
+    spellList: ISpell[] | ISpell | [];
+    room: string;
+  }

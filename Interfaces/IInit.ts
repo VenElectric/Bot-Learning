@@ -1,17 +1,18 @@
 
 interface IStatus {
-    name: string
+    spellName: string
     id: string
-    effect: string
+    effectDescription: string
 }
 
 export interface IInit {
     id: string,
-    name: string,
-    init: number,
-    init_mod: number,
-    line_order: number,
-    cmark: boolean,
-    status_effects: IStatus[] | [],
-    npc:boolean
+    characterName: string,
+    initiative: number,
+    initiativeModifier: number,
+    roundOrder: number,
+    isCurrent: boolean,
+    statusEffects: IStatus[] | [],
+    isNpc:boolean
 }
+

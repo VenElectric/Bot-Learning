@@ -9,6 +9,4 @@ admin.initializeApp({
   credential: admin.credential.cert(googleServiceAccountCreds),
 })
 
-const db = admin.firestore()
-
-module.exports = {db}
+export const db = admin.firestore()

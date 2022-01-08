@@ -1,14 +1,36 @@
-import { BaseCommandInteraction, Message } from "discord.js";
+import {
+  BaseCommandInteraction,
+  Message,
+  SelectMenuInteraction,
+} from "discord.js";
 
 const fs = require("fs");
-const { Client, Collection, Intents } = require("discord.js");
+const { Client, Collection, Intents, MessageEmbed } = require("discord.js");
 const express = require("express");
 const { token } = require("./config.json");
 const http = require("http");
 const app = express();
 const server = http.createServer(app);
 const port = process.env.PORT || 8000;
-const { register_commands } = require("./deploy-commands")
+const { register_commands } = require("./deploy-commands");
+import {
+  commandDescriptions,
+  initiativeCollection,
+  spellCollection,
+} from "./services/constants";
+import { retrieveCollection, getSession } from "./services/database-common";
+import { finalizeInitiative } from "./services/initiative";
+import {IInit} from "./Interfaces/IInit";
+import {EmitTypes} from "./services/emitTypes";
+
+require("dotenv").config();
+
+const io = require("socket.io")(server, {
+  cors: {
+    origin: process.env.HOST_URL,
+    methods: ["GET", "POST"],
+  },
+});
 
 app.use(
   require("cors")({
@@ -17,6 +39,7 @@ app.use(
   })
 );
 
+console.log(process.env.HOST_URL);
 app.use(express.json());
 
 // Create a new client instance
@@ -41,56 +64,136 @@ for (const file of commandFiles) {
   client.commands.set(command.data.name, command);
 }
 
-
 // ----- DISCORD ------
 // When the client is ready, run this code (only once)
 client.once("ready", () => {
-  console.log("Ready")
-})
+  console.log("Ready");
+});
 
 // Login to Discord with your client"s token
-register_commands()
+register_commands();
 client.login(token);
 
-client.on("messageCreate", async (message: Message) => {
-  const regex = new RegExp(/^\d*([d|D])([0-9])+/);
-  const numreg = new RegExp(/(^\d\*|\+|\-|\/\d)/);
-  const prefix = new RegExp(/(\/r)/)
-  const rollcom = client.commands.get("roll");
-  const mathcom = client.commands.get("maths")
-  if (message.content.match(regex) && message.content.match(numreg) || message.content.match(prefix)) {
-    rollcom.execute(message)
-  }
-  if (!message.content.match(regex) && message.content.match(numreg)) {
-    mathcom.execute(message)
-    
+io.on("connection", (socket: any) => {
+  socket.on("create", function (room: any) {
+    socket.join(room);
+    console.log(room);
+  });
+
+  socket.on("test", function (data: any) {
+    console.log("data", data);
+  });
+
+  socket.on("getinitial", async (sessionId: any, respond: any) => {
+    let initiativeList = await retrieveCollection(sessionId, initiativeCollection);
+    let spellList = await retrieveCollection(sessionId, spellCollection);
+    let [isSorted, onDeck, sessionSize] = await getSession(sessionId)
+
+    respond({
+      initiativeList: initiativeList,
+      spellList: spellList,
+      isSorted: isSorted,
+      onDeck: onDeck,
+      sessionId,
+    });
+  });
+
+
+  socket.on(EmitTypes.ROUND_START, async (sessionId:any, respond:any) => {
+    let initiativeList = await retrieveCollection(sessionId, initiativeCollection);
+    let [isSorted, onDeck, sessionSize] = await getSession(sessionId)
+    let sortedList = await finalizeInitiative(initiativeList as IInit[], true,sessionId,onDeck,isSorted)
+    socket.broadcast.to(sessionId).emit(EmitTypes.ROUND_START,{initiativeList: sortedList, isSorted: isSorted, sessionSize:sessionSize, onDeck:onDeck});
+    respond({initiativeList: sortedList, isSorted: isSorted, sessionSize:sessionSize, onDeck:onDeck})
+  })
+
+  socket.on("addinit", (sessionId:any, respond:any) => {
+
+    respond("test")
+  })
+});
+
+client.on("error", (error: unknown) => {
+  if (error instanceof Error) {
+    console.log(error);
+    console.log("client.on");
   }
 });
 
-client.on("interactionCreate", async (interaction: BaseCommandInteraction) => {
+client.on("messageCreate", async (message: Message) => {
+  const regex = new RegExp(/(\/|\/[a-z]|\/[A-Z]|r)*\s*([d|D])([\d])+/);
+  const numreg = new RegExp(/(^\d\s*(\*|\+|\-|\/|=)\s*(\d|[a-z]))/);
+  // const prefix = new RegExp(/\/[a-z]|\/|[r|R]/);
+  const rollcom = client.commands.get("roll");
+  const mathcom = client.commands.get("maths");
+  if (message.author.bot) return;
+  try {
+    if (message.content.match(regex)) {
+      rollcom.execute(message);
+    }
+    if (!message.content.match(regex) && message.content.match(numreg)) {
+      mathcom.execute(message);
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      message.channel.send(error.message);
+    }
+  }
+});
 
-  if (!interaction.isCommand()){ return }
+// Menu interactions
+client.on("interactionCreate", async (interaction: SelectMenuInteraction) => {
+  if (!interaction.isSelectMenu()) return;
+
+  // help menu
+  if (interaction.customId === "helpmenu") {
+    await interaction.deferUpdate();
+    const helpEmbed = new MessageEmbed()
+      .setTitle(interaction.values[0])
+      .addField(
+        "\u200b",
+        commandDescriptions[`${interaction.values[0]}`].description,
+        false
+      )
+      .setImage(commandDescriptions[`${interaction.values[0]}`].image);
+
+    await interaction.editReply({
+      embeds: [helpEmbed],
+      components: [],
+    });
+  }
+  if (interaction.customId === "changechannel") {
+    let channelName = await interaction?.guild?.channels.fetch(
+      interaction.values[0]
+    );
+    await interaction.deferUpdate();
+    await interaction.editReply({
+      content: `Your channel has been changed to ${channelName?.name}`,
+      components: [],
+    });
+  }
+});
+
+// Command Interactions
+client.on("interactionCreate", async (interaction: BaseCommandInteraction) => {
+  if (!interaction.isCommand()) {
+    return;
+  }
   const command = client.commands.get(interaction.commandName);
 
-  if (!command) { return }
-
+  if (!command) {
+    return;
+  }
   try {
     await command.execute(interaction);
   } catch (error) {
     console.error(error);
     await interaction.reply({
       content: "There was an error while executing this command!",
-      ephemeral: true,
     });
   }
 });
 
-// ----- ROUTES ------
-
-app.get("/dungeon-bot/api/sessions/:id",async(req,res) =>{
-  console.log('test')
-  // get session list
-})
 
 
 server.listen(port, () => {

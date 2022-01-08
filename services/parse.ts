@@ -1,5 +1,5 @@
 
-function parse_args(msg:string[]){
+export function parseRoll(msg:string[]){
 	let comment = ""
 	let rollex = ""
 	let length = msg.length;
@@ -31,4 +31,15 @@ function parse_args(msg:string[]){
 	return {comment:comment,rollex:rollex}
 }
 
-export default parse_args
+export function addBash(item: string, color:string){
+	let final = "";
+	switch (color.toLowerCase()){
+		case "green":
+			final = '```bash\n' + '"' + item + '"' + '```'
+			break
+		case "blue":
+			final = '```ini\n' + '[' + item + ']' + '```'
+			break
+	}
+	return final
+}

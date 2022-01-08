@@ -5,9 +5,18 @@ import { Message } from "discord.js";
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName("maths")
-		.setDescription("Replies with Pong!"),
+		.setDescription("1+1 = ?"),
 	async execute(message:Message) {
-		await message.reply(`Answer: ${evaluate(message.content)}`);
+		try{
+			let answer = evaluate(message.content)
+			await message.reply(`Answer: ${answer}`);
+		}
+		catch (error){
+			if (error instanceof Error) {
+				await message.reply(error.message);
+			  }
+		}
+		
 	},
 };
 
