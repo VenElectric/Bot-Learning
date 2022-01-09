@@ -1,5 +1,4 @@
 const fs = require("fs");
-const { token } = require("./config.json");
 const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v9");
 
@@ -18,7 +17,7 @@ async function register_commands() {
     commands.push(command.data.toJSON());
   }
 
-  const rest = new REST({ version: "9" }).setToken(token);
+  const rest = new REST({ version: "9" }).setToken(process.env.DISCORD_TOKEN);
   
 
   await rest

@@ -9,7 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const fs = require("fs");
-const { token } = require("./config.json");
 const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v9");
 require("dotenv").config();
@@ -24,7 +23,7 @@ function register_commands() {
             const command = require(`./commands/${file}`);
             commands.push(command.data.toJSON());
         }
-        const rest = new REST({ version: "9" }).setToken(token);
+        const rest = new REST({ version: "9" }).setToken(process.env.DISCORD_TOKEN);
         yield rest
             .put(Routes.applicationCommands(clientId), { body: commands })
             .then(() => console.log("Successfully registered application commands."))
