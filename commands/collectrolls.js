@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { MessageEmbed } = require("discord.js");
 const parse_1 = require("../services/parse");
+const LoggingClass_1 = require("../utilities/LoggingClass");
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("collectrolls")
@@ -26,6 +27,7 @@ module.exports = {
         .setRequired(true)),
     execute(interaction) {
         return __awaiter(this, void 0, void 0, function* () {
+            let sessionId = interaction.channel.id;
             const tag = interaction.options.getString("tag");
             const rollAmount = interaction.options.getInteger("rollamount");
             const filter = (m) => m.content.includes(`${tag}`) && m.author.username === "Initiative Bot";
@@ -34,6 +36,7 @@ module.exports = {
                 .setColor("#0099ff");
             if (tag === null || rollAmount === null) {
                 yield interaction.reply("Please enter a tag and number of dice rolls when you run this command. If you need help with this command, please use the /help slash command.");
+                LoggingClass_1.weapon_of_logging.NOTICE("CollectRolls", "tag or roll ammount is null", interaction.content, sessionId);
                 return;
             }
             try {
@@ -56,6 +59,7 @@ module.exports = {
                         .replace(tag, "")
                         .trim();
                     let roll = (0, parse_1.addBash)(commentArray[2].replace("```", "").replace('"', ""), "green");
+                    LoggingClass_1.weapon_of_logging.INFO("CollectRolls", "infocollected", { characterName: characterName, roll: roll, commentArray: commentArray }, sessionId);
                     if (characterName.length > 0) {
                         embed.addField("\u200b", `${(0, parse_1.addBash)(characterName, "blue")} ${roll}`, false);
                     }
@@ -64,14 +68,17 @@ module.exports = {
                             .fetch((_a = m.mentions.repliedUser) === null || _a === void 0 ? void 0 : _a.id)
                             .then((username) => {
                             let nickname = (0, parse_1.addBash)(username.nickname, "blue");
+                            LoggingClass_1.weapon_of_logging.INFO("CollectRolls", "nickname", nickname, sessionId);
                             embed.addField("\u200b", `${nickname} ${roll}`, false);
                         })
                             .catch((error) => {
+                            LoggingClass_1.weapon_of_logging.NOTICE(error.name, error.message, m, sessionId);
                             console.log(error);
                         });
                     }
                 }));
                 collector.on("end", (collected) => __awaiter(this, void 0, void 0, function* () {
+                    LoggingClass_1.weapon_of_logging.INFO("collected", "collectedrolls", collected, sessionId);
                     yield interaction.editReply("Collection ended");
                     yield interaction.channel.send({ embeds: [embed] });
                     // embed is being sent before the above code. So embed is empty when it is sent to the channel.
@@ -79,6 +86,9 @@ module.exports = {
             }
             catch (error) {
                 console.log(error);
+                if (error instanceof Error) {
+                    LoggingClass_1.weapon_of_logging.CRITICAL(error.name, error.message, error.stack, interaction.content, sessionId);
+                }
             }
         });
     },

@@ -1,4 +1,4 @@
-
+const d20Regex = new RegExp(/([\d]*|[d|D]*)(\s?)([a-z]|[\d]+)/)
 export function parseRoll(msg:string[]){
 	let comment = ""
 	let rollex = ""
@@ -42,4 +42,12 @@ export function addBash(item: string, color:string){
 			break
 	}
 	return final
+}
+
+
+// try to parse out myriad d20 rolls from string
+
+export function parseD20(d20String: string){
+	let newD20 = d20String.match(d20Regex)
+	console.log(newD20, "newd20")
 }

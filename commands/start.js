@@ -13,16 +13,22 @@ const { SlashCommandBuilder } = require("@discordjs/builders");
 const { finalizeInitiative } = require("../services/initiative");
 const { db } = require("../services/firebase-setup");
 const { createEmbed } = require("../services/create-embed");
+const LoggingClass_1 = require("../utilities/LoggingClass");
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("start")
         .setDescription("Start Initiative and reset turn order."),
     execute(interaction) {
         return __awaiter(this, void 0, void 0, function* () {
+            let newList;
+            let sessionId = interaction.channel.id;
             try {
-                let initiativeSnap = yield db.collection("sessions").doc(interaction.channel.id).collection("initiative").get();
+                let initiativeSnap = yield db
+                    .collection("sessions")
+                    .doc(interaction.channel.id)
+                    .collection("initiative")
+                    .get();
                 let initiativeList = [];
-                let newList;
                 initiativeSnap.forEach((doc) => {
                     let record = doc.data();
                     record.isCurrent = false;
@@ -30,12 +36,19 @@ module.exports = {
                     initiativeList.push(record);
                 });
                 newList = yield finalizeInitiative(initiativeList, true, interaction.channel.id, 2, true);
+                LoggingClass_1.weapon_of_logging.INFO("start", "newList data", newList, sessionId);
                 console.log(newList, "newList");
                 let initiativeEmbed = createEmbed(newList);
-                yield interaction.reply({ content: "Rounds have been started.", embeds: [initiativeEmbed] });
+                yield interaction.reply({
+                    content: "Rounds have been started.",
+                    embeds: [initiativeEmbed],
+                });
             }
             catch (error) {
                 console.log(error);
+                if (error instanceof Error) {
+                    LoggingClass_1.weapon_of_logging.CRITICAL(error.name, error.message, error.stack, newList, sessionId);
+                }
             }
         });
     },

@@ -1,7 +1,8 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { v4: uuidv4 } = require("uuid");
 import { addSingle } from "../services/database-common";
-import { initiativeCollection } from "../services/constants";
+import { collectionTypes } from "../Interfaces/ENUMS";
+import { weapon_of_logging } from "../utilities/LoggingClass";
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -26,12 +27,19 @@ module.exports = {
         .setRequired(true)
     )
     .addBooleanOption((option: any) =>
-      option.setName("isnpc").setDescription("NPC? True or False").setRequired(true)
+      option
+        .setName("isnpc")
+        .setDescription("NPC? True or False")
+        .setRequired(true)
     )
     .addBooleanOption((option: any) =>
-      option.setName("isnat20").setDescription("Rolled a Nat 20?").setRequired(true)
+      option
+        .setName("isnat20")
+        .setDescription("Rolled a Nat 20?")
+        .setRequired(true)
     ),
   async execute(interaction: any) {
+    let sessionId = interaction.channel.id;
     let name = interaction.options.getString("charactername");
     let initiativeRoll = interaction.options.getInteger("initiativeroll");
     let initiativeModifier =
@@ -39,7 +47,7 @@ module.exports = {
     let isNpc = interaction.options.getBoolean("isnpc");
     let isNat20 = interaction.options.getBoolean("isnat20");
 
-    if (isNat20){
+    if (isNat20) {
       initiativeRoll += 100;
     }
 
@@ -54,21 +62,38 @@ module.exports = {
         statusEffects: [],
         isNpc: isNpc,
       };
+      // weapon_of_logging.INFO("options", "added character", options, sessionId);
 
-      let [isUploaded, errorMsg] = await addSingle(
+      let [errorMsg, isUploaded] = await addSingle(
         options,
         interaction.channelId,
-        initiativeCollection
+        collectionTypes.INITIATIVE
       );
-      console.log(isUploaded);
-      console.error(errorMsg);
+
+      if (errorMsg instanceof Error){
+        weapon_of_logging.CRITICAL(
+          errorMsg.name,
+          errorMsg.message,
+          errorMsg.stack,
+          options,
+          sessionId
+        );
+      }
+     
+      console.log(errorMsg instanceof Error)
       let replyString = `Your character, ${name}, has been added with an initiative of ${initiativeRoll} + ${initiativeModifier} = ${
         initiativeRoll + initiativeModifier
       }. You can edit this on the website component using the /link command. \n Any rolled nat 20's have 100 added on for sorting purposes.`;
       await interaction.reply(replyString);
     } catch (error) {
       if (error instanceof Error) {
-        await interaction.reply(error.message);
+          weapon_of_logging.CRITICAL(
+            error.name,
+            error.message,
+            error.stack,
+            interaction.content,
+            sessionId
+          );
       }
     }
   },

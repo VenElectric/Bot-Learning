@@ -9,27 +9,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// get session embed (initiative list in table format)
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const { evaluate } = require('mathjs');
-const LoggingClass_1 = require("../utilities/LoggingClass");
+// import { webComponent, devWeb } from "../services/constants"
+// const { hyperlink } = require('@discordjs/builders');
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName("maths")
-        .setDescription("1+1 = ?"),
-    execute(message) {
+        .setName("table")
+        .setDescription("Get the link for the web component."),
+    execute(interaction) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sessionId = message.channel.id;
-            try {
-                let answer = evaluate(message.content);
-                LoggingClass_1.weapon_of_logging.INFO("math", "Calculation", answer, sessionId);
-                yield message.reply(`Answer: ${answer}`);
-            }
-            catch (error) {
-                if (error instanceof Error) {
-                    yield message.reply(error.message);
-                    LoggingClass_1.weapon_of_logging.NOTICE(error.name, error.message, message.content, sessionId);
-                }
-            }
+            yield interaction.reply("Website is down for maintenance!");
+            // let url = `${devWeb}/session/${interaction.channel.id}`
+            // await interaction.reply(`Here is the URL for your session: ${url} \nThis URL is specific to this channel. If you need to change the session to a different text channel then please use the /changechannel slash command.`);
         });
     },
 };

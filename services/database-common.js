@@ -14,6 +14,7 @@ exports.getSession = exports.updateSession = exports.retrieveCollection = export
 const { db } = require("./firebase-setup");
 const { v4: uuidv4 } = require("uuid");
 const initRef = db.collection("sessions");
+const LoggingClass_1 = require("../utilities/LoggingClass");
 function addSingle(item, sessionId, collection) {
     return __awaiter(this, void 0, void 0, function* () {
         let isUploaded;
@@ -25,10 +26,15 @@ function addSingle(item, sessionId, collection) {
             .set(item)
             .then(() => {
             isUploaded = true;
+            errorMsg = "";
+            LoggingClass_1.weapon_of_logging.INFO("isUploaded", "added single upload", item, sessionId);
         })
             .catch((error) => {
             // error handling
-            console.log(error);
+            console.trace(error);
+            if (error instanceof Error) {
+                LoggingClass_1.weapon_of_logging.CRITICAL(error.name, error.message, error.stack, { item: item, collectionType: collection }, sessionId);
+            }
             isUploaded = false;
             errorMsg = error;
         });
@@ -43,11 +49,12 @@ function deleteSingle(itemId, sessionId, collection) {
         .doc(itemId)
         .delete()
         .then(() => {
-        // insert logging here
-        console.log("Success?");
+        LoggingClass_1.weapon_of_logging.INFO("isDeleted", "success deletion", itemId, sessionId);
     })
         .catch((error) => {
-        // error handling
+        if (error instanceof Error) {
+            LoggingClass_1.weapon_of_logging.ERROR(error.name, error.message, error.stack, { itemId: itemId, collectionType: collection }, sessionId);
+        }
         console.log(error);
     });
 }
@@ -61,12 +68,14 @@ function updatecollectionRecord(item, collection, docId, sessionId) {
         .doc(docId)
         .set(item, { merge: true })
         .then(() => {
-        console.log("success");
+        LoggingClass_1.weapon_of_logging.INFO("updateCollectionRecord", `success updating collection ${collection}`, { item: item, docId: docId, collection: collection }, sessionId);
         isUploaded = true;
         errorMsg = 0;
     })
         .catch((error) => {
-        console.log(error);
+        if (error instanceof Error) {
+            LoggingClass_1.weapon_of_logging.ERROR(error.name, error.message, error.stack, { item: item, docId: docId, collectionType: collection }, sessionId);
+        }
         isUploaded = false;
         errorMsg = error;
     });
@@ -102,6 +111,9 @@ function updateSession(sessionId, onDeck, isSorted, sessionSize) {
             if (error instanceof Error) {
                 isError = true;
                 errorMsg = error.message;
+                if (error instanceof Error) {
+                    LoggingClass_1.weapon_of_logging.ERROR(error.name, error.message, error.stack, { onDeck: onDeck, isSorted: isSorted, sessionSize: sessionSize }, sessionId);
+                }
             }
         }
         return [isError, errorMsg];
@@ -111,8 +123,11 @@ exports.updateSession = updateSession;
 function getSession(sessionId) {
     return __awaiter(this, void 0, void 0, function* () {
         let snapshot = yield initRef.doc(sessionId).get();
+        //@ts-ignore
         let isSorted;
+        //@ts-ignore
         let onDeck;
+        //@ts-ignore
         let sessionSize;
         console.log("in get session");
         try {
@@ -122,11 +137,16 @@ function getSession(sessionId) {
                 isSorted = snapshot.data().isSorted;
                 onDeck = snapshot.data().onDeck;
                 sessionSize = snapshot.data().sessionSize;
+                LoggingClass_1.weapon_of_logging.INFO("getSession", "grabbingSessionData", { onDeck: onDeck, isSorted: isSorted, sessionSize: sessionSize }, sessionId);
             }
             else {
                 console.log("initref set");
                 initRef.doc(sessionId).set({ isSorted: false, onDeck: 0, sessionSize: 0 }, { merge: true }).then(() => { console.log("sucess"); }).catch((error) => {
-                    console.log(error);
+                    if (error instanceof Error) {
+                        LoggingClass_1.weapon_of_logging.ERROR(error.name, error.message, error.stack, 
+                        //@ts-ignore
+                        { onDeck: onDeck, isSorted: isSorted, sessionSize: sessionSize }, sessionId);
+                    }
                 });
                 console.log(sessionId);
             }
@@ -136,6 +156,9 @@ function getSession(sessionId) {
             console.log("in error");
             console.log(typeof (snapshot.data()));
             console.log(snapshot.data());
+            if (error instanceof Error) {
+                LoggingClass_1.weapon_of_logging.ERROR(error.name, error.message, error.stack, sessionId, sessionId);
+            }
             // better logging and error handling
         }
         return [isSorted, onDeck, sessionSize];

@@ -6,6 +6,7 @@ require("dotenv").config();
 
 const clientId = process.env.CLIENT_ID
 
+
 async function register_commands() {
   const commands = [];
   const commandFiles = fs

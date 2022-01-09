@@ -44,7 +44,7 @@ console.log(process.env.HOST_URL);
 app.use(express.json());
 
 // Create a new client instance
-const client = new Client({
+export const client = new Client({
   intents: [
     Intents.FLAGS.GUILDS,
     Intents.FLAGS.GUILD_MESSAGES,

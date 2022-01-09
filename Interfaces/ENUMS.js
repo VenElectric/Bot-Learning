@@ -5,4 +5,5 @@ var collectionTypes;
 (function (collectionTypes) {
     collectionTypes["INITIATIVE"] = "initiative";
     collectionTypes["SPELLS"] = "spells";
+    collectionTypes["LOGGING"] = "logging";
 })(collectionTypes = exports.collectionTypes || (exports.collectionTypes = {}));

@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addBash = exports.parseRoll = void 0;
+exports.parseD20 = exports.addBash = exports.parseRoll = void 0;
+const d20Regex = new RegExp(/([\d]*|[d|D]*)(\s?)([a-z]|[\d]+)/);
 function parseRoll(msg) {
     let comment = "";
     let rollex = "";
@@ -45,3 +46,9 @@ function addBash(item, color) {
     return final;
 }
 exports.addBash = addBash;
+// try to parse out myriad d20 rolls from string
+function parseD20(d20String) {
+    let newD20 = d20String.match(d20Regex);
+    console.log(newD20, "newd20");
+}
+exports.parseD20 = parseD20;

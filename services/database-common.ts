@@ -4,11 +4,13 @@ const { v4: uuidv4 } = require("uuid");
 const initRef = db.collection("sessions");
 import { IInit } from "../Interfaces/IInit";
 import { ISpell } from "../Interfaces/ISpell";
+import { collectionTypes } from "../Interfaces/ENUMS";
+import { weapon_of_logging } from "../utilities/LoggingClass";
 
-export async function addSingle(item: any, sessionId: string, collection: string) {
+
+export async function addSingle(item: any, sessionId: string, collection: collectionTypes) {
   let isUploaded;
-  let errorMsg;
-
+  let errorMsg: any;
   initRef
     .doc(sessionId)
     .collection(collection)
@@ -16,10 +18,21 @@ export async function addSingle(item: any, sessionId: string, collection: string
     .set(item)
     .then(() => {
       isUploaded = true;
+      errorMsg = "";
+      weapon_of_logging.INFO("isUploaded", "added single upload",item,sessionId)
     })
     .catch((error: any) => {
       // error handling
-      console.log(error);
+      console.trace(error);
+      if (error instanceof Error) {
+        weapon_of_logging.CRITICAL(
+          error.name,
+          error.message,
+          error.stack,
+          {item:item, collectionType: collection},
+          sessionId
+        );
+    }
       isUploaded = false;
       errorMsg = error;
     });
@@ -38,11 +51,18 @@ export function deleteSingle(
     .doc(itemId)
     .delete()
     .then(() => {
-      // insert logging here
-      console.log("Success?");
+      weapon_of_logging.INFO("isDeleted", "success deletion",itemId,sessionId)
     })
     .catch((error: any) => {
-      // error handling
+      if (error instanceof Error) {
+        weapon_of_logging.ERROR(
+          error.name,
+          error.message,
+          error.stack,
+          {itemId: itemId, collectionType: collection},
+          sessionId
+        );
+    }
       console.log(error);
     });
 }
@@ -62,12 +82,20 @@ export function updatecollectionRecord(
     .doc(docId)
     .set(item, { merge: true })
     .then(() => {
-      console.log("success");
+      weapon_of_logging.INFO("updateCollectionRecord", `success updating collection ${collection}`,{item:item,docId:docId,collection:collection},sessionId)
       isUploaded = true;
       errorMsg = 0;
     })
     .catch((error: any) => {
-      console.log(error);
+      if (error instanceof Error) {
+        weapon_of_logging.ERROR(
+          error.name,
+          error.message,
+          error.stack,
+          {item: item, docId: docId, collectionType: collection},
+          sessionId
+        );
+      }
       isUploaded = false;
       errorMsg = error;
     });
@@ -110,6 +138,15 @@ export async function updateSession(
     if (error instanceof Error) {
       isError = true;
       errorMsg = error.message;
+      if (error instanceof Error) {
+        weapon_of_logging.ERROR(
+          error.name,
+          error.message,
+          error.stack,
+          { onDeck: onDeck, isSorted: isSorted, sessionSize: sessionSize },
+          sessionId
+        );
+      }
     }
   }
 
@@ -118,8 +155,11 @@ export async function updateSession(
 
 export async function getSession(sessionId: string) {
   let snapshot = await initRef.doc(sessionId).get();
+  //@ts-ignore
   let isSorted;
+  //@ts-ignore
   let onDeck;
+  //@ts-ignore
   let sessionSize;
 console.log("in get session")
   try {
@@ -129,12 +169,22 @@ console.log("in get session")
       isSorted = snapshot.data().isSorted;
       onDeck = snapshot.data().onDeck;
       sessionSize = snapshot.data().sessionSize
+      weapon_of_logging.INFO("getSession", "grabbingSessionData",{ onDeck: onDeck, isSorted: isSorted, sessionSize: sessionSize },sessionId)
     }
       else {
         console.log("initref set")
         initRef.doc(sessionId).set({ isSorted: false, onDeck: 0, sessionSize:0 }, { merge: true }).then(() => 
         {console.log("sucess")}).catch((error:any) => {
-          console.log(error)
+          if (error instanceof Error) {
+            weapon_of_logging.ERROR(
+              error.name,
+              error.message,
+              error.stack,
+              //@ts-ignore
+              { onDeck: onDeck, isSorted: isSorted, sessionSize: sessionSize },
+              sessionId
+            );
+          }
         });
         console.log(sessionId)
         
@@ -145,6 +195,15 @@ console.log("in get session")
     console.log("in error")
     console.log(typeof(snapshot.data()))
     console.log(snapshot.data())
+    if (error instanceof Error) {
+      weapon_of_logging.ERROR(
+        error.name,
+        error.message,
+        error.stack,
+        sessionId,
+        sessionId
+      );
+    }
     // better logging and error handling
   }
 

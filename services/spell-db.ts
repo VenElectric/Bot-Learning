@@ -1,7 +1,7 @@
 const { v4: uuidv4 } = require("uuid");
 import { ISpell } from "../Interfaces/ISpell";
-import { spellCollection } from "./constants";
 import { updatecollectionRecord, addSingle } from "./database-common";
+import { collectionTypes } from "../Interfaces/ENUMS";
 
 
 export async function addSpell(sessionId: string, spell: ISpell) {
@@ -16,7 +16,7 @@ export async function addSpell(sessionId: string, spell: ISpell) {
     playeridsEffected: [],
   };
 
-  let [isUploaded, errorMsg] = await addSingle(options,sessionId,spellCollection)
+  let [isUploaded, errorMsg] = await addSingle(options,sessionId,collectionTypes.SPELLS)
 
   return [isUploaded, errorMsg]
 }
@@ -27,7 +27,7 @@ export function updateAllSpells(sessionId: string, spellList: ISpell[]) {
   let uploadArray = [];
 
   for (let record of spellList) {
-    let [isUploaded, errorMsg] = updatecollectionRecord(record,spellCollection,record.id,sessionId)
+    let [isUploaded, errorMsg] = updatecollectionRecord(record,collectionTypes.SPELLS,record.id,sessionId)
   
     uploadArray.push({isUploaded:isUploaded, errorMsg: errorMsg, ...record})
   }

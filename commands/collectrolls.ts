@@ -1,6 +1,7 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { MessageEmbed } = require("discord.js");
 import { addBash } from "../services/parse";
+import { weapon_of_logging } from "../utilities/LoggingClass";
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -19,6 +20,7 @@ module.exports = {
         .setRequired(true)
     ),
   async execute(interaction: any) {
+    let sessionId = interaction.channel.id;
     const tag = interaction.options.getString("tag");
     const rollAmount = interaction.options.getInteger("rollamount");
     const filter = (m: any) =>
@@ -31,6 +33,7 @@ module.exports = {
       await interaction.reply(
         "Please enter a tag and number of dice rolls when you run this command. If you need help with this command, please use the /help slash command."
       );
+      weapon_of_logging.NOTICE("CollectRolls", "tag or roll ammount is null",interaction.content,sessionId)
       return;
     }
     try {
@@ -61,6 +64,8 @@ module.exports = {
           "green"
         );
 
+        weapon_of_logging.INFO("CollectRolls","infocollected",{characterName: characterName,roll:roll,commentArray: commentArray},sessionId)
+
         if (characterName.length > 0) {
           embed.addField("\u200b", `${addBash(characterName, "blue")} ${roll}`, false);
         } else {
@@ -68,21 +73,33 @@ module.exports = {
             .fetch(m.mentions.repliedUser?.id)
             .then((username: any) => {
               let nickname = addBash(username.nickname, "blue");
+              weapon_of_logging.INFO("CollectRolls","nickname",nickname,sessionId)
               embed.addField("\u200b", `${nickname} ${roll}`, false);
             })
             .catch((error: any) => {
+              weapon_of_logging.NOTICE(error.name, error.message,m,sessionId)
               console.log(error);
             });
         }
       });
 
       collector.on("end", async (collected: any) => {
+        weapon_of_logging.INFO("collected", "collectedrolls", collected,sessionId)
         await interaction.editReply("Collection ended");
         await interaction.channel.send({ embeds: [embed] });
         // embed is being sent before the above code. So embed is empty when it is sent to the channel.
       });
     } catch (error) {
       console.log(error);
+      if (error instanceof Error){
+        weapon_of_logging.CRITICAL(
+          error.name,
+          error.message,
+          error.stack,
+          interaction.content,
+          sessionId
+          );
+      }
     }
   },
 }

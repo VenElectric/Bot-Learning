@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const LoggingClass_1 = require("../utilities/LoggingClass");
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { turnOrder, initiativeFunctionTypes } = require("../services/initiative");
 module.exports = {
@@ -17,7 +18,11 @@ module.exports = {
         .setDescription("Move turn order forward"),
     execute(interaction) {
         return __awaiter(this, void 0, void 0, function* () {
+            let sessionId = interaction.channel.id;
             let [errorMsg, currentTurn] = yield turnOrder(interaction.channel.id, initiativeFunctionTypes.NEXT);
+            if (errorMsg instanceof Error) {
+                LoggingClass_1.weapon_of_logging.CRITICAL(errorMsg.name, errorMsg.message, errorMsg.stack, currentTurn, sessionId);
+            }
             console.log(errorMsg); // better error logging and handling
             yield interaction.reply(`Current Turn: ${currentTurn}`);
         });

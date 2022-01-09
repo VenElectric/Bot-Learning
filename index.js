@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.client = void 0;
 const fs = require("fs");
 const { Client, Collection, Intents, MessageEmbed } = require("discord.js");
 const express = require("express");
@@ -36,14 +37,14 @@ app.use(require("cors")({
 console.log(process.env.HOST_URL);
 app.use(express.json());
 // Create a new client instance
-const client = new Client({
+exports.client = new Client({
     intents: [
         Intents.FLAGS.GUILDS,
         Intents.FLAGS.GUILD_MESSAGES,
         Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
     ],
 });
-client.commands = new Collection();
+exports.client.commands = new Collection();
 const commandFiles = fs
     .readdirSync("./commands")
     .filter((file) => file.endsWith(".js"));
@@ -51,16 +52,16 @@ for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
     // Set a new item in the Collection
     // With the key as the command name and the value as the exported module
-    client.commands.set(command.data.name, command);
+    exports.client.commands.set(command.data.name, command);
 }
 // ----- DISCORD ------
 // When the client is ready, run this code (only once)
-client.once("ready", () => {
+exports.client.once("ready", () => {
     console.log("Ready");
 });
 // Login to Discord with your client"s token
 register_commands();
-client.login(token);
+exports.client.login(token);
 io.on("connection", (socket) => {
     socket.on("create", function (room) {
         socket.join(room);
@@ -112,18 +113,18 @@ io.on("connection", (socket) => {
         respond("test");
     });
 });
-client.on("error", (error) => {
+exports.client.on("error", (error) => {
     if (error instanceof Error) {
         console.log(error);
         console.log("client.on");
     }
 });
-client.on("messageCreate", (message) => __awaiter(void 0, void 0, void 0, function* () {
+exports.client.on("messageCreate", (message) => __awaiter(void 0, void 0, void 0, function* () {
     const regex = new RegExp(/(\/|\/[a-z]|\/[A-Z]|r)*\s*([d|D])([\d])+/);
     const numreg = new RegExp(/(^\d\s*(\*|\+|\-|\/|=)\s*(\d|[a-z]))/);
     // const prefix = new RegExp(/\/[a-z]|\/|[r|R]/);
-    const rollcom = client.commands.get("roll");
-    const mathcom = client.commands.get("maths");
+    const rollcom = exports.client.commands.get("roll");
+    const mathcom = exports.client.commands.get("maths");
     if (message.author.bot)
         return;
     try {
@@ -141,7 +142,7 @@ client.on("messageCreate", (message) => __awaiter(void 0, void 0, void 0, functi
     }
 }));
 // Menu interactions
-client.on("interactionCreate", (interaction) => __awaiter(void 0, void 0, void 0, function* () {
+exports.client.on("interactionCreate", (interaction) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     if (!interaction.isSelectMenu())
         return;
@@ -167,11 +168,11 @@ client.on("interactionCreate", (interaction) => __awaiter(void 0, void 0, void 0
     }
 }));
 // Command Interactions
-client.on("interactionCreate", (interaction) => __awaiter(void 0, void 0, void 0, function* () {
+exports.client.on("interactionCreate", (interaction) => __awaiter(void 0, void 0, void 0, function* () {
     if (!interaction.isCommand()) {
         return;
     }
-    const command = client.commands.get(interaction.commandName);
+    const command = exports.client.commands.get(interaction.commandName);
     if (!command) {
         return;
     }

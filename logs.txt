@@ -1,0 +1,44 @@
+{"level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","date":"2022-01-09T03:59:22.256Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"eae &l;hml&g; le.lg&q;ale&q;","date":"2022-01-09T04:02:14.389Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"","date":"2022-01-09T04:03:52.384Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"","date":"2022-01-09T04:03:55.370Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"","date":"2022-01-09T04:07:51.830Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"","date":"2022-01-09T04:07:57.483Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"rollerargs","debugMessage":"Args are","date":"2022-01-09T04:10:23.135Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"","date":"2022-01-09T04:10:23.144Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"rollerargs","debugMessage":"Args are","date":"2022-01-09T04:12:24.987Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"","date":"2022-01-09T04:12:24.994Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"rollerargs","debugMessage":"Args are","date":"2022-01-09T04:13:43.544Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"","date":"2022-01-09T04:13:43.554Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"rollerargs","debugMessage":"Args are","date":"2022-01-09T04:13:47.581Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"","date":"2022-01-09T04:13:47.586Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"rollerargs","debugMessage":"Args are","date":"2022-01-09T04:14:42.872Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"","date":"2022-01-09T04:14:42.878Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"rollerargs","debugMessage":"Args are","date":"2022-01-09T04:21:19.695Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"","date":"2022-01-09T04:21:19.701Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"rollerargs","debugMessage":"Args are","date":"2022-01-09T04:22:05.936Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"","date":"2022-01-09T04:22:05.946Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"rollerargs","debugMessage":"Args are","date":"2022-01-09T04:22:11.182Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"","date":"2022-01-09T04:22:11.188Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"rollerargs","debugMessage":"Args are","data":"[&q;d20+3&q;]","date":"2022-01-09T04:26:07.478Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"&q;&q;","date":"2022-01-09T04:26:07.487Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"&q;&q;","date":"2022-01-09T04:26:10.008Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"rollerargs","debugMessage":"Args are","data":"[&q;d20+3&q;,&q;&q;]","date":"2022-01-09T04:26:10.003Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"rollerargs","debugMessage":"Args are","data":"[&q;d20+3&q;,&q;&q;]","date":"2022-01-09T04:29:31.084Z","sessionId":"731278337917452380"}
+{"level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"&q;&q;","date":"2022-01-09T04:29:31.094Z","sessionId":"731278337917452380"}
+{"id":"1c9a3cf1-1ee0-4cc6-a4ea-e308a414886f","level":"INFO","debugName":"rollerargs","debugMessage":"Args are","data":"[&q;d20+3&q;,&q;&q;]","date":"2022-01-09T04:33:13.103Z","sessionId":"731278337917452380"}
+{"id":"056eccea-abc4-4eeb-b439-db53cec50d35","level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"&q;&q;","date":"2022-01-09T04:33:13.112Z","sessionId":"731278337917452380"}
+{"id":"4a21276c-e836-4c6c-b84d-7f1fcc6711db","level":"INFO","debugName":"rollerargs","debugMessage":"Args are","data":["d20+3","()"],"date":{"_seconds":1641703649,"_nanoseconds":374000000},"sessionId":"731278337917452380"}
+{"id":"ad1e5075-598b-4b21-adf7-5d106c5619a3","level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"","date":{"_seconds":1641703649,"_nanoseconds":381000000},"sessionId":"731278337917452380"}
+{"id":"bcea1122-84d5-494e-8442-e43ef671157f","level":"INFO","debugName":"rollerargs","debugMessage":"Args are","data":["d20+3","times","threee"],"date":{"_seconds":1641703793,"_nanoseconds":161000000},"sessionId":"731278337917452380"}
+{"id":"832026e4-a4eb-4656-b176-c8b90d7dd279","level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"times threee","date":{"_seconds":1641703793,"_nanoseconds":165000000},"sessionId":"731278337917452380"}
+{"id":"8627ad19-eca2-4bed-ad63-4a7db83f0e94","level":"INFO","debugName":"rollerargs","debugMessage":"Args are","data":["d20","+","3"],"date":{"_seconds":1641703808,"_nanoseconds":485000000},"sessionId":"731278337917452380"}
+{"id":"ea048c50-335f-4384-9bfd-398cf2f6e87e","level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"","date":{"_seconds":1641703808,"_nanoseconds":488000000},"sessionId":"731278337917452380"}
+{"id":"0c3f92fa-11ab-4399-b0b7-d95cf935083e","level":"INFO","debugName":"rollerargs","debugMessage":"Args are","data":["/d20"],"date":{"_seconds":1641703939,"_nanoseconds":901000000},"sessionId":"731278337917452380"}
+{"id":"5446388d-957f-428f-92bb-af520a2ab33c","level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"","date":{"_seconds":1641703939,"_nanoseconds":904000000},"sessionId":"731278337917452380"}
+{"id":"37456284-8eb8-4d60-acb0-0c7f2516a2d6","level":"INFO","debugName":"rollerargs","debugMessage":"Args are","data":["d20+3","()"],"date":{"_seconds":1641705150,"_nanoseconds":875000000},"sessionId":"731278337917452380"}
+{"id":"c10bb857-a711-4796-bb83-83b2b27096e0","level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"","date":{"_seconds":1641705150,"_nanoseconds":882000000},"sessionId":"731278337917452380"}
+{"id":"7eca194f-65de-4e01-8dcf-622d41e601b6","level":"INFO","debugName":"rollerargs","debugMessage":"Args are","data":["d20+3"],"date":{"_seconds":1641705795,"_nanoseconds":596000000},"sessionId":"731278337917452380"}
+{"id":"1bde9868-07cf-4741-8fa4-4be2c770c5ee","level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"","date":{"_seconds":1641705795,"_nanoseconds":602000000},"sessionId":"731278337917452380"}
+{"id":"8901d338-a51a-4d79-a905-bd66f2c9b235","level":"INFO","debugName":"rollerargs","debugMessage":"Args are","data":["(d20+3)*2"],"date":{"_seconds":1641705800,"_nanoseconds":187000000},"sessionId":"731278337917452380"}
+{"id":"6049d673-98dc-4c87-8c97-c7b0efba5c64","level":"INFO","debugName":"D20 roll","debugMessage":"grabbing args","data":"","date":{"_seconds":1641705800,"_nanoseconds":189000000},"sessionId":"731278337917452380"}
