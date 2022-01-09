@@ -1,7 +1,7 @@
 const { LEVEL } = require("triple-beam");
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
-import validator from "validator";
+
 const { firestore } = require("firebase-admin");
 const { db } = require("../services/firebase-setup");
 const initRef = db.collection("sessions");
