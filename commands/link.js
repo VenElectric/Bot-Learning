@@ -10,7 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const { hyperlink } = require('@discordjs/builders');
+// import { webComponent, devWeb } from "../services/constants"
+// const { hyperlink } = require('@discordjs/builders');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("link")

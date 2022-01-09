@@ -28,7 +28,7 @@ module.exports = {
         return __awaiter(this, void 0, void 0, function* () {
             const tag = interaction.options.getString("tag");
             const rollAmount = interaction.options.getInteger("rollamount");
-            const filter = (m) => m.content.includes(`${tag}`) && m.author.username === "DiscordLearn";
+            const filter = (m) => m.content.includes(`${tag}`) && m.author.username === "Initiative Bot";
             const embed = new MessageEmbed()
                 .setTitle(`Embed for the tag: ${tag}`)
                 .setColor("#0099ff");
@@ -39,9 +39,9 @@ module.exports = {
             try {
                 // retest collector so that it does not collect the initial interaction
                 const collector = interaction.channel.createMessageCollector({
-                    filter,
+                    filter: filter,
+                    idle: 60000,
                 });
-                let rollCount = 0;
                 yield interaction.reply(`**[Enter your rolls with the tag ${tag}]**\n Leave a comment after the tag if you need to separate different rolls for different characters.\n I.E. d20+3 tag Meridia`);
                 collector.on("collect", (m) => __awaiter(this, void 0, void 0, function* () {
                     var _a;
