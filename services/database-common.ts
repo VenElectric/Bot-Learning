@@ -4,7 +4,6 @@ const { v4: uuidv4 } = require("uuid");
 const initRef = db.collection("sessions");
 import { IInit } from "../Interfaces/IInit";
 import { ISpell } from "../Interfaces/ISpell";
-import { initiativeCollection } from "./constants";
 
 export async function addSingle(item: any, sessionId: string, collection: string) {
   let isUploaded;
@@ -122,34 +121,32 @@ export async function getSession(sessionId: string) {
   let isSorted;
   let onDeck;
   let sessionSize;
-
+console.log("in get session")
   try {
-    if (snapshot.data().isSorted != undefined) {
+    console.log("in try catch ")
+    if (snapshot.data() != undefined){
+      console.log(snapshot.data(), "not undefined")
       isSorted = snapshot.data().isSorted;
-    }
-    if (snapshot.data().isSorted == undefined) {
-      initRef.doc(sessionId).set({ isSorted: false }, { merge: true });
-      isSorted = false;
-    }
-    if (snapshot.data().onDeck != undefined) {
       onDeck = snapshot.data().onDeck;
+      sessionSize = snapshot.data().sessionSize
     }
-    if (snapshot.data().onDeck == undefined) {
-      initRef.doc(sessionId).set({ onDeck: 0 }, { merge: true });
-      onDeck = 0;
+      else {
+        console.log("initref set")
+        initRef.doc(sessionId).set({ isSorted: false, onDeck: 0, sessionSize:0 }, { merge: true }).then(() => 
+        {console.log("sucess")}).catch((error:any) => {
+          console.log(error)
+        });
+        console.log(sessionId)
+        
+      }
     }
-    if (snapshot.data().sessionSize != undefined) {
-      sessionSize = snapshot.data().sessionSize;
-    }
-    if (snapshot.data().sessionSize == undefined) {
-      let session = await retrieveCollection(sessionId, initiativeCollection);
-      sessionSize = !session[0] ? session.length : 0;
-      initRef.doc(sessionId).set({ sessionSize: sessionSize }, { merge: true });
-    }
-  } catch (error) {
+     catch (error) {
     console.log(error);
+    console.log("in error")
+    console.log(typeof(snapshot.data()))
+    console.log(snapshot.data())
     // better logging and error handling
   }
-  console.log(onDeck)
+
   return [isSorted, onDeck, sessionSize];
 }

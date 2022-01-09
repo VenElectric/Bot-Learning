@@ -1,5 +1,3 @@
-import { Intents } from "discord.js";
-
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { MessageActionRow, MessageSelectMenu } = require("discord.js");
 

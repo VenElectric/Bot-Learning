@@ -10,7 +10,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const constants_1 = require("../services/constants");
 const { hyperlink } = require('@discordjs/builders');
 module.exports = {
     data: new SlashCommandBuilder()
@@ -18,8 +17,9 @@ module.exports = {
         .setDescription("Get the link for the web component."),
     execute(interaction) {
         return __awaiter(this, void 0, void 0, function* () {
-            let url = `${constants_1.devWeb}/session/${interaction.channel.id}`;
-            yield interaction.reply(`Here is the URL for your session: ${url} \nThis URL is specific to this channel. If you need to change the session to a different text channel then please use the /changechannel slash command.`);
+            yield interaction.reply("Website is down for maintenance!");
+            // let url = `${devWeb}/session/${interaction.channel.id}`
+            // await interaction.reply(`Here is the URL for your session: ${url} \nThis URL is specific to this channel. If you need to change the session to a different text channel then please use the /changechannel slash command.`);
         });
     },
 };

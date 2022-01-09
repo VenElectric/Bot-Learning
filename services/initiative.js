@@ -333,19 +333,3 @@ function nextpreviousDatabase(sessionId, toFalse, toTrue, newOnDeck) {
         return [errorMsg, currentName];
     });
 }
-// // remove and use retrieveData from database-common
-// export async function retrieveInitiative(sessionId: string) {
-//   let initiativeList: IDatabase[] = [];
-//   let snapshot = await initRef.doc(sessionId).collection("initiative").get();
-//   if (snapshot.docs !== undefined) {
-//     snapshot.forEach((doc: any) => {
-//       initiativeList.push({ ...doc.data() });
-//     });
-//     // logging
-//     return initiativeList;
-//   }
-//   if (snapshot.docs === undefined) {
-//     // logging
-//     return false;
-//   }
-// }

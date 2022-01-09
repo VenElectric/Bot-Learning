@@ -7,7 +7,6 @@ import {
 const fs = require("fs");
 const { Client, Collection, Intents, MessageEmbed } = require("discord.js");
 const express = require("express");
-const { token } = require("./config.json");
 const http = require("http");
 const app = express();
 const server = http.createServer(app);
@@ -18,12 +17,14 @@ import {
   initiativeCollection,
   spellCollection,
 } from "./services/constants";
-import { retrieveCollection, getSession } from "./services/database-common";
+import { retrieveCollection, getSession, addSingle } from "./services/database-common";
 import { finalizeInitiative } from "./services/initiative";
 import {IInit} from "./Interfaces/IInit";
 import {EmitTypes} from "./services/emitTypes";
 
 require("dotenv").config();
+
+const token = process.env.DISCORD_TOKEN
 
 const io = require("socket.io")(server, {
   cors: {
@@ -84,19 +85,42 @@ io.on("connection", (socket: any) => {
     console.log("data", data);
   });
 
-  socket.on("getinitial", async (sessionId: any, respond: any) => {
+  socket.on("GET_INITIAL_INIT", async (sessionId: any, respond: any) => {
+    console.log("GET_INITIAL_INIT")
     let initiativeList = await retrieveCollection(sessionId, initiativeCollection);
-    let spellList = await retrieveCollection(sessionId, spellCollection);
     let [isSorted, onDeck, sessionSize] = await getSession(sessionId)
-
+    console.log(isSorted, onDeck, sessionSize)
     respond({
       initiativeList: initiativeList,
-      spellList: spellList,
+      spellList: [],
       isSorted: isSorted,
       onDeck: onDeck,
       sessionId,
     });
   });
+
+  socket.on("GET_INITIAL_SPELLS", async (sessionId: any, respond: any) => {
+    let spellList = await retrieveCollection(sessionId, spellCollection);
+    console.log("get initial spells")
+    respond(spellList);
+  });
+
+  socket.on(EmitTypes.CREATE_NEW, async(dataList: any, respond:any) => {
+    console.log(dataList)
+    let response;
+    try {
+      await addSingle(dataList.payload, dataList.sessionId,dataList.collectionType)
+      console.log("success")
+      response = 200;
+    }
+    catch(error){
+      console.log(error)
+      response = error;
+    }
+
+    respond(response);
+    
+  })
 
 
   socket.on(EmitTypes.ROUND_START, async (sessionId:any, respond:any) => {

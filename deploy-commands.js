@@ -12,7 +12,8 @@ const fs = require("fs");
 const { token } = require("./config.json");
 const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v9");
-const { clientId, guildId } = require("./config.json");
+require("dotenv").config();
+const clientId = process.env.CLIENT_ID;
 function register_commands() {
     return __awaiter(this, void 0, void 0, function* () {
         const commands = [];
@@ -24,8 +25,8 @@ function register_commands() {
             commands.push(command.data.toJSON());
         }
         const rest = new REST({ version: "9" }).setToken(token);
-        rest
-            .put(Routes.applicationGuildCommands(clientId, guildId), { body: commands })
+        yield rest
+            .put(Routes.applicationCommands(clientId), { body: commands })
             .then(() => console.log("Successfully registered application commands."))
             .catch(console.error);
     });

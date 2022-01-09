@@ -29,22 +29,6 @@ function addSpell(sessionId, spell) {
     });
 }
 exports.addSpell = addSpell;
-// use database delete
-// export function removeSpell(sessionId: string, spellId: string) {
-//   initRef
-//     .doc(sessionId)
-//     .collection("spells")
-//     .doc(spellId)
-//     .delete()
-//     .then(() => {
-//       // insert logging here
-//       console.log("Success?");
-//     })
-//     .catch((error: any) => {
-//       // error handling
-//       console.log(error);
-//     });
-// }
 function updateAllSpells(sessionId, spellList) {
     let uploadArray = [];
     for (let record of spellList) {

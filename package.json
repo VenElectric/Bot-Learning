@@ -25,6 +25,9 @@
     "uuidv4": "^6.2.12",
     "validator": "^13.6.0"
   },
+  "engines": {
+    "node": "16.x"
+  },
   "devDependencies": {
     "@babel/preset-typescript": "^7.16.7",
     "@types/jest": "^27.4.0",

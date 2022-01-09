@@ -14,7 +14,6 @@ exports.getSession = exports.updateSession = exports.retrieveCollection = export
 const { db } = require("./firebase-setup");
 const { v4: uuidv4 } = require("uuid");
 const initRef = db.collection("sessions");
-const constants_1 = require("./constants");
 function addSingle(item, sessionId, collection) {
     return __awaiter(this, void 0, void 0, function* () {
         let isUploaded;
@@ -115,35 +114,30 @@ function getSession(sessionId) {
         let isSorted;
         let onDeck;
         let sessionSize;
+        console.log("in get session");
         try {
-            if (snapshot.data().isSorted != undefined) {
+            console.log("in try catch ");
+            if (snapshot.data() != undefined) {
+                console.log(snapshot.data(), "not undefined");
                 isSorted = snapshot.data().isSorted;
-            }
-            if (snapshot.data().isSorted == undefined) {
-                initRef.doc(sessionId).set({ isSorted: false }, { merge: true });
-                isSorted = false;
-            }
-            if (snapshot.data().onDeck != undefined) {
                 onDeck = snapshot.data().onDeck;
-            }
-            if (snapshot.data().onDeck == undefined) {
-                initRef.doc(sessionId).set({ onDeck: 0 }, { merge: true });
-                onDeck = 0;
-            }
-            if (snapshot.data().sessionSize != undefined) {
                 sessionSize = snapshot.data().sessionSize;
             }
-            if (snapshot.data().sessionSize == undefined) {
-                let session = yield retrieveCollection(sessionId, constants_1.initiativeCollection);
-                sessionSize = !session[0] ? session.length : 0;
-                initRef.doc(sessionId).set({ sessionSize: sessionSize }, { merge: true });
+            else {
+                console.log("initref set");
+                initRef.doc(sessionId).set({ isSorted: false, onDeck: 0, sessionSize: 0 }, { merge: true }).then(() => { console.log("sucess"); }).catch((error) => {
+                    console.log(error);
+                });
+                console.log(sessionId);
             }
         }
         catch (error) {
             console.log(error);
+            console.log("in error");
+            console.log(typeof (snapshot.data()));
+            console.log(snapshot.data());
             // better logging and error handling
         }
-        console.log(onDeck);
         return [isSorted, onDeck, sessionSize];
     });
 }

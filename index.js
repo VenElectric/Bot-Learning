@@ -12,7 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const { Client, Collection, Intents, MessageEmbed } = require("discord.js");
 const express = require("express");
-const { token } = require("./config.json");
 const http = require("http");
 const app = express();
 const server = http.createServer(app);
@@ -20,7 +19,10 @@ const port = process.env.PORT || 8000;
 const { register_commands } = require("./deploy-commands");
 const constants_1 = require("./services/constants");
 const database_common_1 = require("./services/database-common");
+const initiative_1 = require("./services/initiative");
+const emitTypes_1 = require("./services/emitTypes");
 require("dotenv").config();
+const token = process.env.DISCORD_TOKEN;
 const io = require("socket.io")(server, {
     cors: {
         origin: process.env.HOST_URL,
@@ -67,17 +69,44 @@ io.on("connection", (socket) => {
     socket.on("test", function (data) {
         console.log("data", data);
     });
-    socket.on("getinitial", (sessionId, respond) => __awaiter(void 0, void 0, void 0, function* () {
+    socket.on("GET_INITIAL_INIT", (sessionId, respond) => __awaiter(void 0, void 0, void 0, function* () {
+        console.log("GET_INITIAL_INIT");
         let initiativeList = yield (0, database_common_1.retrieveCollection)(sessionId, constants_1.initiativeCollection);
-        let spellList = yield (0, database_common_1.retrieveCollection)(sessionId, constants_1.spellCollection);
-        let [isSorted, onDeck] = yield (0, database_common_1.getSession)(sessionId);
+        let [isSorted, onDeck, sessionSize] = yield (0, database_common_1.getSession)(sessionId);
+        console.log(isSorted, onDeck, sessionSize);
         respond({
             initiativeList: initiativeList,
-            spellList: spellList,
+            spellList: [],
             isSorted: isSorted,
             onDeck: onDeck,
             sessionId,
         });
+    }));
+    socket.on("GET_INITIAL_SPELLS", (sessionId, respond) => __awaiter(void 0, void 0, void 0, function* () {
+        let spellList = yield (0, database_common_1.retrieveCollection)(sessionId, constants_1.spellCollection);
+        console.log("get initial spells");
+        respond(spellList);
+    }));
+    socket.on(emitTypes_1.EmitTypes.CREATE_NEW, (dataList, respond) => __awaiter(void 0, void 0, void 0, function* () {
+        console.log(dataList);
+        let response;
+        try {
+            yield (0, database_common_1.addSingle)(dataList.payload, dataList.sessionId, dataList.collectionType);
+            console.log("success");
+            response = 200;
+        }
+        catch (error) {
+            console.log(error);
+            response = error;
+        }
+        respond(response);
+    }));
+    socket.on(emitTypes_1.EmitTypes.ROUND_START, (sessionId, respond) => __awaiter(void 0, void 0, void 0, function* () {
+        let initiativeList = yield (0, database_common_1.retrieveCollection)(sessionId, constants_1.initiativeCollection);
+        let [isSorted, onDeck, sessionSize] = yield (0, database_common_1.getSession)(sessionId);
+        let sortedList = yield (0, initiative_1.finalizeInitiative)(initiativeList, true, sessionId, onDeck, isSorted);
+        socket.broadcast.to(sessionId).emit(emitTypes_1.EmitTypes.ROUND_START, { initiativeList: sortedList, isSorted: isSorted, sessionSize: sessionSize, onDeck: onDeck });
+        respond({ initiativeList: sortedList, isSorted: isSorted, sessionSize: sessionSize, onDeck: onDeck });
     }));
     socket.on("addinit", (sessionId, respond) => {
         respond("test");
@@ -155,13 +184,6 @@ client.on("interactionCreate", (interaction) => __awaiter(void 0, void 0, void 0
             content: "There was an error while executing this command!",
         });
     }
-}));
-// ----- ROUTES ------
-app.get("/dungeon-bot/api/sessions/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(req);
-    console.log(res);
-    console.log("test");
-    // get session list
 }));
 server.listen(port, () => {
     console.log(`Example app listening on port ${port}!`);
