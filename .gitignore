@@ -1,24 +1,7 @@
-<<<<<<< HEAD
 config.json
 node_modules
 .env
 collector.png
 slack_replies.txt
 slack.http
-=======
-/node_modules
-/package-lock.json
-config.json
-/commands/spells/cast.js
-tsconfig.json
-/logs
-text.txt
-empty.ts
-test.js
-firebase.json
-googlecred.txt
-.env
-/commands/devfolder
-combined.log
-error.log
->>>>>>> 5a72c287aeefc5b62fcb78af8053691ffb0000fd
+logs.txt
