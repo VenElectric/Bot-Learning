@@ -13,6 +13,15 @@ module.exports = {
 			const initSnapshot = await initRef.collection("initiative").get()
 			const spellSnapshot = await initRef.collection("spells").get()
 			const batch = db.batch();
+
+
+			initRef.set({isSorted: false, onDeck: 0, sessionSize: 0}, {merge: true}).then(() => {
+				weapon_of_logging.INFO("reset session data", "Reset of isSorted, onDeck, and sessionSize successful","none")
+			}).catch((error: any) => {
+				if (error instanceof Error){
+					weapon_of_logging.CRITICAL(error.name,error.message,"Uncaught error in clearsessionlist", "none");
+				}
+			})
 			initSnapshot.docs.forEach((doc:any)=>{
 				batch.delete(doc.ref);
 			})
