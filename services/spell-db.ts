@@ -16,7 +16,7 @@ export async function addSpell(sessionId: string, spell: SpellObject) {
     playeridsEffected: [],
   };
 
-  return await addSingle(options,sessionId,collectionTypes.SPELLS)
+  return addSingle(options,sessionId,collectionTypes.SPELLS)
 }
 
 

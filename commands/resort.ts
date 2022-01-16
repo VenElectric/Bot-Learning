@@ -6,7 +6,7 @@ const {
 const { db } = require("../services/firebase-setup");
 const { createEmbed } = require("../services/create-embed");
 import {InitiativeObject} from "../Interfaces/GameSessionTypes";
-import { weapon_of_logging } from "../utilities/LoggingClass";
+const weapon_of_logging = require("../utilities/LoggerConfig").logger
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -14,7 +14,6 @@ module.exports = {
     .setDescription("Resort initiative and keep turn order."),
   async execute(interaction: any) {
 	let newList;
-	let sessionId = interaction.channel.id
     try {
       let snapshot = await db
         .collection("sessions")
@@ -23,7 +22,7 @@ module.exports = {
 
 
       let initiativeList = await retrieveSession(interaction.channel.id);
-      weapon_of_logging.INFO("resort", "retrieved initiativeList", initiativeList);
+      weapon_of_logging.info({message: "successfully retrieved session data", function:"resort"});
       if (snapshot.data().isSorted) {
         newList = await finalizeInitiative(
           initiativeList,
@@ -32,10 +31,10 @@ module.exports = {
           2,
           true
         );
-        weapon_of_logging.DEBUG("resort", "isSorted is true",snapshot.data().isSorted)
+        weapon_of_logging.debug({message: "isSorted is true", function:"resort"})
       }
       if (!snapshot.data().isSorted){
-        weapon_of_logging.DEBUG("resort", "isSorted is false",snapshot.data().isSorted)
+        weapon_of_logging.debug({message: "isSorted is false", function:"resort"})
         await interaction.reply("Initiative has not been sorted yet. Please use the /start command.")
       }
       if (snapshot.data().isSorted === undefined) {
@@ -49,22 +48,19 @@ module.exports = {
           2,
           false
         );
-        weapon_of_logging.DEBUG("resort", "isSorted is undefined",snapshot.data().isSorted)
+        weapon_of_logging.debug({message: "isSorted is undefined", function:"resort"})
       }
 
       let initiativeEmbed = createEmbed(newList);
-      weapon_of_logging.INFO("resort", "resort complete",newList);
+      weapon_of_logging.info({message: "resort complete", function:"resort"});
       await interaction.reply({
         content: "Initiative has been resorted.",
         embeds: [initiativeEmbed],
       });
     } catch (error) {
       if (error instanceof Error) {
-        weapon_of_logging.CRITICAL(
-          error.name,
-          error.message,
-          error.stack,
-          newList
+        weapon_of_logging.error(
+          {message: error.message, function:"resort"}
         );
       }
     }

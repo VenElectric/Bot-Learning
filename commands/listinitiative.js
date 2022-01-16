@@ -13,7 +13,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const initiative_1 = require("../services/initiative");
 const database_common_1 = require("../services/database-common");
-const LoggingClass_1 = require("../utilities/LoggingClass");
+const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 const create_embed_1 = require("../services/create-embed");
 // import { webComponent, devWeb } from "../services/constants"
 // const { hyperlink } = require('@discordjs/builders');
@@ -26,16 +26,16 @@ module.exports = {
             let sessionId = interaction.channel.id;
             try {
                 let newList = (yield (0, database_common_1.retrieveCollection)(sessionId, "initiative"));
-                LoggingClass_1.weapon_of_logging.INFO("listinitiative", "getting initiative list", newList);
+                weapon_of_logging.info({ message: "getting initiative records", function: "listinitiative" });
                 let [isSorted, onDeck, sessionSize] = yield (0, database_common_1.getSession)(sessionId);
                 let sortedList = yield (0, initiative_1.finalizeInitiative)(newList, isSorted, sessionId, onDeck, isSorted);
                 let initEmbed = (0, create_embed_1.initiativeEmbed)(sortedList);
-                LoggingClass_1.weapon_of_logging.DEBUG("listinitiative", "sorted Initiative and created embed", sortedList);
+                weapon_of_logging.debug({ message: "sorted initiative and creating embed", function: "listinitiative" });
                 yield interaction.reply({ embeds: [initEmbed] });
             }
             catch (error) {
                 if (error instanceof Error) {
-                    LoggingClass_1.weapon_of_logging.CRITICAL("listinitiative", "uncaught error", error.stack, error.message);
+                    weapon_of_logging.error({ message: error.message, function: "listinitiative" });
                 }
             }
         });

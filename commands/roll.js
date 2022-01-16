@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const parse_1 = require("../services/parse");
 const rpg_dice_roller_1 = require("@dice-roller/rpg-dice-roller");
-const LoggingClass_1 = require("../utilities/LoggingClass");
+const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("roll")
@@ -24,11 +24,11 @@ module.exports = {
                 let args;
                 if (message.content[0].match(/^(\/|[a-z])/)) {
                     args = message.content.trim().replace("/", "").split(" ");
-                    LoggingClass_1.weapon_of_logging.DEBUG("rollerargs", "Caught a / before the d20 roll /d20", args);
+                    weapon_of_logging.debug({ message: `roller args regex ${args}`, function: "roll" });
                 }
                 else {
                     args = message.content.trim().split(/ +/);
-                    LoggingClass_1.weapon_of_logging.DEBUG("rollerargs", "args have been set", args);
+                    weapon_of_logging.debug({ message: `roller args else ${args}`, function: "roll" });
                 }
                 // remove any unecessary characters I.E. / or /r or r if someone is using that as a command (other rollers use this, easier to take into account rather than retrain)
                 if (args[0].match(/\/[a-z]|\/|[r|R]/)) {
@@ -38,7 +38,7 @@ module.exports = {
                 let parsed = (0, parse_1.parseRoll)(args);
                 // make sure no trailing spaces
                 let comment = parsed.comment.trim();
-                LoggingClass_1.weapon_of_logging.DEBUG("rollerargs", "completed parse", parsed);
+                weapon_of_logging.debug({ message: `parsed completed ${parsed}`, function: "roll" });
                 // if (parsed.rollex === ""){
                 //   parsed = args
                 // }
@@ -51,18 +51,18 @@ module.exports = {
                 // if no comment, then don't include the finalcomment var. if comment, then include the entire text.
                 if (comment != "") {
                     // "Roll Results: " + finalcomment + finalroll
-                    LoggingClass_1.weapon_of_logging.DEBUG("D20 roll", "roll is complete. no comments", finalroll);
+                    weapon_of_logging.debug({ message: `replying with comment Roll: ${finalroll} Comment: ${finalcomment}`, function: "roll" });
                     yield message.reply("Roll Results: " + finalcomment + finalroll);
                 }
                 else {
-                    LoggingClass_1.weapon_of_logging.INFO("D20 roll", "roll is complete. with comments", { finalroll, finalcomment });
+                    weapon_of_logging.info({ message: `replying without comment Roll: ${finalroll}`, function: "roll" });
                     yield message.reply("Roll Results: " + finalroll);
                 }
             }
             catch (error) {
                 if (error instanceof Error) {
                     console.log(error);
-                    LoggingClass_1.weapon_of_logging.NOTICE(error.name, error.message, message.content);
+                    weapon_of_logging.warn({ message: error.message, function: "roll" });
                 }
                 yield message.reply("There was an error with the dice roll. Please try again with the correct dice format.");
             }

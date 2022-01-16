@@ -12,7 +12,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.weapon_of_logging = void 0;
 const { LEVEL } = require("triple-beam");
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
@@ -41,7 +40,7 @@ function addLog(item) {
         return Promise.resolve(errorMsg);
     });
 }
-exports.weapon_of_logging = {
+const legacy_logging = {
     [LoggingTypes_1.LoggingTypes.EMERGENCY](errorName, errorMessage, stackTrace, data) {
         return __awaiter(this, void 0, void 0, function* () {
             let options = {
@@ -60,20 +59,20 @@ exports.weapon_of_logging = {
                 }).catch((error) => {
                     console.error(chalk_1.default.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`));
                     console.error(error);
-                    exports.weapon_of_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`));
+                    legacy_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`));
                 });
                 let errorMsg = yield addLog(options);
                 if (errorMsg instanceof Error) {
                     console.log(chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
                     console.log(chalk_1.default.bgRedBright(errorMsg.message));
-                    exports.weapon_of_logging.DEBUG(errorMsg.name, errorMsg.message, chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
+                    legacy_logging.DEBUG(errorMsg.name, errorMsg.message, chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
                 }
             }
             catch (error) {
                 if (error instanceof Error) {
                     console.error(chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
                     console.error(error);
-                    exports.weapon_of_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
+                    legacy_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
                 }
             }
         });
@@ -96,20 +95,20 @@ exports.weapon_of_logging = {
                 }).catch((error) => {
                     console.error(chalk_1.default.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`));
                     console.error(error);
-                    exports.weapon_of_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`));
+                    legacy_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`));
                 });
                 let errorMsg = yield addLog(options);
                 if (errorMsg instanceof Error) {
                     console.log(chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
                     console.log(chalk_1.default.bgRedBright(errorMsg.message));
-                    exports.weapon_of_logging.DEBUG(errorMsg.name, errorMsg.message, chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
+                    legacy_logging.DEBUG(errorMsg.name, errorMsg.message, chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
                 }
             }
             catch (error) {
                 if (error instanceof Error) {
                     console.error(chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
                     console.error(error);
-                    exports.weapon_of_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
+                    legacy_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
                 }
             }
         });
@@ -132,20 +131,20 @@ exports.weapon_of_logging = {
                 }).catch((error) => {
                     console.error(chalk_1.default.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`));
                     console.error(error);
-                    exports.weapon_of_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`));
+                    legacy_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`));
                 });
                 let errorMsg = yield addLog(options);
                 if (errorMsg instanceof Error) {
                     console.log(chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
                     console.log(chalk_1.default.bgRedBright(errorMsg.message));
-                    exports.weapon_of_logging.DEBUG(errorMsg.name, errorMsg.message, chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
+                    legacy_logging.DEBUG(errorMsg.name, errorMsg.message, chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
                 }
             }
             catch (error) {
                 if (error instanceof Error) {
                     console.error(chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
                     console.error(error);
-                    exports.weapon_of_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
+                    legacy_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
                 }
             }
         });
@@ -167,14 +166,14 @@ exports.weapon_of_logging = {
                 if (errorMsg instanceof Error) {
                     console.log(chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
                     console.log(chalk_1.default.bgRedBright(errorMsg.message));
-                    exports.weapon_of_logging.DEBUG(errorMsg.name, errorMsg.message, chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
+                    legacy_logging.DEBUG(errorMsg.name, errorMsg.message, chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
                 }
             }
             catch (error) {
                 if (error instanceof Error) {
                     console.error(chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
                     console.error(error);
-                    exports.weapon_of_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
+                    legacy_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
                 }
             }
         });
@@ -195,14 +194,14 @@ exports.weapon_of_logging = {
                 if (errorMsg instanceof Error) {
                     console.log(chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
                     console.log(chalk_1.default.bgRedBright(errorMsg.message));
-                    exports.weapon_of_logging.DEBUG(errorMsg.name, errorMsg.message, chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
+                    legacy_logging.DEBUG(errorMsg.name, errorMsg.message, chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
                 }
             }
             catch (error) {
                 if (error instanceof Error) {
                     console.error(chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
                     console.error(error);
-                    exports.weapon_of_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
+                    legacy_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
                 }
             }
         });
@@ -223,14 +222,14 @@ exports.weapon_of_logging = {
                 if (errorMsg instanceof Error) {
                     console.log(chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
                     console.log(chalk_1.default.bgRedBright(errorMsg.message));
-                    exports.weapon_of_logging.DEBUG(errorMsg.name, errorMsg.message, chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
+                    legacy_logging.DEBUG(errorMsg.name, errorMsg.message, chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
                 }
             }
             catch (error) {
                 if (error instanceof Error) {
                     console.error(chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
                     console.error(error);
-                    exports.weapon_of_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
+                    legacy_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
                 }
             }
         });
@@ -251,14 +250,14 @@ exports.weapon_of_logging = {
                 if (errorMsg instanceof Error) {
                     console.log(chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
                     console.log(chalk_1.default.bgRedBright(errorMsg.message));
-                    exports.weapon_of_logging.DEBUG(errorMsg.name, errorMsg.message, chalk_1.default.bgRedBright("There was an error logging to the database"));
+                    legacy_logging.DEBUG(errorMsg.name, errorMsg.message, chalk_1.default.bgRedBright("There was an error logging to the database"));
                 }
             }
             catch (error) {
                 if (error instanceof Error) {
                     console.error(chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
                     console.error(error);
-                    exports.weapon_of_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
+                    legacy_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
                 }
             }
         });

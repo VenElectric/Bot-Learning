@@ -13,7 +13,7 @@ const { SlashCommandBuilder } = require("@discordjs/builders");
 const { finalizeInitiative } = require("../services/initiative");
 const { db } = require("../services/firebase-setup");
 const { createEmbed } = require("../services/create-embed");
-const LoggingClass_1 = require("../utilities/LoggingClass");
+const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("start")
@@ -28,16 +28,17 @@ module.exports = {
                     .collection("initiative")
                     .get();
                 let initiativeList = [];
+                weapon_of_logging.debug({ message: "retrieved initiative data from database", function: "start" });
                 initiativeSnap.forEach((doc) => {
                     let record = doc.data();
                     record.isCurrent = false;
-                    console.log(record);
                     initiativeList.push(record);
+                    weapon_of_logging.debug({ message: "reset isCurrent", function: "start" });
                 });
                 newList = yield finalizeInitiative(initiativeList, true, interaction.channel.id, 2, true);
-                LoggingClass_1.weapon_of_logging.INFO("start", "newList data", newList);
-                console.log(newList, "newList");
+                weapon_of_logging.info({ message: "finalize initiative complete", function: "start" });
                 let initiativeEmbed = createEmbed(newList);
+                weapon_of_logging.debug({ message: "embed created", function: "start" });
                 yield interaction.reply({
                     content: "Rounds have been started.",
                     embeds: [initiativeEmbed],
@@ -46,7 +47,7 @@ module.exports = {
             catch (error) {
                 console.log(error);
                 if (error instanceof Error) {
-                    LoggingClass_1.weapon_of_logging.CRITICAL(error.name, error.message, error.stack, newList);
+                    weapon_of_logging.error({ message: error.message, function: "start" });
                 }
             }
         });

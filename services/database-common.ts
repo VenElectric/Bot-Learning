@@ -3,7 +3,7 @@ const { db } = require("./firebase-setup");
 const { v4: uuidv4 } = require("uuid");
 const initRef = db.collection("sessions");
 import { collectionTypes } from "../Interfaces/ServerCommunicationTypes";
-import { weapon_of_logging } from "../utilities/LoggingClass";
+const weapon_of_logging = require("../utilities/LoggerConfig").logger
 import {SessionData,InitiativeObject,SpellObject} from "../Interfaces/GameSessionTypes";
 import { isInitiativeObject, isSpellObject, isSessionData } from "../utilities/TypeChecking";
 import chalk from "chalk";
@@ -21,17 +21,14 @@ export async function addSingle(item: InitiativeObject | SpellObject, sessionId:
     .set(item)
     .then(() => {
       errorMsg = false;
-      weapon_of_logging.INFO("isUploaded", "added single upload",item)
+      weapon_of_logging.info({message: `added item to collection ${collection}`, function:"addSingle"})
     })
     .catch((error: any) => {
       // error handling
       console.trace(error);
       if (error instanceof Error) {
-        weapon_of_logging.CRITICAL(
-          error.name,
-          error.message,
-          error.stack,
-          {item:item, collectionType: collection},
+        weapon_of_logging.error(
+          {message: error.message, function:"addSingle"}
         );
     }
       errorMsg = error;
@@ -54,16 +51,13 @@ export function deleteSingle(
     .delete()
     .then(() => {
       errorMsg = false;
-      weapon_of_logging.INFO("isDeleted", "success deletion",itemId)
+      weapon_of_logging.info({message: `successfully deleted from ${collection}`, function:"deleteSingle"})
     })
     .catch((error: any) => {
       if (error instanceof Error) {
         errorMsg = error;
-        weapon_of_logging.ERROR(
-          error.name,
-          error.message,
-          error.stack,
-          {itemId: itemId, collectionType: collection},
+        weapon_of_logging.error(
+          {message: error.message, function:"deleteSingle"}
 
         );
     }
@@ -73,18 +67,18 @@ export function deleteSingle(
 
 export function updateCollectionItem(value: any, collection:string, docId: string, sessionId: string, valueName: string){
   try {
-    weapon_of_logging.DEBUG("updatecollectionitem","initial data",{value,collection,docId,sessionId})
+    weapon_of_logging.debug({message: {docId, collection, value, valueName}, function:"deleteSingle"})
     initRef.doc(sessionId)
     .collection(collection)
     .doc(docId)
     .set({[valueName]: value}, {merge:true})
     .then(() => {
-      weapon_of_logging.DEBUG("updatecollectionitem", `successfully updated ${valueName} in ${collection}`, value)
+      weapon_of_logging.info({message:`successfully updated ${valueName} in ${collection}`, function: "updateCollection"})
     })
   }
   catch(error){
     if (error instanceof Error){
-      weapon_of_logging.DEBUG("updateCollectionitem", error.message, value);
+      weapon_of_logging.error({message: error.message, function: "updateCollection"});
     }
   }
 }
@@ -98,23 +92,20 @@ export function updatecollectionRecord(
 ) {
   let errorMsg:any;
 
-  
+  weapon_of_logging.debug({message: {docId, collection}, function:"updateCollectionRecord"})
   initRef
     .doc(sessionId)
     .collection(collection)
     .doc(docId)
     .set(item, { merge: true })
     .then(() => {
-      weapon_of_logging.INFO("updateCollectionRecord", `success updating collection ${collection}`,{item:item,docId:docId,collection:collection},)
+      weapon_of_logging.info({message: `success updating collection ${collection}`, function: "updateCollectionRecord"})
       errorMsg = false;
     })
     .catch((error: any) => {
       if (error instanceof Error) {
-        weapon_of_logging.ERROR(
-          error.name,
-          error.message,
-          error.stack,
-          {item: item, docId: docId, collectionType: collection},
+        weapon_of_logging.error(
+          {message: error.message, function: "updateCollectionRecord"}
 
         );
       }
@@ -142,18 +133,21 @@ export async function retrieveCollection(
       // logging
     }
     if (snapshot.docs === undefined) {
-      weapon_of_logging.DEBUG("retrievecollection","snapshot is undefined","none");
-      // weapon_of_logging.NOTICE("snapshot.docs === undefined","none",collection,sessionId)
+      weapon_of_logging.warn({message: "snapshot.docs is undefined", function:"retrieveCollection"});
+      // weapon_of_logging.warn("snapshot.docs === undefined","none",collection,sessionId)
       // throw ReferenceError(`snapshot.docs is undefined sessionId: ${sessionId} collection: ${collection}`); 
     }
   }
   catch(error){
-    console.log(chalk.bgGreenBright(sessionId))
-    console.log(chalk.bgGreenBright(collection))
-    console.log(error)
+    if (error instanceof Error) {
+      weapon_of_logging.error(
+        {message: error.message, function: "updateCollectionRecord"}
+
+      );
+    }
   }
-  
-  // weapon_of_logging.INFO("retrieveCollection", "complete",databaseList,sessionId)
+  weapon_of_logging.info({message: "collection retrieved", function:"retrieveCollection"});
+  // weapon_of_logging.info("retrieveCollection", "complete",databaseList,sessionId)
   return Promise.resolve(databaseList);
 }
 
@@ -172,16 +166,15 @@ export async function updateSession(
     if (error instanceof Error) {
       errorMsg = error.message;
       if (error instanceof Error) {
-        weapon_of_logging.ERROR(
-          error.name,
-          error.message,
-          error.stack,
-          { onDeck: onDeck, isSorted: isSorted, sessionSize: sessionSize },
+        weapon_of_logging.error(
+         {message: error.message, function: "updatesession"}
         );
       }
     }
   }
-
+  weapon_of_logging.info(
+    {message: "updateSession set", function: "updatesession"}
+   );
   return Promise.resolve(errorMsg)
 }
 
@@ -199,20 +192,15 @@ export async function getSession(sessionId: string): Promise<[isSorted:boolean,o
       isSorted = snapshot.data().isSorted;
       onDeck = snapshot.data().onDeck;
       sessionSize = snapshot.data().sessionSize
-      weapon_of_logging.DEBUG("getSession", "grabbingSessionData",{ onDeck: onDeck, isSorted: isSorted, sessionSize: sessionSize },)
+      weapon_of_logging.debug({message: "snapshot.data is not undefined",function: "getSession"})
     }
       else {
   
         initRef.doc(sessionId).set({ isSorted: false, onDeck: 0, sessionSize:0 }, { merge: true }).then(() => 
-        {weapon_of_logging.INFO("getSession", "setting session data success",null)}).catch((error:any) => {
+        {weapon_of_logging.info({message: "setting session data success",function: "getSession"})}).catch((error:any) => {
           if (error instanceof Error) {
-            weapon_of_logging.DEBUG("getSession", "grabbingSessionData","failed to get session data for some reason.",)
-            weapon_of_logging.ERROR(
-              error.name,
-              error.message,
-              error.stack,
-              //@ts-ignore
-              { onDeck: onDeck, isSorted: isSorted, sessionSize: sessionSize },
+            weapon_of_logging.error(
+              {message: error.message, function: "updatesession"}
 
             );
             isSorted = false;
@@ -226,11 +214,8 @@ export async function getSession(sessionId: string): Promise<[isSorted:boolean,o
     }
      catch (error) {
     if (error instanceof Error) {
-      weapon_of_logging.ERROR(
-        error.name,
-        error.message,
-        error.stack,
-        "none"
+      weapon_of_logging.error(
+        {message: error.message, function: "updatesession"}
       );
     }
   }

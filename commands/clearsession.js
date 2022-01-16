@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { db } = require("../services/firebase-setup");
-const LoggingClass_1 = require("../utilities/LoggingClass");
+const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("clearsessionlist")
@@ -24,6 +24,13 @@ module.exports = {
                 const initSnapshot = yield initRef.collection("initiative").get();
                 const spellSnapshot = yield initRef.collection("spells").get();
                 const batch = db.batch();
+                initRef.set({ isSorted: false, onDeck: 0, sessionSize: 0 }, { merge: true }).then(() => {
+                    weapon_of_logging.debug({ message: "reset of session values successufl", function: "clearsessionlist" });
+                }).catch((error) => {
+                    if (error instanceof Error) {
+                        weapon_of_logging.error({ message: "error resetting session values", function: "clearsessionlist" });
+                    }
+                });
                 initSnapshot.docs.forEach((doc) => {
                     batch.delete(doc.ref);
                 });
@@ -31,7 +38,7 @@ module.exports = {
                     batch.delete(doc.ref);
                 });
                 yield batch.commit();
-                LoggingClass_1.weapon_of_logging.DEBUG("clearsession", "successful deletion of spells and initiative", "none");
+                weapon_of_logging.debug({ message: "reset of spells and initiative", function: "clearsessionlist" });
                 yield interaction.reply("Reset Complete");
             }
             catch (error) {

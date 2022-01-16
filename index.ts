@@ -1,5 +1,6 @@
 import {
   BaseCommandInteraction,
+  Guild,
   Message,
   SelectMenuInteraction,
 } from "discord.js";
@@ -27,7 +28,7 @@ import { InitiativeObject } from "./Interfaces/GameSessionTypes";
 import { EmitTypes } from "./Interfaces/ServerCommunicationTypes";
 import { Socket } from "socket.io";
 import { socketReceiver } from "./services/SocketReceiver";
-import { weapon_of_logging } from "./utilities/LoggingClass";
+const weapon_of_logging = require("./utilities/LoggerConfig").logger;
 
 require("dotenv").config();
 
@@ -47,7 +48,6 @@ app.use(
   })
 );
 
-console.log(process.env.HOST_URL);
 app.use(express.json());
 
 // Create a new client instance
@@ -75,35 +75,37 @@ for (const file of commandFiles) {
 // ----- DISCORD ------
 // When the client is ready, run this code (only once)
 client.once("ready", () => {
-  console.log("Ready");
+  weapon_of_logging.debug({ message: "ready" });
 });
 
 // Login to Discord with your client"s token
+
+// This updates immediately
 register_commands();
 client.login(token);
+// client.guilds.fetch("723744588346556416").then((guild: any) => {
+//   guild.commands.set([])
+//   .then(console.log)
+//   .catch(console.error);
+// }).catch((error:any) => {
+//   console.log(error)
+// });
 
-process.on('unhandledRejection', error => {
-  let sessionId = process.env.MY_DISCORD != undefined ? process.env.MY_DISCORD : ""
-  if (error instanceof Error){
-    weapon_of_logging.EMERGENCY(error.name,error.message,error.stack,"none")
+process.on("unhandledRejection", (error) => {
+  if (error instanceof Error) {
+    weapon_of_logging.error({
+      message: error.message,
+      function: "Any Unhandled Rejection",
+    });
   }
-
 });
 
 io.on("connection", (socket: Socket) => {
   socket.on("create", function (room: any) {
     socket.join(room);
-    console.log("test")
-    weapon_of_logging.INFO("create","room created","none")
+    weapon_of_logging.info({ message: "room joined", function: "create" });
   });
-  socketReceiver(socket,client);
-});
-
-client.on("error", (error: unknown) => {
-  if (error instanceof Error) {
-    console.log(error);
-    console.log("client.on");
-  }
+  socketReceiver(socket, client);
 });
 
 client.on("messageCreate", async (message: Message) => {
@@ -122,12 +124,10 @@ client.on("messageCreate", async (message: Message) => {
     }
   } catch (error) {
     if (error instanceof Error) {
-      weapon_of_logging.CRITICAL(
-        error.name,
-        error.message,
-        error.stack,
-        message.content
-      );
+      weapon_of_logging.error({
+        message: error.message,
+        function: "messagecreate",
+      });
       return;
     }
   }
@@ -166,12 +166,10 @@ client.on("interactionCreate", async (interaction: SelectMenuInteraction) => {
     }
   } catch (error) {
     if (error instanceof Error) {
-      weapon_of_logging.CRITICAL(
-        error.name,
-        error.message,
-        error.stack,
-        interaction.values,
-      );
+      weapon_of_logging.error({
+        message: error.message,
+        function: "interactioncreate for menus",
+      });
       return;
     }
   }
@@ -193,11 +191,10 @@ client.on("interactionCreate", async (interaction: BaseCommandInteraction) => {
     await command.execute(interaction);
   } catch (error) {
     if (error instanceof Error) {
-      weapon_of_logging.NOTICE(
-        error.name,
-        error.message,
-        {stackTrace:error.stack,command:interaction.commandName},
-      );
+      weapon_of_logging.warn({
+        message: error.message,
+        function: "interactioncreate for slash commands",
+      });
     }
     await interaction.reply({
       content: "There was an error while executing this command!",
@@ -206,5 +203,5 @@ client.on("interactionCreate", async (interaction: BaseCommandInteraction) => {
 });
 
 server.listen(port, () => {
-  console.log(`Example app listening on port ${port}!`);
+  console.log(`Listening on port ${port}!`);
 });

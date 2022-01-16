@@ -2,7 +2,7 @@ const { SlashCommandBuilder } = require("@discordjs/builders");
 import { Message } from "discord.js";
 import { parseRoll,addBash } from "../services/parse";
 import { DiceRoll } from "@dice-roller/rpg-dice-roller";
-import { weapon_of_logging } from "../utilities/LoggingClass";
+const weapon_of_logging = require("../utilities/LoggerConfig").logger
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -14,11 +14,11 @@ module.exports = {
       let args;
       if(message.content[0].match(/^(\/|[a-z])/)){
         args = message.content.trim().replace("/","").split(" ");
-        weapon_of_logging.DEBUG("rollerargs", "Caught a / before the d20 roll /d20", args);
+        weapon_of_logging.debug({message: `roller args regex ${args}`, function:"roll"});
       }
       else{
         args = message.content.trim().split(/ +/);
-        weapon_of_logging.DEBUG("rollerargs", "args have been set", args);
+        weapon_of_logging.debug({message: `roller args else ${args}`, function:"roll"});
       }
 
      
@@ -32,7 +32,7 @@ module.exports = {
       let parsed = parseRoll(args);
       // make sure no trailing spaces
       let comment = parsed.comment.trim();
-      weapon_of_logging.DEBUG("rollerargs", "completed parse", parsed);
+      weapon_of_logging.debug({message: `parsed completed ${parsed}`, function:"roll"});
       // if (parsed.rollex === ""){
       //   parsed = args
       // }
@@ -48,27 +48,21 @@ module.exports = {
       // if no comment, then don't include the finalcomment var. if comment, then include the entire text.
       if (comment != "") {
         // "Roll Results: " + finalcomment + finalroll
-        weapon_of_logging.DEBUG(
-          "D20 roll",
-          "roll is complete. no comments",
-          finalroll
+        weapon_of_logging.debug(
+          {message: `replying with comment Roll: ${finalroll} Comment: ${finalcomment}`, function:"roll"}
         );
         await message.reply("Roll Results: " + finalcomment + finalroll);
       } else {
-        weapon_of_logging.INFO(
-          "D20 roll",
-          "roll is complete. with comments",
-          {finalroll,finalcomment}
+        weapon_of_logging.info(
+          {message: `replying without comment Roll: ${finalroll}`, function:"roll"}
         );
         await message.reply("Roll Results: " + finalroll);
       }
     } catch (error) {
       if (error instanceof Error) {
         console.log(error)
-        weapon_of_logging.NOTICE(
-          error.name,
-          error.message,
-          message.content
+        weapon_of_logging.warn(
+          {message: error.message, function:"roll"}
         );
       }
       await message.reply(

@@ -1,30 +1,30 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseD20 = exports.addBash = exports.parseRoll = void 0;
-const LoggingClass_1 = require("../utilities/LoggingClass");
+const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 const d20Regex = new RegExp(/([\d]*|[d|D]*)(\s?)([a-z]|[\d]+)/);
 function parseRoll(msg) {
     let comment = "";
     let rollex = "";
     let length = msg.length;
     let prevtype = false;
-    LoggingClass_1.weapon_of_logging.DEBUG("parseRoll", "entering parse roll", msg);
+    weapon_of_logging.debug("parseRoll", "entering parse roll", msg);
     for (let i = 0; i < length; i++) {
         // trying to match the d20 roll
         if (msg[i].match(/^\d*([d|D])([0-9])+/) && !prevtype) {
-            LoggingClass_1.weapon_of_logging.DEBUG("parseRoll", "match regex for d20", msg[i]);
+            weapon_of_logging.debug({ message: "match for ^\\d*([d|D])([0-9])+ regex", function: "parseRoll" });
             rollex += msg[i];
             continue;
         }
         // trying to match the d20 roll addition or subtraction
         if (msg[i].match(/[(]|[)]|[+|/|*|-]/) && !prevtype) {
-            LoggingClass_1.weapon_of_logging.DEBUG("parseRoll", "match regex symbols", msg[i]);
+            weapon_of_logging.debug({ message: "match for [(]|[)]|[+|/|*|-] regex", function: "parseRoll" });
             rollex += msg[i];
             continue;
         }
         // trying to match the d20 roll numbers
         if (msg[i].match(/[1-9]+/) && !prevtype) {
-            LoggingClass_1.weapon_of_logging.DEBUG("parseRoll", "match regex for number", msg[i]);
+            weapon_of_logging.debug({ message: "match for number and not prevtype", function: "parseRoll" });
             rollex += msg[i];
             continue;
         }
@@ -32,7 +32,7 @@ function parseRoll(msg) {
         // Once we hit the comments, prevtype is true because we know there will be no more math or rolls afterwards.
         // not matching symbols because it's hitting the upper if statements first. Need a way to tell the function to stop after the d20 roll....
         if (typeof (msg[i]) == 'string' || prevtype) {
-            LoggingClass_1.weapon_of_logging.DEBUG("parseRoll", "match regex for prevtype. This isn't catching symbols", msg[i]);
+            weapon_of_logging.debug({ message: "match for string and prevtype", function: "parseRoll" });
             prevtype = true;
             comment += msg[i] + ' ';
         }

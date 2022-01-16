@@ -24,7 +24,7 @@ function addSpell(sessionId, spell) {
             spellName: spell.spellName,
             playeridsEffected: [],
         };
-        return yield (0, database_common_1.addSingle)(options, sessionId, ServerCommunicationTypes_1.collectionTypes.SPELLS);
+        return (0, database_common_1.addSingle)(options, sessionId, ServerCommunicationTypes_1.collectionTypes.SPELLS);
     });
 }
 exports.addSpell = addSpell;

@@ -8,7 +8,7 @@ import {
   updateSession,
 } from "./database-common";
 import { initiativeCollection } from "./constants";
-import { weapon_of_logging } from "../utilities/LoggingClass";
+const weapon_of_logging = require("../utilities/LoggerConfig").logger
 const { MessageEmbed } = require("discord.js");
 const cemoj = ":bow_and_arrow:";
 const bemoj = ":black_medium_square:";
@@ -49,7 +49,7 @@ function findDuplicates(initiativeList: InitiativeObject[]) {
       // we want to only check values that are not initiativeList[i], so we check that against the unique ID of each record.
       // we don't use name, since there's a possibility that we could have similarly named characters.
       if (initiativeList[x].id !== initiativeList[y].id) {
-        console.log("initiativeList");
+       
         //logging
 
         // only add to dupes array if both the initiative and init_mod are the same. If the initiative is similar, but the init_mod is not, the sort later will handle that.
@@ -60,6 +60,7 @@ function findDuplicates(initiativeList: InitiativeObject[]) {
             Number(initiativeList[y].initiativeModifier)
         ) {
           dupes.push(initiativeList[x]);
+          weapon_of_logging.debug({message: "adding to dupes", function:"findDuplicates"})
           break;
         } else {
           continue;
@@ -111,9 +112,12 @@ function rerollDuplicates(dupes: InitiativeObject[], initiativeList: InitiativeO
       }
     }
   } catch (error) {
-    console.log(error);
+    if (error instanceof Error){
+      weapon_of_logging.error({message: error.message, function:"rerollDuplicates"})
+    }
+   
   }
-
+  weapon_of_logging.info({message: "duplicate rerolls complete", function:"rerollDuplicates"})
   return initiativeList;
 }
 
@@ -151,7 +155,7 @@ export function firstsortInitiave(initiativeList: InitiativeObject[]) {
   for (let v = 0; v < initiativeList.length; v++) {
     initiativeList[v].roundOrder = Number(v + 1);
   }
-
+  weapon_of_logging.info({message: "sorting complete", function:"firstsortinitiative"})
   return initiativeList;
 }
 
@@ -161,7 +165,7 @@ export function resortInitiative(initiativeList: InitiativeObject[]) {
     if (a.roundOrder > b.roundOrder) return -1;
     if (a.roundOrder < b.roundOrder) return 1;
   });
-  weapon_of_logging.DEBUG("initiativeresort","finishedresorting initiative",initiativeList)
+  weapon_of_logging.debug({message: "sorting complete", function:"resortinitiative"})
 
   return initiativeList;
 }
@@ -177,28 +181,23 @@ export async function finalizeInitiative(
 
   let dupes = findDuplicates(initiativeList);
 
-  weapon_of_logging.DEBUG("duplicates", "retrieved duplicates",dupes !== [] ? dupes: "none")
+  weapon_of_logging.debug({message:`retrieved duplicates Number: ${dupes.length}`, function:"finalizeinitiative"})
   // if no dupes, proceed, else we need to find out who goes before who by rolling a d20
   initiativeList = rerollDuplicates(dupes, initiativeList);
-  weapon_of_logging.INFO(
-    "intitiativeList",
-    "post reroll duplicates",
-    initiativeList,
-
-  );
+  weapon_of_logging.debug({message: "reroll duplicates complete", function:"finalizeinitiative"})
   
   if (isFirstSort) {
     initiativeList = resetisCurrent(initiativeList);
     initiativeList = firstsortInitiave(initiativeList);
     isSorted = true;
     initiativeList[0].isCurrent = true;
+    weapon_of_logging.debug({message: "isFirsSort = true", function:"finalizeinitiative"})
   } else {
     initiativeList = resortInitiative(initiativeList);
+    weapon_of_logging.debug({message: "isFirsSort = false", function:"finalizeinitiative"})
   }
-  weapon_of_logging.INFO(
-    "intitiativeList",
-    "post isFirstsort clause",
-    initiativeList,
+  weapon_of_logging.info(
+    {message: "finished sort and dupe detection", function:"finalizeinitiative"}
 
   );
   await updateAllInitiative(
@@ -209,7 +208,10 @@ export async function finalizeInitiative(
     initiativeList.length
   );
  
+  weapon_of_logging.info(
+    {message: "finished uploading to db", function:"finalizeinitiative"}
 
+  );
   return initiativeList;
 }
 
@@ -228,11 +230,8 @@ export async function updateAllInitiative(
     sessionSize
   );
   if (errorMsg instanceof Error) {
-    weapon_of_logging.CRITICAL(
-      errorMsg.name,
-      errorMsg.message,
-      errorMsg.stack,
-      { onDeck: onDeck, isSorted: isSorted, sessionSize: sessionSize },
+    weapon_of_logging.error(
+      {message: errorMsg.message, function:"updateAllInitiative"}
     );
   }
 
@@ -244,22 +243,22 @@ export async function updateAllInitiative(
       sessionId
     );
     if (errorMsg2 instanceof Error) {
-      weapon_of_logging.CRITICAL(
-        errorMsg2.name,
-        errorMsg2.message,
-        errorMsg2.stack,
-        record,
+      weapon_of_logging.error(
+        {message: errorMsg.message, function:"updateAllInitiative"}
 
       );
     } else {
-      weapon_of_logging.WARN(
-        "upload Results",
-        "updateAllInitiative upload result",
-        record,
+      weapon_of_logging.debug(
+        {message: "finished updating collection record", function:"updateAllInitiative"}
 
       );
     }
+
   }
+  weapon_of_logging.info(
+    {message: "finished uploading to db", function:"updateAllInitiative"}
+
+  );
 }
 
 export async function sortedtoFalse(sessionId: string) {
@@ -285,29 +284,21 @@ export async function sortedtoFalse(sessionId: string) {
       notSorted = true;
 
       if (errorMsg2 instanceof Error) {
-        weapon_of_logging.CRITICAL(
-          errorMsg2.name,
-          errorMsg2.message,
-          errorMsg2.stack,
-          dataParams,
+        weapon_of_logging.error(
+          {message: errorMsg2.message, function:"sortedtoFalse"}
 
         );
       }
     } else {
-      weapon_of_logging.INFO(
-        "sortedtoFalse",
-        "grabbing get session returns",
-        dataParams,
+      weapon_of_logging.info(
+       {message: "finished resting isSorted to false", function:"sortedtoFalse"}
       );
       notSorted = true;
     }
   } catch (error) {
     if (error instanceof Error) {
-      weapon_of_logging.CRITICAL(
-        error.name,
-        error.message,
-        error.stack,
-        dataParams,
+      weapon_of_logging.error(
+        {message: error.message, function:"sortedtoFalse"}
       );
     }
   }
@@ -323,19 +314,25 @@ export function nextInitiative(onDeck: number, sessionLength: number) {
     newOnDeck = 1;
     previous = onDeck - 1;
     //logging
-    console.log("this");
+    weapon_of_logging.debug(
+      {message: "onDeck == sessionLength", function:"nextInitiative"}
+     );
   }
   if (onDeck == 1) {
     newOnDeck = onDeck + 1;
     previous = sessionLength;
     //logging
-    console.log("prev=total");
+    weapon_of_logging.debug(
+      {message: "onDeck == 1", function:"nextInitiative"}
+     );
   }
   if (onDeck < sessionLength && onDeck != 1) {
     newOnDeck = onDeck + 1;
     previous = onDeck - 1;
     //logging
-    console.log("current<total");
+    weapon_of_logging.debug(
+      {message: "onDeck < sessionLength && onDeck != 1", function:"nextInitiative"}
+     );
   }
 
   return [newOnDeck, previous];
@@ -356,20 +353,25 @@ export function previousInitiative(
     newOnDeck = 1;
     current = sessionLength;
     //logging
-    console.log("this");
+    weapon_of_logging.debug(
+      {message: "previousOnDeck === 2", function:"previousInitiative"}
+     );
   }
   if (previousOnDeck === 1) {
     newOnDeck = sessionLength;
     current = sessionLength - 1;
     //logging
-    console.log("prev=total");
+    weapon_of_logging.debug(
+      {message: "previousOnDeck === 1", function:"previousInitiative"}
+     );
   }
   if (previousOnDeck <= sessionLength && previousOnDeck > 2) {
     newOnDeck = previousOnDeck - 1;
     current = newOnDeck - 1;
     //logging
-    console.log(newOnDeck, current);
-    console.log("current<total");
+    weapon_of_logging.debug(
+      {message: "previousOnDeck <= sessionLength && previousOnDeck > 2", function:"previousInitiative"}
+     );
   }
 
   return [newOnDeck, current];
@@ -381,13 +383,18 @@ export async function turnOrder(
 ) {
   const [isSorted, onDeck, sessionSize] = await getSession(sessionId);
   if (functionType == initiativeFunctionTypes.NEXT) {
-    console.log(onDeck, "Ondeck?");
     if (onDeck != 0) {
+      weapon_of_logging.debug(
+        {message: "starting next function", function:"turnOrder"}
+       );
       let [newOnDeck, previous] = nextInitiative(onDeck, sessionSize);
       return Promise.resolve(nextpreviousDatabase(sessionId, previous, onDeck, newOnDeck));
     }
   }
   if (functionType == initiativeFunctionTypes.PREVIOUS) {
+    weapon_of_logging.debug(
+      {message: "starting previous function", function:"turnOrder"}
+     );
     let [newOnDeck, current] = previousInitiative(onDeck, sessionSize);
     return Promise.resolve(nextpreviousDatabase(sessionId, newOnDeck, current, newOnDeck));
   }
@@ -430,35 +437,15 @@ async function nextpreviousDatabase(
       .set({ isCurrent: true }, { merge: true });
 
     initRef.doc(sessionId).set({ onDeck: newOnDeck }, { merge: true });
-    weapon_of_logging.INFO(
-      "next or previous",
-      "grabbing session data",
-      {
-        toFalsedoc: snapshotData.toFalse,
-        toTruedoc: snapshotData.toTrue,
-        toFalseNumber: toFalse,
-        toTrueNumber: toTrue,
-        newOnDeck: newOnDeck,
-        currentName: currentName,
-      },
-
+    weapon_of_logging.info(
+      {message: "finished setting snapshot data", function:"nextpreviousDatabase"}
     );
 
     currentName = toTrueSnapshot.docs[0].data().characterName;
   } catch (error: any) {
     if (error instanceof Error) {
-      weapon_of_logging.CRITICAL(
-        error.name,
-        error.message,
-        error.stack,
-        {
-          sessionId: sessionId,
-          toFalseNumber: toFalse,
-          toTrueNumber: toTrue,
-          newOnDeck: newOnDeck,
-          toFalsedoc: snapshotData.toFalse,
-          toTruedoc: snapshotData.toTrue,
-        },
+      weapon_of_logging.error(
+       {message: error.message, function: "nextpreviousDatabase"}
 
       );
     }

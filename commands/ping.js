@@ -11,14 +11,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { MessageEmbed } = require("discord.js");
-const LoggingClass_1 = require("../utilities/LoggingClass");
+const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("ping")
         .setDescription("Replies with Pong!"),
     execute(interaction) {
         return __awaiter(this, void 0, void 0, function* () {
-            LoggingClass_1.weapon_of_logging.CRITICAL("test", "testMessage", "stacktrace", "data");
+            weapon_of_logging.error({ message: "send to discord channel test", function: "ping" });
             interaction.reply("Pong");
         });
     },

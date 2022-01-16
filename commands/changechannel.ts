@@ -1,4 +1,4 @@
-import { weapon_of_logging } from "../utilities/LoggingClass";
+const weapon_of_logging = require("../utilities/LoggerConfig").logger
 
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { MessageActionRow, MessageSelectMenu } = require("discord.js");
@@ -13,11 +13,7 @@ module.exports = {
       let guildChannels = await interaction.guild.channels.fetch();
       guildChannels.forEach((item: any) => {
         if (item.type !== "GUILD_CATEGORY" && item.type !== "GUILD_VOICE") {
-          weapon_of_logging.DEBUG(
-            "changechannel",
-            "add in new channel to menu",
-            { channelName: item.name, channelId: item.id }
-          );
+          weapon_of_logging.debug( {message: "add in new channel to menu" , function:"changechannel"});
           menuChannels.push({
             label: item.name,
             value: item.id,
@@ -26,11 +22,8 @@ module.exports = {
       });
     } catch (error) {
       if (error instanceof Error) {
-        weapon_of_logging.CRITICAL(
-          error.name,
-          "Uncaught error in changchannel",
-          error.stack,
-          error.message
+        weapon_of_logging.error(
+          {message: error.message , function:"changechannel"}
         );
       }
     }
@@ -40,7 +33,7 @@ module.exports = {
         .setPlaceholder("Nothing selected")
         .addOptions(menuChannels)
     );
-    weapon_of_logging.INFO("changechannel", "Replying to interaction with created select menu", "none");
+    weapon_of_logging.info({message: "replying to interaction with menu", function:"changechannel"});
     await interaction.reply({
       content: "Select a new channel for your session.",
       components: [row],

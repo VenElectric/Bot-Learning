@@ -20,7 +20,7 @@ const port = process.env.PORT || 8000;
 const { register_commands } = require("./deploy-commands");
 const constants_1 = require("./services/constants");
 const SocketReceiver_1 = require("./services/SocketReceiver");
-const LoggingClass_1 = require("./utilities/LoggingClass");
+const weapon_of_logging = require("./utilities/LoggerConfig").logger;
 require("dotenv").config();
 const token = process.env.DISCORD_TOKEN;
 const io = require("socket.io")(server, {
@@ -33,7 +33,6 @@ app.use(require("cors")({
     origin: process.env.HOST_URL,
     methods: ["GET", "POST"],
 }));
-console.log(process.env.HOST_URL);
 app.use(express.json());
 // Create a new client instance
 exports.client = new Client({
@@ -56,30 +55,33 @@ for (const file of commandFiles) {
 // ----- DISCORD ------
 // When the client is ready, run this code (only once)
 exports.client.once("ready", () => {
-    console.log("Ready");
+    weapon_of_logging.debug({ message: "ready" });
 });
 // Login to Discord with your client"s token
+// This updates immediately
 register_commands();
 exports.client.login(token);
-process.on('unhandledRejection', error => {
-    let sessionId = process.env.MY_DISCORD != undefined ? process.env.MY_DISCORD : "";
+// client.guilds.fetch("723744588346556416").then((guild: any) => {
+//   guild.commands.set([])
+//   .then(console.log)
+//   .catch(console.error);
+// }).catch((error:any) => {
+//   console.log(error)
+// });
+process.on("unhandledRejection", (error) => {
     if (error instanceof Error) {
-        LoggingClass_1.weapon_of_logging.EMERGENCY(error.name, error.message, error.stack, "none");
+        weapon_of_logging.error({
+            message: error.message,
+            function: "Any Unhandled Rejection",
+        });
     }
 });
 io.on("connection", (socket) => {
     socket.on("create", function (room) {
         socket.join(room);
-        console.log("test");
-        LoggingClass_1.weapon_of_logging.INFO("create", "room created", "none");
+        weapon_of_logging.info({ message: "room joined", function: "create" });
     });
     (0, SocketReceiver_1.socketReceiver)(socket, exports.client);
-});
-exports.client.on("error", (error) => {
-    if (error instanceof Error) {
-        console.log(error);
-        console.log("client.on");
-    }
 });
 exports.client.on("messageCreate", (message) => __awaiter(void 0, void 0, void 0, function* () {
     const regex = new RegExp(/(\/|\/[a-z]|\/[A-Z]|r)*\s*([d|D])([\d])+/);
@@ -99,7 +101,10 @@ exports.client.on("messageCreate", (message) => __awaiter(void 0, void 0, void 0
     }
     catch (error) {
         if (error instanceof Error) {
-            LoggingClass_1.weapon_of_logging.CRITICAL(error.name, error.message, error.stack, message.content);
+            weapon_of_logging.error({
+                message: error.message,
+                function: "messagecreate",
+            });
             return;
         }
     }
@@ -133,7 +138,10 @@ exports.client.on("interactionCreate", (interaction) => __awaiter(void 0, void 0
     }
     catch (error) {
         if (error instanceof Error) {
-            LoggingClass_1.weapon_of_logging.CRITICAL(error.name, error.message, error.stack, interaction.values);
+            weapon_of_logging.error({
+                message: error.message,
+                function: "interactioncreate for menus",
+            });
             return;
         }
     }
@@ -154,7 +162,10 @@ exports.client.on("interactionCreate", (interaction) => __awaiter(void 0, void 0
     }
     catch (error) {
         if (error instanceof Error) {
-            LoggingClass_1.weapon_of_logging.NOTICE(error.name, error.message, { stackTrace: error.stack, command: interaction.commandName });
+            weapon_of_logging.warn({
+                message: error.message,
+                function: "interactioncreate for slash commands",
+            });
         }
         yield interaction.reply({
             content: "There was an error while executing this command!",
@@ -162,5 +173,5 @@ exports.client.on("interactionCreate", (interaction) => __awaiter(void 0, void 0
     }
 }));
 server.listen(port, () => {
-    console.log(`Example app listening on port ${port}!`);
+    console.log(`Listening on port ${port}!`);
 });

@@ -1,4 +1,4 @@
-import { weapon_of_logging } from "../utilities/LoggingClass";
+const weapon_of_logging = require("../utilities/LoggerConfig").logger
 
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { turnOrder,initiativeFunctionTypes } = require("../services/initiative")
@@ -11,14 +11,11 @@ module.exports = {
 		let [errorMsg, currentTurn] = await turnOrder(interaction.channel.id, initiativeFunctionTypes.PREVIOUS)
 
 		if (errorMsg instanceof Error){
-			weapon_of_logging.CRITICAL(
-				errorMsg.name,
-				errorMsg.message,
-				errorMsg.stack,
-				currentTurn
+			weapon_of_logging.error(
+				{message: errorMsg.message, function:"next"}
 			  );
 		}
-		weapon_of_logging.INFO("currentTurn", "successfully went back in turn order", currentTurn)
+		weapon_of_logging.info({message: "previous turn success", function:"next"})
 			await interaction.reply(`Current Turn: ${currentTurn}`);
 	},
 };

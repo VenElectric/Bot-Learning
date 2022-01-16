@@ -720,3 +720,11 @@
 {"id":"135e9fb4-b59f-429f-b91d-1afb734075cc","level":"DEBUG","debugName":"initial data","debugMessage":"getting data","adata":"{\"sessionId\":\"731278337917452380\",\"collectionType\":\"initiative\"}","date":"2022-01-16T06:15:49.910Z"}
 {"id":"0aa0575a-9f41-4e2a-baf0-8201f18f2fac","level":"DEBUG","debugName":"getSession","debugMessage":"grabbingSessionData","adata":"{\"onDeck\":2,\"isSorted\":true,\"sessionSize\":5}","date":"2022-01-16T06:15:50.225Z"}
 {"id":"8255d7e1-1339-45d7-9643-2c890d8a26f7","level":"DEBUG","debugName":"GET_INITIAL","debugMessage":"Successfully retrieved initial data of type initiative","adata":"{\"sessionId\":\"731278337917452380\",\"collectionType\":\"initiative\"}","date":"2022-01-16T06:15:50.225Z"}
+{"id":"a61b84a4-fbb5-4e5b-b110-0cbfc695a7dc","level":"DEBUG","debugName":"rollerargs","debugMessage":"Caught a / before the d20 roll /d20","adata":"[\"d20\"]","date":"2022-01-16T19:48:10.907Z"}
+{"id":"7fea9896-99b8-4723-b442-5f773f24c3cc","level":"DEBUG","debugName":"parseRoll","debugMessage":"entering parse roll","adata":"[\"d20\"]","date":"2022-01-16T19:48:10.956Z"}
+{"id":"d2693cd1-2f47-45a4-98c3-2b025f1d6f7b","level":"DEBUG","debugName":"rollerargs","debugMessage":"completed parse","adata":"{\"comment\":\"\",\"rollex\":\"d20\"}","date":"2022-01-16T19:48:10.957Z"}
+{"id":"80e0c957-ad65-4f9b-95e8-295266a93c43","level":"DEBUG","debugName":"parseRoll","debugMessage":"match regex for d20","adata":"\"d20\"","date":"2022-01-16T19:48:10.956Z"}
+{"id":"0ba08d33-d5bc-483a-8e0c-535a0dda2560","level":"DEBUG","debugName":"parseRoll","debugMessage":"entering parse roll","adata":"[\"d20\"]","date":"2022-01-16T19:48:22.045Z"}
+{"id":"fee9cff0-2fe5-48ad-bb8b-05f55228239b","level":"DEBUG","debugName":"rollerargs","debugMessage":"completed parse","adata":"{\"comment\":\"\",\"rollex\":\"d20\"}","date":"2022-01-16T19:48:22.045Z"}
+{"id":"437542ad-69bb-4510-860b-9a0af60a500e","level":"DEBUG","debugName":"parseRoll","debugMessage":"match regex for d20","adata":"\"d20\"","date":"2022-01-16T19:48:22.045Z"}
+{"id":"a41fa8be-95e2-4978-ac78-2aaf0424f89f","level":"DEBUG","debugName":"rollerargs","debugMessage":"Caught a / before the d20 roll /d20","adata":"[\"d20\"]","date":"2022-01-16T19:48:22.045Z"}

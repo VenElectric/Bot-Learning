@@ -1,5 +1,5 @@
 import { Socket } from "socket.io";
-import { weapon_of_logging } from "../utilities/LoggingClass";
+const weapon_of_logging = require("../utilities/LoggerConfig").logger
 import {
   SessionData,
   InitiativeObject,
@@ -42,78 +42,34 @@ export interface SocketData {
 //   );
 // });
 export function socketReceiver(socket: Socket, client: any) {
-  socket.on("test", (data: any) => {
-    console.log("test");
-  });
-  socket.on(LoggingTypes.DEBUG, async function (data: any, respond: any) {
-    let response = await weapon_of_logging.DEBUG(
-      data.payload.infoName,
-      data.payload.infoMessage,
-      data.payload.data,
+  socket.on(LoggingTypes.DEBUG, async function (data: any) {
+    weapon_of_logging.debug(
+     {message: data.message, function: data.function}
     );
-    respond(response);
+
   });
   // LOGGING SOCKETS
-  socket.on(LoggingTypes.INFO, async function (data: any, respond: any) {
-    let response = await weapon_of_logging.INFO(
-      data.payload.infoName,
-      data.payload.infoMessage,
-      data.payload.data,
+  socket.on(LoggingTypes.INFO, async function (data: any) {
+   weapon_of_logging.info(
+    {message: data.message, function: data.function}
     );
-    respond(response);
+
   });
-  socket.on(LoggingTypes.CRITICAL, async function (data: any, respond: any) {
-    let response = await weapon_of_logging.CRITICAL(
-      data.payload.errorName,
-      data.payload.errorMessage,
-      data.payload.stackTrace,
-      data.payload.data,
+
+  
+  socket.on(LoggingTypes.ERROR, async function (data: any) {
+   weapon_of_logging.error(
+    {message: data.message, function: data.function}
     );
-    respond(response);
+ 
   });
-  socket.on(LoggingTypes.ALERT, async function (data: any, respond: any) {
-    let response = await weapon_of_logging.ALERT(
-      data.payload.errorName,
-      data.payload.errorMessage,
-      data.payload.stackTrace,
-      data.payload.data,
+ 
+  socket.on(LoggingTypes.WARN, async function (data: any) {
+    
+   weapon_of_logging.warn(
+    {message: data.message, function: data.function}
     );
-    respond(response);
-  });
-  socket.on(LoggingTypes.EMERGENCY, async function (data: any, respond: any) {
-    let response = await weapon_of_logging.EMERGENCY(
-      data.payload.errorName,
-      data.payload.errorMessage,
-      data.payload.stackTrace,
-      data.payload.data,
-    );
-    respond(response);
-  });
-  socket.on(LoggingTypes.ERROR, async function (data: any, respond: any) {
-    let response = await weapon_of_logging.ERROR(
-      data.payload.errorName,
-      data.payload.errorMessage,
-      data.payload.stackTrace,
-      data.payload.data,
-    );
-    respond(response);
-  });
-  socket.on(LoggingTypes.NOTICE, async function (data: any, respond: any) {
-    let response = await weapon_of_logging.NOTICE(
-      data.payload.errorName,
-      data.payload.errorMessage,
-      data.payload.data,
-    );
-    respond(response);
-  });
-  socket.on(LoggingTypes.WARN, async function (data: any, respond: any) {
-    console.log("here I am");
-    let response = await weapon_of_logging.WARN(
-      data.payload.errorName,
-      data.payload.errorMessage,
-      data.payload.data,
-    );
-    respond(response);
+   
   });
 
   // DATABASE/INITIATIVE/SPELL SOCKETS
@@ -159,11 +115,8 @@ export function socketReceiver(socket: Socket, client: any) {
         respond(finalMessage);
       }
       if (finalMessage instanceof Error) {
-        await weapon_of_logging.ERROR(
-          finalMessage.name,
-          finalMessage.message,
-          finalMessage.stack,
-          data.payload,
+       weapon_of_logging.error(
+          {message: finalMessage.message, function: "create_new SocketReceiver"}
         );
       }
     }
@@ -177,11 +130,8 @@ export function socketReceiver(socket: Socket, client: any) {
         data.collectionType
       );
       if (finalMessage instanceof Error) {
-        await weapon_of_logging.ERROR(
-          finalMessage.name,
-          finalMessage.message,
-          finalMessage.stack,
-          data.payload,
+        weapon_of_logging.error(
+          {message: finalMessage.message, function: "DELETE_ONE SocketReceiver"}
         );
       }
       let newList = await dbCall.retrieveCollection(
@@ -204,7 +154,7 @@ export function socketReceiver(socket: Socket, client: any) {
       let isSorted;
       let onDeck;
       let sessionSize;
-      weapon_of_logging.DEBUG("initial data","getting data", data);
+      weapon_of_logging.debug( {message: "retrieving initial data", function: "GET_INITIAL SOCKET RECEIVER"});
       if (data.sessionId !== undefined) {
          initiative = await dbCall.retrieveCollection(
           data.sessionId,
@@ -216,29 +166,14 @@ export function socketReceiver(socket: Socket, client: any) {
       }
       
       if (initiative instanceof Error) {
-        weapon_of_logging.DEBUG(
-          initiative.name,
-          initiative.message,
-          initiative.stack
+        weapon_of_logging.error(
+          {message: initiative.message, function: "GET_INITIAL SOCKET RECEIVER"}
         );
-        // await weapon_of_logging.ERROR(
-        //   initiative.name,
-        //   initiative.message,
-        //   initiative.stack,
-        //   data.payload,
-        //   data.sessionId
-        // );
+      
       }
-      // await weapon_of_logging.INFO(
-      //   "finalMessage",
-      //   initiative,
-      //   data.payload,
-      //   data.sessionId
-      // );
-      weapon_of_logging.DEBUG(
-        EmitTypes.GET_INITIAL,
-        `Successfully retrieved initial data of type ${data.collectionType}`,
-        data
+     
+      weapon_of_logging.debug(
+        {message: "succesfully retrieved initiative", function: "GET_INITIAL SOCKET RECEIVER"}
       );
 
       respond({ initiativeList: initiative, isSorted: isSorted });
@@ -250,7 +185,7 @@ export function socketReceiver(socket: Socket, client: any) {
       initiativeFunctions.initiativeFunctionTypes.NEXT
     );
     if (finalMessage instanceof Error) {
-      await weapon_of_logging.ERROR(
+      weapon_of_logging.error(
         finalMessage.name,
         finalMessage.message,
         finalMessage.stack,
@@ -258,10 +193,8 @@ export function socketReceiver(socket: Socket, client: any) {
 
       );
     }
-    await weapon_of_logging.INFO(
-      "finalMessage",
-      "Succesfully retrieved NEXT",
-      data,
+   weapon_of_logging.info(
+    {message: "succesfully retrieved next", function: "NEXT SOCKET RECEIVER"}
 
     );
     let initiativeList = await dbCall.retrieveCollection(
@@ -272,11 +205,8 @@ export function socketReceiver(socket: Socket, client: any) {
       .to(data.sessionId)
       .emit(EmitTypes.UPDATE_ALL, initiativeList);
     if (finalMessage instanceof Error) {
-      await weapon_of_logging.ERROR(
-        finalMessage.name,
-        finalMessage.message,
-        finalMessage.stack,
-        data.payload,
+     weapon_of_logging.error(
+      {message:finalMessage.message, function: "NEXT SOCKET RECEIVER"}
 
       );
     }
@@ -290,11 +220,8 @@ export function socketReceiver(socket: Socket, client: any) {
         initiativeFunctions.initiativeFunctionTypes.PREVIOUS
       );
       if (finalMessage instanceof Error) {
-        await weapon_of_logging.ERROR(
-          finalMessage.name,
-          finalMessage.message,
-          finalMessage.stack,
-          data.payload,
+        weapon_of_logging.error(
+          {message:finalMessage.message, function: "PREVIOUS SOCKET RECEIVER"}
         );
       }
       let initiativeList = await dbCall.retrieveCollection(
@@ -305,17 +232,12 @@ export function socketReceiver(socket: Socket, client: any) {
         .to(data.sessionId)
         .emit(EmitTypes.UPDATE_ALL, initiativeList);
       if (finalMessage instanceof Error) {
-        await weapon_of_logging.ERROR(
-          finalMessage.name,
-          finalMessage.message,
-          finalMessage.stack,
-          data.payload,
+        weapon_of_logging.error(
+          {message:finalMessage.message, function: "PREVIOUS SOCKET RECEIVER"}
         );
       } else {
-        weapon_of_logging.INFO(
-          "finalMessage",
-          "successfully sent previous",
-          data,
+        weapon_of_logging.info(
+          {message: "succesfully retrieved previous", function: "NEXT SOCKET RECEIVER"}
         );
       }
       respond(finalMessage);
@@ -332,22 +254,20 @@ export function socketReceiver(socket: Socket, client: any) {
         .to(data.sessionId)
         .emit(EmitTypes.UPDATE_ALL, finalMessage);
       if (finalMessage instanceof Error) {
-        await weapon_of_logging.ERROR(
-          finalMessage.name,
-          finalMessage.message,
-          finalMessage.stack,
-          data.payload,
+        weapon_of_logging.error(
+          {message:finalMessage.message, function: "RESORT SOCKET RECEIVER"}
         );
       }
       respond(finalMessage);
     }
   });
   socket.on(EmitTypes.RE_ROLL, async function (data: SocketData, respond: any) {
-    if (isInitiativeObject(data.payload)) {
+    let initiativeList = data.payload as InitiativeObject
+    let docId = data.sessionId;
       let finalMessage = await dbCall.updatecollectionRecord(
-        data.payload,
+        initiativeList,
         data.collectionType,
-        data.payload.id,
+        docId,
         data.sessionId
       );
       let newList = await dbCall.retrieveCollection(
@@ -356,39 +276,32 @@ export function socketReceiver(socket: Socket, client: any) {
       );
       socket.broadcast.to(data.sessionId).emit(EmitTypes.UPDATE_ALL, newList);
       if (finalMessage instanceof Error) {
-        await weapon_of_logging.ERROR(
-          finalMessage.name,
-          finalMessage.message,
-          finalMessage.stack,
-          data.payload,
+        weapon_of_logging.error(
+          {message:finalMessage.message, function: "REROLL SOCKET RECEIVER"}
         );
       }
       respond(finalMessage);
-    } else {
-      respond(`Invalid Collection Type. Type Sent: ${data.collectionType}`);
-    }
   });
   socket.on(
     EmitTypes.UPDATE_ONE,
     async function (data: any, respond: any) {
-      weapon_of_logging.DEBUG("update one","initial data at the beginning",data)
-      console.log(chalk.cyanBright(data.id))
+      weapon_of_logging.debug(  {message:"updating one value", function: "UPDATE ONE SOCKET RECEIVER"})
       try {
         dbCall.updateCollectionItem(data.toUpdate,data.CollectionType,data.id,data.sessionId,data.ObjectType)
       }
       catch(error){
-        console.log(error)
+        if (error instanceof Error) {
+          weapon_of_logging.error(
+            {message:error.message, function: "UPDATE_ONE SOCKET RECEIVER"}
+          );
       }
        let finalMessage = await dbCall.retrieveCollection(data.sessionId,data.CollectionType);
 
 
 
         if (finalMessage instanceof Error) {
-          await weapon_of_logging.ERROR(
-            finalMessage.name,
-            finalMessage.message,
-            finalMessage.stack,
-            data.payload,
+          weapon_of_logging.error(
+            {message:finalMessage.message, function: "UPDATE_ONE SOCKET RECEIVER"}
           );
         }
         let newList = await dbCall.retrieveCollection(
@@ -397,6 +310,7 @@ export function socketReceiver(socket: Socket, client: any) {
         );
         socket.broadcast.to(data.sessionId).emit(EmitTypes.UPDATE_ONE, newList);
         respond(finalMessage);
+        }
       }
   );
 
@@ -424,27 +338,19 @@ export function socketReceiver(socket: Socket, client: any) {
 
           if (finalMessage instanceof Error) {
             weapon_of_logging.ALERT(
-              finalMessage.name,
-              `${finalMessage.message} : Record was not uploaded`,
-              finalMessage.stack,
-              data.payload,
+              {message:finalMessage.message, function: "UPDATE_ALL SOCKET RECEIVER"}
             );
             failures.push(record.id);
           } else {
-            weapon_of_logging.INFO(
-              EmitTypes.UPDATE_ALL,
-              `${data.collectionType} was updated successfully`,
-              data.payload,
+            weapon_of_logging.info(
+              {message:"Collection was updated successfully", function: "UPDATE_ALL SOCKET RECEIVER"}
             );
             successes.push(record.id);
           }
         } catch (error) {
           if (error instanceof Error) {
-            weapon_of_logging.ALERT(
-              error.name,
-              error.message,
-              error.stack,
-              data.payload,
+            weapon_of_logging.error(
+              {message:error.message, function: "UPDATE_ALL SOCKET RECEIVER"}
             );
             continue;
           }
@@ -465,10 +371,8 @@ export function socketReceiver(socket: Socket, client: any) {
           data.sessionId,
           data.collectionType
         );
-        weapon_of_logging.INFO(
-          "initiativeList",
-          "Starting sort for round start",
-          data,
+        weapon_of_logging.debug(
+          {message: "starting round start, initiative retrieved", function: "ROUND_START SOCKET_RECEIVER"}
         );
         if (isInitiativeObjectArray(initiativeList)) {
           let [isSorted, onDeck, sessionSize] = await dbCall.getSession(
@@ -481,11 +385,9 @@ export function socketReceiver(socket: Socket, client: any) {
             onDeck,
             isSorted
           );
-          console.log(chalk.bgRedBright(finalMessage));
-          weapon_of_logging.INFO(
-            "initiativeList Sort",
-            "successfully sorted Initiative",
-            data,
+         
+          weapon_of_logging.info(
+            {message: "initiative sorted and being emitted", function: "ROUND_START SOCKET_RECEIVER"}
           );
           socket.broadcast
             .to(data.sessionId)
@@ -494,21 +396,16 @@ export function socketReceiver(socket: Socket, client: any) {
         }
       } catch (error) {
         if (error instanceof ReferenceError) {
-          weapon_of_logging.NOTICE(
-            error.name,
-            error.message,
-            data,
+          weapon_of_logging.warn(
+            {message: error.message, function: "ROUND_START SOCKET_RECEIVER"}
           );
           respond("No initiative to sort. Please add in initiative");
         } else if (
           error instanceof Error &&
           !(error instanceof ReferenceError)
         ) {
-          await weapon_of_logging.ERROR(
-            error.name,
-            error.message,
-            error.stack,
-            data.payload,
+          weapon_of_logging.error(
+            {message: error.message, function: "ROUND_START SOCKET_RECEIVER"}
           );
         }
       }
@@ -523,10 +420,8 @@ export function socketReceiver(socket: Socket, client: any) {
           data.sessionId,
           data.collectionType
         )) as InitiativeObject[];
-        weapon_of_logging.INFO(
-          EmitTypes.DISCORD,
-          "getting initiative list",
-          newList,
+        weapon_of_logging.info(
+          {message: `retrieving ${data.collectionType} for discord embed`, function: "DISCORD SOCKET_RECEIVER"}
         );
         let [isSorted, onDeck, sessionSize] = await dbCall.getSession(
           data.sessionId
@@ -541,10 +436,8 @@ export function socketReceiver(socket: Socket, client: any) {
         let initEmbed = initiativeEmbed(sortedList);
         client.channels.fetch(data.sessionId).then((channel: any) => {
           channel.send({ embeds: [initEmbed] });
-          weapon_of_logging.INFO(
-            "ChannelSend",
-            "success",
-            sortedList,
+          weapon_of_logging.info(
+            {message: "sending initiative to discord channel success", function: "DISCORD SOCKET_RECEIVER"}
           );
           respond(200);
         });
@@ -554,29 +447,22 @@ export function socketReceiver(socket: Socket, client: any) {
           data.sessionId,
           data.collectionType
         )) as SpellObject[];
-        weapon_of_logging.INFO(
-          EmitTypes.DISCORD,
-          "getting initiative list",
-          newList,
+        weapon_of_logging.info(
+          {message:`retrieving ${data.collectionType} for discord embed`, function: "DISCORD SOCKET_RECEIVER"}
         );
         let spellsEmbed = spellEmbed(newList);
         client.channels.fetch(data.sessionId).then((channel: any) => {
           channel.send({ embeds: [spellsEmbed] });
-          weapon_of_logging.INFO(
-            "ChannelSend",
-            "success",
-            data,
+          weapon_of_logging.info(
+            {message: "sending spells to discord channel success", function: "DISCORD SOCKET_RECEIVER"}
           );
           respond(200);
         });
       }
     } catch (error) {
       if (error instanceof Error) {
-        weapon_of_logging.CRITICAL(
-          error.name,
-          error.message,
-          error.stack,
-          data,
+        weapon_of_logging.error(
+         {message: error.message, function: "DISCORD SOCKET_RECEIVER"}
         );
         respond(error);
       }

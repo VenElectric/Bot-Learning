@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const LoggingClass_1 = require("../utilities/LoggingClass");
+const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { turnOrder, initiativeFunctionTypes } = require("../services/initiative");
 module.exports = {
@@ -20,10 +20,10 @@ module.exports = {
         return __awaiter(this, void 0, void 0, function* () {
             let [errorMsg, currentTurn] = yield turnOrder(interaction.channel.id, initiativeFunctionTypes.NEXT);
             if (errorMsg instanceof Error) {
-                LoggingClass_1.weapon_of_logging.CRITICAL(errorMsg.name, errorMsg.message, errorMsg.stack, currentTurn);
+                weapon_of_logging.error({ message: errorMsg.message, function: "next" });
             }
             else {
-                LoggingClass_1.weapon_of_logging.INFO("next", "successfully completed next command", currentTurn);
+                weapon_of_logging.info({ message: "next turn success", function: "next" });
             }
             yield interaction.reply(`Current Turn: ${currentTurn}`);
         });

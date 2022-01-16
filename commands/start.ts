@@ -3,7 +3,7 @@ const { finalizeInitiative } = require("../services/initiative");
 const { db } = require("../services/firebase-setup");
 const { createEmbed } = require("../services/create-embed");
 import { InitiativeObject } from "../Interfaces/GameSessionTypes";
-import { weapon_of_logging } from "../utilities/LoggingClass";
+const weapon_of_logging = require("../utilities/LoggerConfig").logger
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -18,12 +18,13 @@ module.exports = {
         .collection("initiative")
         .get();
       let initiativeList = [] as InitiativeObject[];
+      weapon_of_logging.debug( {message: "retrieved initiative data from database", function:"start"});
 
       initiativeSnap.forEach((doc: any) => {
         let record = doc.data() as InitiativeObject;
         record.isCurrent = false;
-        console.log(record);
         initiativeList.push(record);
+        weapon_of_logging.debug( {message: "reset isCurrent", function:"start"});
       });
 
       newList = await finalizeInitiative(
@@ -33,10 +34,11 @@ module.exports = {
         2,
         true
       );
-      weapon_of_logging.INFO("start", "newList data", newList);
-      console.log(newList, "newList");
+      weapon_of_logging.info( {message: "finalize initiative complete", function:"start"});
 
       let initiativeEmbed = createEmbed(newList);
+
+      weapon_of_logging.debug( {message: "embed created", function:"start"});
 
       await interaction.reply({
         content: "Rounds have been started.",
@@ -45,11 +47,8 @@ module.exports = {
     } catch (error) {
       console.log(error);
       if (error instanceof Error) {
-        weapon_of_logging.CRITICAL(
-          error.name,
-          error.message,
-          error.stack,
-          newList,
+        weapon_of_logging.error(
+          {message: error.message, function:"start"}
         );
       }
     }

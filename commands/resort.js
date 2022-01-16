@@ -13,7 +13,7 @@ const { SlashCommandBuilder } = require("@discordjs/builders");
 const { finalizeInitiative, retrieveSession, } = require("../services/initiative");
 const { db } = require("../services/firebase-setup");
 const { createEmbed } = require("../services/create-embed");
-const LoggingClass_1 = require("../utilities/LoggingClass");
+const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("resort")
@@ -21,20 +21,19 @@ module.exports = {
     execute(interaction) {
         return __awaiter(this, void 0, void 0, function* () {
             let newList;
-            let sessionId = interaction.channel.id;
             try {
                 let snapshot = yield db
                     .collection("sessions")
                     .doc(interaction.channel.id)
                     .get();
                 let initiativeList = yield retrieveSession(interaction.channel.id);
-                LoggingClass_1.weapon_of_logging.INFO("resort", "retrieved initiativeList", initiativeList);
+                weapon_of_logging.info({ message: "successfully retrieved session data", function: "resort" });
                 if (snapshot.data().isSorted) {
                     newList = yield finalizeInitiative(initiativeList, false, interaction.channel.id, 2, true);
-                    LoggingClass_1.weapon_of_logging.DEBUG("resort", "isSorted is true", snapshot.data().isSorted);
+                    weapon_of_logging.debug({ message: "isSorted is true", function: "resort" });
                 }
                 if (!snapshot.data().isSorted) {
-                    LoggingClass_1.weapon_of_logging.DEBUG("resort", "isSorted is false", snapshot.data().isSorted);
+                    weapon_of_logging.debug({ message: "isSorted is false", function: "resort" });
                     yield interaction.reply("Initiative has not been sorted yet. Please use the /start command.");
                 }
                 if (snapshot.data().isSorted === undefined) {
@@ -42,10 +41,10 @@ module.exports = {
                         initiativeList[item].isCurrent = false;
                     }
                     newList = yield finalizeInitiative(initiativeList, true, interaction.channel.id, 2, false);
-                    LoggingClass_1.weapon_of_logging.DEBUG("resort", "isSorted is undefined", snapshot.data().isSorted);
+                    weapon_of_logging.debug({ message: "isSorted is undefined", function: "resort" });
                 }
                 let initiativeEmbed = createEmbed(newList);
-                LoggingClass_1.weapon_of_logging.INFO("resort", "resort complete", newList);
+                weapon_of_logging.info({ message: "resort complete", function: "resort" });
                 yield interaction.reply({
                     content: "Initiative has been resorted.",
                     embeds: [initiativeEmbed],
@@ -53,7 +52,7 @@ module.exports = {
             }
             catch (error) {
                 if (error instanceof Error) {
-                    LoggingClass_1.weapon_of_logging.CRITICAL(error.name, error.message, error.stack, newList);
+                    weapon_of_logging.error({ message: error.message, function: "resort" });
                 }
             }
         });

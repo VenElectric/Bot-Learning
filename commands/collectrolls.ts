@@ -1,7 +1,8 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { MessageEmbed } = require("discord.js");
 import { addBash } from "../services/parse";
-import { weapon_of_logging } from "../utilities/LoggingClass";
+const weapon_of_logging = require("../utilities/LoggerConfig").logger
+require("dotenv").config();
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -20,36 +21,38 @@ module.exports = {
         .setRequired(true)
     ),
   async execute(interaction: any) {
-    let sessionId = interaction.channel.id;
     const tag = interaction.options.getString("tag");
     const rollAmount = interaction.options.getInteger("rollamount");
+
     const filter = (m: any) =>
-      m.content.includes(`${tag}`) && m.author.username === "Initiative Bot";
+      m.content.includes(`${tag}`) && m.author.username === process.env.BOT_NAME;
     const embed = new MessageEmbed()
       .setTitle(`Embed for the tag: ${tag}`)
       .setColor("#0099ff");
 
+    weapon_of_logging.log({level: "debug",message: `Tag: ${tag} RollAmount: ${rollAmount}`, function: "collectRolls"})
     if (tag === null || rollAmount === null) {
       await interaction.reply(
         "Please enter a tag and number of dice rolls when you run this command. If you need help with this command, please use the /help slash command."
       );
-      weapon_of_logging.NOTICE("CollectRolls", "tag or roll ammount is null",interaction.content)
+      weapon_of_logging.warn({message: "tag or roll amount is null", function:"collectrolls"})
       return;
     }
     try {
+      weapon_of_logging.log({level: "debug",message: "testing logger", function: "collectRolls"})
       // retest collector so that it does not collect the initial interaction
       const collector = interaction.channel.createMessageCollector({
         filter: filter,
         idle: 60000,
       });
-      weapon_of_logging.DEBUG("collectrolls","Starting collector","none")
+      weapon_of_logging.debug({message: "initiating collector", function:"collectrolls"})
       await interaction.reply(
         `**[Enter your rolls with the tag ${tag}]**\n Leave a comment after the tag if you need to separate different rolls for different characters.\n I.E. d20+3 tag Meridia`
       );
 
       collector.on("collect", async (m: any) => {
         if (collector.collected.size > rollAmount) {
-          weapon_of_logging.DEBUG("collectrolls","Stopping Collector",collector.collected)
+          weapon_of_logging.debug({message: "stopping collector", function:"collectrolls"})
           collector.stop();
         }
         // regex to get character name out of comment
@@ -66,7 +69,7 @@ module.exports = {
           "green"
         );
 
-        weapon_of_logging.DEBUG("CollectRolls","infocollected",{characterName: characterName,roll:roll,commentArray: commentArray})
+        weapon_of_logging.debug({message: `collected roll ${commentArray[2]}`, function:"collectrolls"})
 
         if (characterName.length > 0) {
           embed.addField("\u200b", `${addBash(characterName, "blue")} ${roll}`, false);
@@ -75,30 +78,26 @@ module.exports = {
             .fetch(m.mentions.repliedUser?.id)
             .then((username: any) => {
               let nickname = addBash(username.nickname, "blue");
-              weapon_of_logging.DEBUG("CollectRolls","nickname",nickname)
+              weapon_of_logging.debug({message: "nickname successfully fetched", function:"collectrolls"})
               embed.addField("\u200b", `${nickname} ${roll}`, false);
             })
             .catch((error: any) => {
-              weapon_of_logging.CRITICAL(error.name, error.message,error.stack,m)
+              weapon_of_logging.error({message: "could not find guild member or uncaught error", function:"collectrolls"})
               console.log(error);
             });
         }
       });
 
       collector.on("end", async (collected: any) => {
-        weapon_of_logging.INFO("collectrolls", "Rolls have finished collecting. Sending embed.", collected)
+        weapon_of_logging.info({message: "collector successuflly ended", function:"collectrolls"})
         await interaction.editReply("Collection ended");
         await interaction.channel.send({ embeds: [embed] });
         // embed is being sent before the above code. So embed is empty when it is sent to the channel.
       });
     } catch (error) {
-      console.log(error);
       if (error instanceof Error){
-        weapon_of_logging.CRITICAL(
-          error.name,
-          error.message,
-          error.stack,
-          interaction.content
+        weapon_of_logging.error(
+          {message: error.message, function:"collectrolls"}
           );
       }
     }

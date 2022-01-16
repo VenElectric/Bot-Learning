@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { db } = require("../services/firebase-setup");
-import {weapon_of_logging} from "../utilities/LoggingClass";
+const weapon_of_logging = require("../utilities/LoggerConfig").logger
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -16,10 +16,10 @@ module.exports = {
 
 
 			initRef.set({isSorted: false, onDeck: 0, sessionSize: 0}, {merge: true}).then(() => {
-				weapon_of_logging.INFO("reset session data", "Reset of isSorted, onDeck, and sessionSize successful","none")
+				weapon_of_logging.debug({message: "reset of session values successufl", function:"clearsessionlist"})
 			}).catch((error: any) => {
 				if (error instanceof Error){
-					weapon_of_logging.CRITICAL(error.name,error.message,"Uncaught error in clearsessionlist", "none");
+					weapon_of_logging.error({message: "error resetting session values", function:"clearsessionlist"});
 				}
 			})
 			initSnapshot.docs.forEach((doc:any)=>{
@@ -29,7 +29,7 @@ module.exports = {
 				batch.delete(doc.ref);
 			})
 			await batch.commit();
-			weapon_of_logging.DEBUG("clearsession","successful deletion of spells and initiative","none")
+			weapon_of_logging.debug({message: "reset of spells and initiative", function:"clearsessionlist"})
 			await interaction.reply("Reset Complete");
 		}
 		catch(error){

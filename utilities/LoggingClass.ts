@@ -10,6 +10,7 @@ import chalk from 'chalk';
 import { client } from "../index";
 require("dotenv").config();
 
+
 async function addLog(item: any) {
   let errorMsg: any;
   console.log(chalk.greenBright(item.id))
@@ -27,7 +28,7 @@ async function addLog(item: any) {
   return Promise.resolve(errorMsg);
 }
 
-export const weapon_of_logging = {
+const legacy_logging = {
   async [LoggingTypes.EMERGENCY](
     errorName: any,
     errorMessage: any,
@@ -53,20 +54,20 @@ export const weapon_of_logging = {
       }).catch((error:any)=> {
         console.error(chalk.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`));
         console.error(error);
-        weapon_of_logging.DEBUG(error.name,error.message,chalk.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`))
+        legacy_logging.DEBUG(error.name,error.message,chalk.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`))
       });
 
       let errorMsg = await addLog(options);
       if (errorMsg instanceof Error) {
         console.log(chalk.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`))
         console.log(chalk.bgRedBright(errorMsg.message))
-        weapon_of_logging.DEBUG(errorMsg.name,errorMsg.message,chalk.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`))
+        legacy_logging.DEBUG(errorMsg.name,errorMsg.message,chalk.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`))
       }
     } catch (error) {
       if (error instanceof Error){
         console.error(chalk.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
         console.error(error);
-        weapon_of_logging.DEBUG(error.name,error.message,chalk.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`))
+        legacy_logging.DEBUG(error.name,error.message,chalk.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`))
       }
      
     }
@@ -96,20 +97,20 @@ export const weapon_of_logging = {
       }).catch((error:any)=> {
         console.error(chalk.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`));
         console.error(error);
-        weapon_of_logging.DEBUG(error.name,error.message,chalk.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`))
+        legacy_logging.DEBUG(error.name,error.message,chalk.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`))
       });
 
       let errorMsg = await addLog(options);
       if (errorMsg instanceof Error) {
         console.log(chalk.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`))
         console.log(chalk.bgRedBright(errorMsg.message))
-        weapon_of_logging.DEBUG(errorMsg.name,errorMsg.message,chalk.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`))
+        legacy_logging.DEBUG(errorMsg.name,errorMsg.message,chalk.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`))
       }
     } catch (error) {
       if (error instanceof Error){
         console.error(chalk.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
         console.error(error);
-        weapon_of_logging.DEBUG(error.name,error.message,chalk.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`))
+        legacy_logging.DEBUG(error.name,error.message,chalk.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`))
       }
      
     }
@@ -139,20 +140,20 @@ export const weapon_of_logging = {
       }).catch((error:any)=> {
         console.error(chalk.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`));
         console.error(error);
-        weapon_of_logging.DEBUG(error.name,error.message,chalk.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`))
+        legacy_logging.DEBUG(error.name,error.message,chalk.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`))
       });
 
       let errorMsg = await addLog(options);
       if (errorMsg instanceof Error) {
         console.log(chalk.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`))
         console.log(chalk.bgRedBright(errorMsg.message))
-        weapon_of_logging.DEBUG(errorMsg.name,errorMsg.message,chalk.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`))
+        legacy_logging.DEBUG(errorMsg.name,errorMsg.message,chalk.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`))
       }
     } catch (error) {
       if (error instanceof Error){
         console.error(chalk.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
         console.error(error);
-        weapon_of_logging.DEBUG(error.name,error.message,chalk.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`))
+        legacy_logging.DEBUG(error.name,error.message,chalk.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`))
       }
      
     }
@@ -179,13 +180,13 @@ export const weapon_of_logging = {
       if (errorMsg instanceof Error) {
         console.log(chalk.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`))
         console.log(chalk.bgRedBright(errorMsg.message))
-        weapon_of_logging.DEBUG(errorMsg.name,errorMsg.message,chalk.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`))
+        legacy_logging.DEBUG(errorMsg.name,errorMsg.message,chalk.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`))
       }
     } catch (error) {
       if (error instanceof Error){
         console.error(chalk.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
         console.error(error);
-        weapon_of_logging.DEBUG(error.name,error.message,chalk.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`))
+        legacy_logging.DEBUG(error.name,error.message,chalk.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`))
       }
      
     }
@@ -210,13 +211,13 @@ export const weapon_of_logging = {
       if (errorMsg instanceof Error) {
         console.log(chalk.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`))
         console.log(chalk.bgRedBright(errorMsg.message))
-        weapon_of_logging.DEBUG(errorMsg.name,errorMsg.message,chalk.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`))
+        legacy_logging.DEBUG(errorMsg.name,errorMsg.message,chalk.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`))
       }
     } catch (error) {
       if (error instanceof Error){
         console.error(chalk.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
         console.error(error);
-        weapon_of_logging.DEBUG(error.name,error.message,chalk.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`))
+        legacy_logging.DEBUG(error.name,error.message,chalk.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`))
       }
     }
   },
@@ -240,13 +241,13 @@ export const weapon_of_logging = {
       if (errorMsg instanceof Error) {
         console.log(chalk.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`))
         console.log(chalk.bgRedBright(errorMsg.message))
-        weapon_of_logging.DEBUG(errorMsg.name,errorMsg.message,chalk.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`))
+        legacy_logging.DEBUG(errorMsg.name,errorMsg.message,chalk.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`))
       }
     } catch (error) {
       if (error instanceof Error){
         console.error(chalk.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
         console.error(error);
-        weapon_of_logging.DEBUG(error.name,error.message,chalk.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`))
+        legacy_logging.DEBUG(error.name,error.message,chalk.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`))
       }
      
     }
@@ -271,13 +272,13 @@ export const weapon_of_logging = {
       if (errorMsg instanceof Error) {
         console.log(chalk.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`))
         console.log(chalk.bgRedBright(errorMsg.message))
-        weapon_of_logging.DEBUG(errorMsg.name,errorMsg.message,chalk.bgRedBright("There was an error logging to the database"))
+        legacy_logging.DEBUG(errorMsg.name,errorMsg.message,chalk.bgRedBright("There was an error logging to the database"))
       }
     } catch (error) {
       if (error instanceof Error){
         console.error(chalk.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
         console.error(error);
-        weapon_of_logging.DEBUG(error.name,error.message,chalk.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`))
+        legacy_logging.DEBUG(error.name,error.message,chalk.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`))
       }
      
     }

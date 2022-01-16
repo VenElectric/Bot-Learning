@@ -2,7 +2,7 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
 import { finalizeInitiative } from "../services/initiative";
 import { retrieveCollection, getSession } from "../services/database-common";
-import { weapon_of_logging } from "../utilities/LoggingClass";
+const weapon_of_logging = require("../utilities/LoggerConfig").logger
 import { InitiativeObject } from "../Interfaces/GameSessionTypes";
 import { initiativeEmbed } from "../services/create-embed";
 // import { webComponent, devWeb } from "../services/constants"
@@ -19,10 +19,8 @@ module.exports = {
         sessionId,
         "initiative"
       )) as InitiativeObject[];
-      weapon_of_logging.INFO(
-        "listinitiative",
-        "getting initiative list",
-        newList
+      weapon_of_logging.info(
+        {message: "getting initiative records", function:"listinitiative"}
       );
       let [isSorted, onDeck, sessionSize] = await getSession(sessionId);
       let sortedList = await finalizeInitiative(
@@ -33,19 +31,14 @@ module.exports = {
         isSorted
       );
       let initEmbed = initiativeEmbed(sortedList);
-      weapon_of_logging.DEBUG(
-        "listinitiative",
-        "sorted Initiative and created embed",
-        sortedList
+      weapon_of_logging.debug(
+        {message: "sorted initiative and creating embed", function:"listinitiative"}
       );
       await interaction.reply({ embeds: [initEmbed] });
     } catch (error) {
       if (error instanceof Error) {
-        weapon_of_logging.CRITICAL(
-          "listinitiative",
-          "uncaught error",
-          error.stack,
-          error.message
+        weapon_of_logging.error(
+          {message: error.message, function:"listinitiative"}
         );
       }
     }

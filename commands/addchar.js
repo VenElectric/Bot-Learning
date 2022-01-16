@@ -13,7 +13,7 @@ const { SlashCommandBuilder } = require("@discordjs/builders");
 const { v4: uuidv4 } = require("uuid");
 const database_common_1 = require("../services/database-common");
 const ServerCommunicationTypes_1 = require("../Interfaces/ServerCommunicationTypes");
-const LoggingClass_1 = require("../utilities/LoggingClass");
+const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("addchar")
@@ -46,7 +46,6 @@ module.exports = {
             let initiativeModifier = interaction.options.getInteger("initiativemodifier");
             let isNpc = interaction.options.getBoolean("isnpc");
             let isNat20 = interaction.options.getBoolean("isnat20");
-            LoggingClass_1.weapon_of_logging.DEBUG("addchar", "Entering Addchar function. Content Data", interaction.content);
             if (isNat20) {
                 initiativeRoll += 100;
             }
@@ -61,21 +60,21 @@ module.exports = {
                     statusEffects: [],
                     isNpc: isNpc,
                 };
-                LoggingClass_1.weapon_of_logging.DEBUG("addchar", "Grabbing initial values for character", options);
+                weapon_of_logging.debug({ message: "Grabbing initial values for character", function: "addchar" });
                 let errorMsg = yield (0, database_common_1.addSingle)(options, sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE);
                 if (errorMsg instanceof Error) {
-                    LoggingClass_1.weapon_of_logging.CRITICAL(errorMsg.name, errorMsg.message, errorMsg.stack, options);
+                    weapon_of_logging.error(errorMsg.name, errorMsg.message, errorMsg.stack, options);
                 }
                 else {
-                    LoggingClass_1.weapon_of_logging.DEBUG("addchar", "Results were successful for adding character", errorMsg);
+                    weapon_of_logging.debug({ message: "Grabbing initial values for character", function: "addchar" });
                 }
                 let replyString = `Your character, ${name}, has been added with an initiative of ${initiativeRoll} + ${initiativeModifier} = ${initiativeRoll + initiativeModifier}. You can edit this on the website component using the /link command. \n Any rolled nat 20's have 100 added on for sorting purposes.`;
-                LoggingClass_1.weapon_of_logging.INFO("addchar", "Replying to interaction with this message", replyString);
+                weapon_of_logging.info({ message: `Replying to interaction: ${replyString}`, function: "addchar" });
                 yield interaction.reply(replyString);
             }
             catch (error) {
                 if (error instanceof Error) {
-                    LoggingClass_1.weapon_of_logging.CRITICAL(error.name, error.message, error.stack, interaction.content);
+                    weapon_of_logging.error({ message: error.message, function: "addchar" });
                 }
             }
         });
