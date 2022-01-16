@@ -1,6 +1,7 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { MessageActionRow, MessageSelectMenu } = require("discord.js");
 import { helpMenu } from "../services/constants";
+import { weapon_of_logging } from "../utilities/LoggingClass";
 const wait = require('util').promisify(setTimeout);
 
 module.exports = {
@@ -14,6 +15,7 @@ module.exports = {
         .setPlaceholder("Nothing selected")
         .addOptions(helpMenu)
     )
+    weapon_of_logging.INFO("help","sending helpmenu to channel","none")
     await interaction.reply({ content: "Select a command", components: [row] })
   },
 };

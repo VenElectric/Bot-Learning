@@ -8,7 +8,6 @@ module.exports = {
 		.setName("prev")
 		.setDescription("Move Turn Order Backwards"),
 	async execute(interaction:any) {
-		let sessionId = interaction.channel.id
 		let [errorMsg, currentTurn] = await turnOrder(interaction.channel.id, initiativeFunctionTypes.PREVIOUS)
 
 		if (errorMsg instanceof Error){
@@ -16,11 +15,10 @@ module.exports = {
 				errorMsg.name,
 				errorMsg.message,
 				errorMsg.stack,
-				currentTurn,
-				sessionId
+				currentTurn
 			  );
 		}
-		weapon_of_logging.INFO("currentTurn", "none", currentTurn,sessionId)
+		weapon_of_logging.INFO("currentTurn", "successfully went back in turn order", currentTurn)
 			await interaction.reply(`Current Turn: ${currentTurn}`);
 	},
 };

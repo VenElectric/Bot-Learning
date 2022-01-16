@@ -18,12 +18,11 @@ module.exports = {
         .setDescription("Move Turn Order Backwards"),
     execute(interaction) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sessionId = interaction.channel.id;
             let [errorMsg, currentTurn] = yield turnOrder(interaction.channel.id, initiativeFunctionTypes.PREVIOUS);
             if (errorMsg instanceof Error) {
-                LoggingClass_1.weapon_of_logging.CRITICAL(errorMsg.name, errorMsg.message, errorMsg.stack, currentTurn, sessionId);
+                LoggingClass_1.weapon_of_logging.CRITICAL(errorMsg.name, errorMsg.message, errorMsg.stack, currentTurn);
             }
-            LoggingClass_1.weapon_of_logging.INFO("currentTurn", "none", currentTurn, sessionId);
+            LoggingClass_1.weapon_of_logging.INFO("currentTurn", "successfully went back in turn order", currentTurn);
             yield interaction.reply(`Current Turn: ${currentTurn}`);
         });
     },

@@ -18,16 +18,15 @@ module.exports = {
         .setDescription("1+1 = ?"),
     execute(message) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sessionId = message.channel.id;
             try {
                 let answer = evaluate(message.content);
-                LoggingClass_1.weapon_of_logging.INFO("math", "Calculation", answer, sessionId);
+                LoggingClass_1.weapon_of_logging.INFO("math", "Calculation complete", answer);
                 yield message.reply(`Answer: ${answer}`);
             }
             catch (error) {
                 if (error instanceof Error) {
                     yield message.reply(error.message);
-                    LoggingClass_1.weapon_of_logging.NOTICE(error.name, error.message, message.content, sessionId);
+                    LoggingClass_1.weapon_of_logging.CRITICAL(error.name, error.message, error.stack, message.content);
                 }
             }
         });

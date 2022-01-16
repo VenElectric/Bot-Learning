@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateAllSpells = exports.addSpell = void 0;
 const { v4: uuidv4 } = require("uuid");
 const database_common_1 = require("./database-common");
-const ENUMS_1 = require("../Interfaces/ENUMS");
+const ServerCommunicationTypes_1 = require("../Interfaces/ServerCommunicationTypes");
 function addSpell(sessionId, spell) {
     return __awaiter(this, void 0, void 0, function* () {
         spell.id = uuidv4();
@@ -24,17 +24,18 @@ function addSpell(sessionId, spell) {
             spellName: spell.spellName,
             playeridsEffected: [],
         };
-        let [isUploaded, errorMsg] = yield (0, database_common_1.addSingle)(options, sessionId, ENUMS_1.collectionTypes.SPELLS);
-        return [isUploaded, errorMsg];
+        return yield (0, database_common_1.addSingle)(options, sessionId, ServerCommunicationTypes_1.collectionTypes.SPELLS);
     });
 }
 exports.addSpell = addSpell;
 function updateAllSpells(sessionId, spellList) {
-    let uploadArray = [];
-    for (let record of spellList) {
-        let [isUploaded, errorMsg] = (0, database_common_1.updatecollectionRecord)(record, ENUMS_1.collectionTypes.SPELLS, record.id, sessionId);
-        uploadArray.push(Object.assign({ isUploaded: isUploaded, errorMsg: errorMsg }, record));
-    }
-    return uploadArray;
+    return __awaiter(this, void 0, void 0, function* () {
+        let uploadArray = [];
+        for (let record of spellList) {
+            let errorMsg = yield (0, database_common_1.updatecollectionRecord)(record, ServerCommunicationTypes_1.collectionTypes.SPELLS, record.id, sessionId);
+            uploadArray.push(Object.assign({ errorMsg: errorMsg }, record));
+        }
+        return uploadArray;
+    });
 }
 exports.updateAllSpells = updateAllSpells;

@@ -27,18 +27,25 @@ module.exports = {
                     .collection("sessions")
                     .doc(interaction.channel.id)
                     .get();
-                let initiativeList = [];
-                initiativeList = yield retrieveSession(interaction.channel.id);
+                let initiativeList = yield retrieveSession(interaction.channel.id);
+                LoggingClass_1.weapon_of_logging.INFO("resort", "retrieved initiativeList", initiativeList);
                 if (snapshot.data().isSorted) {
                     newList = yield finalizeInitiative(initiativeList, false, interaction.channel.id, 2, true);
+                    LoggingClass_1.weapon_of_logging.DEBUG("resort", "isSorted is true", snapshot.data().isSorted);
+                }
+                if (!snapshot.data().isSorted) {
+                    LoggingClass_1.weapon_of_logging.DEBUG("resort", "isSorted is false", snapshot.data().isSorted);
+                    yield interaction.reply("Initiative has not been sorted yet. Please use the /start command.");
                 }
                 if (snapshot.data().isSorted === undefined) {
                     for (let item in initiativeList) {
                         initiativeList[item].isCurrent = false;
                     }
                     newList = yield finalizeInitiative(initiativeList, true, interaction.channel.id, 2, false);
+                    LoggingClass_1.weapon_of_logging.DEBUG("resort", "isSorted is undefined", snapshot.data().isSorted);
                 }
                 let initiativeEmbed = createEmbed(newList);
+                LoggingClass_1.weapon_of_logging.INFO("resort", "resort complete", newList);
                 yield interaction.reply({
                     content: "Initiative has been resorted.",
                     embeds: [initiativeEmbed],
@@ -46,7 +53,7 @@ module.exports = {
             }
             catch (error) {
                 if (error instanceof Error) {
-                    LoggingClass_1.weapon_of_logging.CRITICAL(error.name, error.message, error.stack, newList, sessionId);
+                    LoggingClass_1.weapon_of_logging.CRITICAL(error.name, error.message, error.stack, newList);
                 }
             }
         });

@@ -9,22 +9,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.rollEmbed = exports.createEmbed = void 0;
+exports.rollEmbed = exports.spellEmbed = exports.initiativeEmbed = void 0;
 const { MessageEmbed } = require('discord.js');
 const cemoj = ":bow_and_arrow:";
 const bemoj = ":black_medium_square:";
 const constants_1 = require("./constants");
-function createEmbed(embedArray) {
+function initiativeEmbed(embedArray) {
     let embed = new MessageEmbed();
     console.log(embedArray, "embedArray");
     for (let record of embedArray) {
-        console.log(record);
         embed.addField(constants_1.escapeChar, `${record.characterName}   |   ${record.isCurrent ? cemoj : bemoj}`, false);
     }
     embed.setTitle('Initiative List');
     return embed;
 }
-exports.createEmbed = createEmbed;
+exports.initiativeEmbed = initiativeEmbed;
+function spellEmbed(embedArray) {
+    let embed = new MessageEmbed();
+    console.log(embedArray, "embedArray");
+    for (let record of embedArray) {
+        embed.addField(record.spellName, record.effect, false);
+    }
+    embed.setTitle('Initiative List');
+    return embed;
+}
+exports.spellEmbed = spellEmbed;
 function rollEmbed(embedArray, tag) {
     return __awaiter(this, void 0, void 0, function* () {
         let embedFields = [];

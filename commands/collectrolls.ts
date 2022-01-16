@@ -33,7 +33,7 @@ module.exports = {
       await interaction.reply(
         "Please enter a tag and number of dice rolls when you run this command. If you need help with this command, please use the /help slash command."
       );
-      weapon_of_logging.NOTICE("CollectRolls", "tag or roll ammount is null",interaction.content,sessionId)
+      weapon_of_logging.NOTICE("CollectRolls", "tag or roll ammount is null",interaction.content)
       return;
     }
     try {
@@ -42,12 +42,14 @@ module.exports = {
         filter: filter,
         idle: 60000,
       });
+      weapon_of_logging.DEBUG("collectrolls","Starting collector","none")
       await interaction.reply(
         `**[Enter your rolls with the tag ${tag}]**\n Leave a comment after the tag if you need to separate different rolls for different characters.\n I.E. d20+3 tag Meridia`
       );
 
       collector.on("collect", async (m: any) => {
         if (collector.collected.size > rollAmount) {
+          weapon_of_logging.DEBUG("collectrolls","Stopping Collector",collector.collected)
           collector.stop();
         }
         // regex to get character name out of comment
@@ -64,7 +66,7 @@ module.exports = {
           "green"
         );
 
-        weapon_of_logging.INFO("CollectRolls","infocollected",{characterName: characterName,roll:roll,commentArray: commentArray},sessionId)
+        weapon_of_logging.DEBUG("CollectRolls","infocollected",{characterName: characterName,roll:roll,commentArray: commentArray})
 
         if (characterName.length > 0) {
           embed.addField("\u200b", `${addBash(characterName, "blue")} ${roll}`, false);
@@ -73,18 +75,18 @@ module.exports = {
             .fetch(m.mentions.repliedUser?.id)
             .then((username: any) => {
               let nickname = addBash(username.nickname, "blue");
-              weapon_of_logging.INFO("CollectRolls","nickname",nickname,sessionId)
+              weapon_of_logging.DEBUG("CollectRolls","nickname",nickname)
               embed.addField("\u200b", `${nickname} ${roll}`, false);
             })
             .catch((error: any) => {
-              weapon_of_logging.NOTICE(error.name, error.message,m,sessionId)
+              weapon_of_logging.CRITICAL(error.name, error.message,error.stack,m)
               console.log(error);
             });
         }
       });
 
       collector.on("end", async (collected: any) => {
-        weapon_of_logging.INFO("collected", "collectedrolls", collected,sessionId)
+        weapon_of_logging.INFO("collectrolls", "Rolls have finished collecting. Sending embed.", collected)
         await interaction.editReply("Collection ended");
         await interaction.channel.send({ embeds: [embed] });
         // embed is being sent before the above code. So embed is empty when it is sent to the channel.
@@ -96,8 +98,7 @@ module.exports = {
           error.name,
           error.message,
           error.stack,
-          interaction.content,
-          sessionId
+          interaction.content
           );
       }
     }

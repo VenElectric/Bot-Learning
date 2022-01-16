@@ -21,7 +21,6 @@ module.exports = {
     execute(interaction) {
         return __awaiter(this, void 0, void 0, function* () {
             let newList;
-            let sessionId = interaction.channel.id;
             try {
                 let initiativeSnap = yield db
                     .collection("sessions")
@@ -36,7 +35,7 @@ module.exports = {
                     initiativeList.push(record);
                 });
                 newList = yield finalizeInitiative(initiativeList, true, interaction.channel.id, 2, true);
-                LoggingClass_1.weapon_of_logging.INFO("start", "newList data", newList, sessionId);
+                LoggingClass_1.weapon_of_logging.INFO("start", "newList data", newList);
                 console.log(newList, "newList");
                 let initiativeEmbed = createEmbed(newList);
                 yield interaction.reply({
@@ -47,7 +46,7 @@ module.exports = {
             catch (error) {
                 console.log(error);
                 if (error instanceof Error) {
-                    LoggingClass_1.weapon_of_logging.CRITICAL(error.name, error.message, error.stack, newList, sessionId);
+                    LoggingClass_1.weapon_of_logging.CRITICAL(error.name, error.message, error.stack, newList);
                 }
             }
         });

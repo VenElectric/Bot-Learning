@@ -5,7 +5,7 @@ const {
 } = require("../services/initiative");
 const { db } = require("../services/firebase-setup");
 const { createEmbed } = require("../services/create-embed");
-import { IInit } from "../Interfaces/IInit";
+import {InitiativeObject} from "../Interfaces/GameSessionTypes";
 import { weapon_of_logging } from "../utilities/LoggingClass";
 
 module.exports = {
@@ -21,10 +21,9 @@ module.exports = {
         .doc(interaction.channel.id)
         .get();
 
-      let initiativeList = [] as IInit[];
 
-      initiativeList = await retrieveSession(interaction.channel.id);
-
+      let initiativeList = await retrieveSession(interaction.channel.id);
+      weapon_of_logging.INFO("resort", "retrieved initiativeList", initiativeList);
       if (snapshot.data().isSorted) {
         newList = await finalizeInitiative(
           initiativeList,
@@ -33,6 +32,11 @@ module.exports = {
           2,
           true
         );
+        weapon_of_logging.DEBUG("resort", "isSorted is true",snapshot.data().isSorted)
+      }
+      if (!snapshot.data().isSorted){
+        weapon_of_logging.DEBUG("resort", "isSorted is false",snapshot.data().isSorted)
+        await interaction.reply("Initiative has not been sorted yet. Please use the /start command.")
       }
       if (snapshot.data().isSorted === undefined) {
         for (let item in initiativeList) {
@@ -45,10 +49,11 @@ module.exports = {
           2,
           false
         );
+        weapon_of_logging.DEBUG("resort", "isSorted is undefined",snapshot.data().isSorted)
       }
 
       let initiativeEmbed = createEmbed(newList);
-
+      weapon_of_logging.INFO("resort", "resort complete",newList);
       await interaction.reply({
         content: "Initiative has been resorted.",
         embeds: [initiativeEmbed],
@@ -59,8 +64,7 @@ module.exports = {
           error.name,
           error.message,
           error.stack,
-          newList,
-          sessionId
+          newList
         );
       }
     }

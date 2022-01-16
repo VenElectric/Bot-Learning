@@ -18,12 +18,13 @@ module.exports = {
         .setDescription("Move turn order forward"),
     execute(interaction) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sessionId = interaction.channel.id;
             let [errorMsg, currentTurn] = yield turnOrder(interaction.channel.id, initiativeFunctionTypes.NEXT);
             if (errorMsg instanceof Error) {
-                LoggingClass_1.weapon_of_logging.CRITICAL(errorMsg.name, errorMsg.message, errorMsg.stack, currentTurn, sessionId);
+                LoggingClass_1.weapon_of_logging.CRITICAL(errorMsg.name, errorMsg.message, errorMsg.stack, currentTurn);
             }
-            console.log(errorMsg); // better error logging and handling
+            else {
+                LoggingClass_1.weapon_of_logging.INFO("next", "successfully completed next command", currentTurn);
+            }
             yield interaction.reply(`Current Turn: ${currentTurn}`);
         });
     },

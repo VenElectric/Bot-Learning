@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const LoggingClass_1 = require("../utilities/LoggingClass");
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { MessageActionRow, MessageSelectMenu } = require("discord.js");
 module.exports = {
@@ -18,21 +19,28 @@ module.exports = {
     execute(interaction) {
         return __awaiter(this, void 0, void 0, function* () {
             let menuChannels = [];
-            let guildChannels = yield interaction.guild.channels.fetch();
-            // console.log(guildChannels);
-            guildChannels.forEach((item) => {
-                if (item.type !== "GUILD_CATEGORY" && item.type !== "GUILD_VOICE") {
-                    menuChannels.push({
-                        label: item.name,
-                        value: item.id,
-                    });
+            try {
+                let guildChannels = yield interaction.guild.channels.fetch();
+                guildChannels.forEach((item) => {
+                    if (item.type !== "GUILD_CATEGORY" && item.type !== "GUILD_VOICE") {
+                        LoggingClass_1.weapon_of_logging.DEBUG("changechannel", "add in new channel to menu", { channelName: item.name, channelId: item.id });
+                        menuChannels.push({
+                            label: item.name,
+                            value: item.id,
+                        });
+                    }
+                });
+            }
+            catch (error) {
+                if (error instanceof Error) {
+                    LoggingClass_1.weapon_of_logging.CRITICAL(error.name, "Uncaught error in changchannel", error.stack, error.message);
                 }
-            });
+            }
             const row = new MessageActionRow().addComponents(new MessageSelectMenu()
                 .setCustomId("changechannel")
                 .setPlaceholder("Nothing selected")
                 .addOptions(menuChannels));
-            // transfer docs or use UUID for doc id (like we were doing)
+            LoggingClass_1.weapon_of_logging.INFO("changechannel", "Replying to interaction with created select menu", "none");
             yield interaction.reply({
                 content: "Select a new channel for your session.",
                 components: [row],

@@ -15,6 +15,7 @@ const initRef = firebase_setup_1.db.collection("sessions");
 const rpg_dice_roller_1 = require("@dice-roller/rpg-dice-roller");
 const database_common_1 = require("./database-common");
 const constants_1 = require("./constants");
+const LoggingClass_1 = require("../utilities/LoggingClass");
 const { MessageEmbed } = require("discord.js");
 const cemoj = ":bow_and_arrow:";
 const bemoj = ":black_medium_square:";
@@ -32,6 +33,12 @@ function uniqueRolls(num) {
         arrd20.push(myroll.total);
     }
     return [...new Set(arrd20)];
+}
+function resetisCurrent(initiativeList) {
+    for (let record of initiativeList) {
+        record.isCurrent = false;
+    }
+    return initiativeList;
 }
 function findDuplicates(initiativeList) {
     let dupes = [];
@@ -154,6 +161,7 @@ function resortInitiative(initiativeList) {
         if (a.roundOrder < b.roundOrder)
             return 1;
     });
+    LoggingClass_1.weapon_of_logging.DEBUG("initiativeresort", "finishedresorting initiative", initiativeList);
     return initiativeList;
 }
 exports.resortInitiative = resortInitiative;
@@ -161,34 +169,41 @@ function finalizeInitiative(initiativeList, isFirstSort, sessionId, onDeck, isSo
     return __awaiter(this, void 0, void 0, function* () {
         // look for duplicate initiative and initiative modifiers. Add them to a dupes array
         let dupes = findDuplicates(initiativeList);
-        console.log(dupes);
+        LoggingClass_1.weapon_of_logging.DEBUG("duplicates", "retrieved duplicates", dupes !== [] ? dupes : "none");
         // if no dupes, proceed, else we need to find out who goes before who by rolling a d20
         initiativeList = rerollDuplicates(dupes, initiativeList);
+        LoggingClass_1.weapon_of_logging.INFO("intitiativeList", "post reroll duplicates", initiativeList);
         if (isFirstSort) {
+            initiativeList = resetisCurrent(initiativeList);
             initiativeList = firstsortInitiave(initiativeList);
+            isSorted = true;
             initiativeList[0].isCurrent = true;
         }
         else {
             initiativeList = resortInitiative(initiativeList);
         }
-        let uploadResults = yield updateAllInitiative(initiativeList, sessionId, onDeck, isSorted, initiativeList.length);
-        console.log("upload results", uploadResults);
-        // better logic for logging/error handling
+        LoggingClass_1.weapon_of_logging.INFO("intitiativeList", "post isFirstsort clause", initiativeList);
+        yield updateAllInitiative(initiativeList, sessionId, onDeck, isSorted, initiativeList.length);
         return initiativeList;
     });
 }
 exports.finalizeInitiative = finalizeInitiative;
 function updateAllInitiative(initiativeList, sessionId, onDeck, isSorted, sessionSize) {
     return __awaiter(this, void 0, void 0, function* () {
-        let uploadArray = [];
         // todo loggin and error handling
-        let [isError, errorMsg] = yield (0, database_common_1.updateSession)(sessionId, onDeck, isSorted, sessionSize);
-        console.log(isError, errorMsg);
-        for (let record of initiativeList) {
-            let [isUploaded, errorMsg2] = (0, database_common_1.updatecollectionRecord)(record, constants_1.initiativeCollection, record.id, sessionId);
-            uploadArray.push(Object.assign({ isUploaded: isUploaded, errorMsg: errorMsg2 }, record));
+        let errorMsg = yield (0, database_common_1.updateSession)(sessionId, onDeck, isSorted, sessionSize);
+        if (errorMsg instanceof Error) {
+            LoggingClass_1.weapon_of_logging.CRITICAL(errorMsg.name, errorMsg.message, errorMsg.stack, { onDeck: onDeck, isSorted: isSorted, sessionSize: sessionSize });
         }
-        return uploadArray;
+        for (let record of initiativeList) {
+            let errorMsg2 = (0, database_common_1.updatecollectionRecord)(record, constants_1.initiativeCollection, record.id, sessionId);
+            if (errorMsg2 instanceof Error) {
+                LoggingClass_1.weapon_of_logging.CRITICAL(errorMsg2.name, errorMsg2.message, errorMsg2.stack, record);
+            }
+            else {
+                LoggingClass_1.weapon_of_logging.WARN("upload Results", "updateAllInitiative upload result", record);
+            }
+        }
     });
 }
 exports.updateAllInitiative = updateAllInitiative;
@@ -196,26 +211,32 @@ function sortedtoFalse(sessionId) {
     return __awaiter(this, void 0, void 0, function* () {
         let notSorted;
         let errorMsg;
+        let dataParams = {
+            isSorted: false,
+            onDeck: 0,
+            sessionSize: 0,
+        };
         try {
             let [isSorted, onDeck, sessionSize] = yield (0, database_common_1.getSession)(sessionId);
+            dataParams.isSorted = isSorted;
+            dataParams.onDeck = onDeck;
+            dataParams.sessionSize = sessionSize;
             if (isSorted) {
-                let [isError, errorMsg2] = yield (0, database_common_1.updateSession)(sessionId, onDeck, false, sessionSize);
+                let errorMsg2 = yield (0, database_common_1.updateSession)(sessionId, onDeck, false, sessionSize);
                 notSorted = true;
-                if (isError) {
-                    console.log(errorMsg2);
-                    errorMsg = errorMsg2;
+                if (errorMsg2 instanceof Error) {
+                    LoggingClass_1.weapon_of_logging.CRITICAL(errorMsg2.name, errorMsg2.message, errorMsg2.stack, dataParams);
                 }
             }
             else {
-                // insert logging here
+                LoggingClass_1.weapon_of_logging.INFO("sortedtoFalse", "grabbing get session returns", dataParams);
                 notSorted = true;
             }
         }
         catch (error) {
-            // better error handling. Not sure where the typerror for issorted is being caught....
-            console.log(error);
-            errorMsg = error;
-            notSorted = true;
+            if (error instanceof Error) {
+                LoggingClass_1.weapon_of_logging.CRITICAL(error.name, error.message, error.stack, dataParams);
+            }
         }
         return [errorMsg, notSorted];
     });
@@ -271,10 +292,6 @@ function previousInitiative(previousOnDeck, sessionLength) {
         console.log(newOnDeck, current);
         console.log("current<total");
     }
-    // need to change isCurrent to reflect the new current turn.
-    // newondeck was previously the current turn so it needs to be false for isCurrent
-    // current (from our previous exmample) is now 2, so that record needs to be true for isCurrent
-    // and then set the ondeck parameter in the initiative collection to the newOndeck number
     return [newOnDeck, current];
 }
 exports.previousInitiative = previousInitiative;
@@ -285,12 +302,12 @@ function turnOrder(sessionId, functionType) {
             console.log(onDeck, "Ondeck?");
             if (onDeck != 0) {
                 let [newOnDeck, previous] = nextInitiative(onDeck, sessionSize);
-                return nextpreviousDatabase(sessionId, previous, onDeck, newOnDeck);
+                return Promise.resolve(nextpreviousDatabase(sessionId, previous, onDeck, newOnDeck));
             }
         }
         if (functionType == initiativeFunctionTypes.PREVIOUS) {
             let [newOnDeck, current] = previousInitiative(onDeck, sessionSize);
-            return nextpreviousDatabase(sessionId, newOnDeck, current, newOnDeck);
+            return Promise.resolve(nextpreviousDatabase(sessionId, newOnDeck, current, newOnDeck));
         }
     });
 }
@@ -299,9 +316,11 @@ function nextpreviousDatabase(sessionId, toFalse, toTrue, newOnDeck) {
     return __awaiter(this, void 0, void 0, function* () {
         let currentName;
         let errorMsg;
+        let snapshotData = {
+            toFalse: null,
+            toTrue: null,
+        };
         try {
-            console.log(toFalse, "toFalse");
-            console.log(toTrue, "toTrue");
             let toFalseSnapshot = yield initRef
                 .doc(sessionId)
                 .collection("initiative")
@@ -312,21 +331,40 @@ function nextpreviousDatabase(sessionId, toFalse, toTrue, newOnDeck) {
                 .collection("initiative")
                 .where("roundOrder", "==", Number(toTrue))
                 .get();
+            snapshotData.toFalse = toFalseSnapshot.docs[0].id;
+            snapshotData.toTrue = toTrueSnapshot.docs[0].id;
             initRef
                 .doc(sessionId)
                 .collection("initiative")
-                .doc(toFalseSnapshot.docs[0].id)
+                .doc(snapshotData.toFalse)
                 .set({ isCurrent: false }, { merge: true });
             initRef
                 .doc(sessionId)
                 .collection("initiative")
-                .doc(toTrueSnapshot.docs[0].id)
+                .doc(snapshotData.toTrue)
                 .set({ isCurrent: true }, { merge: true });
             initRef.doc(sessionId).set({ onDeck: newOnDeck }, { merge: true });
+            LoggingClass_1.weapon_of_logging.INFO("next or previous", "grabbing session data", {
+                toFalsedoc: snapshotData.toFalse,
+                toTruedoc: snapshotData.toTrue,
+                toFalseNumber: toFalse,
+                toTrueNumber: toTrue,
+                newOnDeck: newOnDeck,
+                currentName: currentName,
+            });
             currentName = toTrueSnapshot.docs[0].data().characterName;
         }
         catch (error) {
-            console.log(error);
+            if (error instanceof Error) {
+                LoggingClass_1.weapon_of_logging.CRITICAL(error.name, error.message, error.stack, {
+                    sessionId: sessionId,
+                    toFalseNumber: toFalse,
+                    toTrueNumber: toTrue,
+                    newOnDeck: newOnDeck,
+                    toFalsedoc: snapshotData.toFalse,
+                    toTruedoc: snapshotData.toTrue,
+                });
+            }
             errorMsg = error;
             // error logging
         }

@@ -19,9 +19,8 @@ const server = http.createServer(app);
 const port = process.env.PORT || 8000;
 const { register_commands } = require("./deploy-commands");
 const constants_1 = require("./services/constants");
-const database_common_1 = require("./services/database-common");
-const initiative_1 = require("./services/initiative");
-const emitTypes_1 = require("./services/emitTypes");
+const SocketReceiver_1 = require("./services/SocketReceiver");
+const LoggingClass_1 = require("./utilities/LoggingClass");
 require("dotenv").config();
 const token = process.env.DISCORD_TOKEN;
 const io = require("socket.io")(server, {
@@ -62,56 +61,19 @@ exports.client.once("ready", () => {
 // Login to Discord with your client"s token
 register_commands();
 exports.client.login(token);
+process.on('unhandledRejection', error => {
+    let sessionId = process.env.MY_DISCORD != undefined ? process.env.MY_DISCORD : "";
+    if (error instanceof Error) {
+        LoggingClass_1.weapon_of_logging.EMERGENCY(error.name, error.message, error.stack, "none");
+    }
+});
 io.on("connection", (socket) => {
     socket.on("create", function (room) {
         socket.join(room);
-        console.log(room);
+        console.log("test");
+        LoggingClass_1.weapon_of_logging.INFO("create", "room created", "none");
     });
-    socket.on("test", function (data) {
-        console.log("data", data);
-    });
-    socket.on("GET_INITIAL_INIT", (sessionId, respond) => __awaiter(void 0, void 0, void 0, function* () {
-        console.log("GET_INITIAL_INIT");
-        let initiativeList = yield (0, database_common_1.retrieveCollection)(sessionId, constants_1.initiativeCollection);
-        let [isSorted, onDeck, sessionSize] = yield (0, database_common_1.getSession)(sessionId);
-        console.log(isSorted, onDeck, sessionSize);
-        respond({
-            initiativeList: initiativeList,
-            spellList: [],
-            isSorted: isSorted,
-            onDeck: onDeck,
-            sessionId,
-        });
-    }));
-    socket.on("GET_INITIAL_SPELLS", (sessionId, respond) => __awaiter(void 0, void 0, void 0, function* () {
-        let spellList = yield (0, database_common_1.retrieveCollection)(sessionId, constants_1.spellCollection);
-        console.log("get initial spells");
-        respond(spellList);
-    }));
-    socket.on(emitTypes_1.EmitTypes.CREATE_NEW, (dataList, respond) => __awaiter(void 0, void 0, void 0, function* () {
-        console.log(dataList);
-        let response;
-        try {
-            yield (0, database_common_1.addSingle)(dataList.payload, dataList.sessionId, dataList.collectionType);
-            console.log("success");
-            response = 200;
-        }
-        catch (error) {
-            console.log(error);
-            response = error;
-        }
-        respond(response);
-    }));
-    socket.on(emitTypes_1.EmitTypes.ROUND_START, (sessionId, respond) => __awaiter(void 0, void 0, void 0, function* () {
-        let initiativeList = yield (0, database_common_1.retrieveCollection)(sessionId, constants_1.initiativeCollection);
-        let [isSorted, onDeck, sessionSize] = yield (0, database_common_1.getSession)(sessionId);
-        let sortedList = yield (0, initiative_1.finalizeInitiative)(initiativeList, true, sessionId, onDeck, isSorted);
-        socket.broadcast.to(sessionId).emit(emitTypes_1.EmitTypes.ROUND_START, { initiativeList: sortedList, isSorted: isSorted, sessionSize: sessionSize, onDeck: onDeck });
-        respond({ initiativeList: sortedList, isSorted: isSorted, sessionSize: sessionSize, onDeck: onDeck });
-    }));
-    socket.on("addinit", (sessionId, respond) => {
-        respond("test");
-    });
+    (0, SocketReceiver_1.socketReceiver)(socket, exports.client);
 });
 exports.client.on("error", (error) => {
     if (error instanceof Error) {
@@ -137,7 +99,8 @@ exports.client.on("messageCreate", (message) => __awaiter(void 0, void 0, void 0
     }
     catch (error) {
         if (error instanceof Error) {
-            message.channel.send(error.message);
+            LoggingClass_1.weapon_of_logging.CRITICAL(error.name, error.message, error.stack, message.content);
+            return;
         }
     }
 }));
@@ -146,29 +109,39 @@ exports.client.on("interactionCreate", (interaction) => __awaiter(void 0, void 0
     var _a;
     if (!interaction.isSelectMenu())
         return;
+    let sessionId = interaction.channel ? interaction.channel.id : "";
+    try {
+        if (interaction.customId === "helpmenu") {
+            yield interaction.deferUpdate();
+            const helpEmbed = new MessageEmbed()
+                .setTitle(interaction.values[0])
+                .addField("\u200b", constants_1.commandDescriptions[`${interaction.values[0]}`].description, false)
+                .setImage(constants_1.commandDescriptions[`${interaction.values[0]}`].image);
+            yield interaction.editReply({
+                embeds: [helpEmbed],
+                components: [],
+            });
+        }
+        if (interaction.customId === "changechannel") {
+            let channelName = yield ((_a = interaction === null || interaction === void 0 ? void 0 : interaction.guild) === null || _a === void 0 ? void 0 : _a.channels.fetch(interaction.values[0]));
+            yield interaction.deferUpdate();
+            yield interaction.editReply({
+                content: `Your channel has been changed to ${channelName === null || channelName === void 0 ? void 0 : channelName.name}`,
+                components: [],
+            });
+        }
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            LoggingClass_1.weapon_of_logging.CRITICAL(error.name, error.message, error.stack, interaction.values);
+            return;
+        }
+    }
     // help menu
-    if (interaction.customId === "helpmenu") {
-        yield interaction.deferUpdate();
-        const helpEmbed = new MessageEmbed()
-            .setTitle(interaction.values[0])
-            .addField("\u200b", constants_1.commandDescriptions[`${interaction.values[0]}`].description, false)
-            .setImage(constants_1.commandDescriptions[`${interaction.values[0]}`].image);
-        yield interaction.editReply({
-            embeds: [helpEmbed],
-            components: [],
-        });
-    }
-    if (interaction.customId === "changechannel") {
-        let channelName = yield ((_a = interaction === null || interaction === void 0 ? void 0 : interaction.guild) === null || _a === void 0 ? void 0 : _a.channels.fetch(interaction.values[0]));
-        yield interaction.deferUpdate();
-        yield interaction.editReply({
-            content: `Your channel has been changed to ${channelName === null || channelName === void 0 ? void 0 : channelName.name}`,
-            components: [],
-        });
-    }
 }));
 // Command Interactions
 exports.client.on("interactionCreate", (interaction) => __awaiter(void 0, void 0, void 0, function* () {
+    let sessionId = interaction.channel ? interaction.channel.id : "";
     if (!interaction.isCommand()) {
         return;
     }
@@ -180,7 +153,9 @@ exports.client.on("interactionCreate", (interaction) => __awaiter(void 0, void 0
         yield command.execute(interaction);
     }
     catch (error) {
-        console.error(error);
+        if (error instanceof Error) {
+            LoggingClass_1.weapon_of_logging.NOTICE(error.name, error.message, { stackTrace: error.stack, command: interaction.commandName });
+        }
         yield interaction.reply({
             content: "There was an error while executing this command!",
         });

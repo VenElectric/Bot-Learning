@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { MessageActionRow, MessageSelectMenu } = require("discord.js");
 const constants_1 = require("../services/constants");
+const LoggingClass_1 = require("../utilities/LoggingClass");
 const wait = require('util').promisify(setTimeout);
 module.exports = {
     data: new SlashCommandBuilder()
@@ -23,6 +24,7 @@ module.exports = {
                 .setCustomId("helpmenu")
                 .setPlaceholder("Nothing selected")
                 .addOptions(constants_1.helpMenu));
+            LoggingClass_1.weapon_of_logging.INFO("help", "sending helpmenu to channel", "none");
             yield interaction.reply({ content: "Select a command", components: [row] });
         });
     },

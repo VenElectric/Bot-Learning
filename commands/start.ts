@@ -2,7 +2,7 @@ const { SlashCommandBuilder } = require("@discordjs/builders");
 const { finalizeInitiative } = require("../services/initiative");
 const { db } = require("../services/firebase-setup");
 const { createEmbed } = require("../services/create-embed");
-import { IInit } from "../Interfaces/IInit";
+import { InitiativeObject } from "../Interfaces/GameSessionTypes";
 import { weapon_of_logging } from "../utilities/LoggingClass";
 
 module.exports = {
@@ -11,17 +11,16 @@ module.exports = {
     .setDescription("Start Initiative and reset turn order."),
   async execute(interaction: any) {
     let newList;
-    let sessionId = interaction.channel.id;
     try {
       let initiativeSnap = await db
         .collection("sessions")
         .doc(interaction.channel.id)
         .collection("initiative")
         .get();
-      let initiativeList = [] as IInit[];
+      let initiativeList = [] as InitiativeObject[];
 
       initiativeSnap.forEach((doc: any) => {
-        let record = doc.data() as IInit;
+        let record = doc.data() as InitiativeObject;
         record.isCurrent = false;
         console.log(record);
         initiativeList.push(record);
@@ -34,7 +33,7 @@ module.exports = {
         2,
         true
       );
-      weapon_of_logging.INFO("start", "newList data", newList, sessionId);
+      weapon_of_logging.INFO("start", "newList data", newList);
       console.log(newList, "newList");
 
       let initiativeEmbed = createEmbed(newList);
@@ -51,7 +50,6 @@ module.exports = {
           error.message,
           error.stack,
           newList,
-          sessionId
         );
       }
     }

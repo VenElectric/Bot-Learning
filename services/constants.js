@@ -35,7 +35,7 @@ exports.helpMenu = [
     {
         label: "previous",
         description: "",
-        value: "prev"
+        value: "previous"
     },
     {
         label: "next",

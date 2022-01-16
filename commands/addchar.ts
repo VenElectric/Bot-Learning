@@ -1,7 +1,7 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { v4: uuidv4 } = require("uuid");
 import { addSingle } from "../services/database-common";
-import { collectionTypes } from "../Interfaces/ENUMS";
+import { collectionTypes } from "../Interfaces/ServerCommunicationTypes";
 import { weapon_of_logging } from "../utilities/LoggingClass";
 
 module.exports = {
@@ -46,7 +46,8 @@ module.exports = {
       interaction.options.getInteger("initiativemodifier");
     let isNpc = interaction.options.getBoolean("isnpc");
     let isNat20 = interaction.options.getBoolean("isnat20");
-
+    
+    weapon_of_logging.DEBUG("addchar", "Entering Addchar function. Content Data", interaction.content)
     if (isNat20) {
       initiativeRoll += 100;
     }
@@ -62,11 +63,11 @@ module.exports = {
         statusEffects: [],
         isNpc: isNpc,
       };
-      // weapon_of_logging.INFO("options", "added character", options, sessionId);
+      weapon_of_logging.DEBUG("addchar", "Grabbing initial values for character", options);
 
-      let [errorMsg, isUploaded] = await addSingle(
+      let errorMsg = await addSingle(
         options,
-        interaction.channelId,
+        sessionId,
         collectionTypes.INITIATIVE
       );
 
@@ -75,15 +76,18 @@ module.exports = {
           errorMsg.name,
           errorMsg.message,
           errorMsg.stack,
-          options,
-          sessionId
+          options
         );
       }
+      else {
+        weapon_of_logging.DEBUG("addchar", "Results were successful for adding character",errorMsg)
+      }
      
-      console.log(errorMsg instanceof Error)
       let replyString = `Your character, ${name}, has been added with an initiative of ${initiativeRoll} + ${initiativeModifier} = ${
         initiativeRoll + initiativeModifier
       }. You can edit this on the website component using the /link command. \n Any rolled nat 20's have 100 added on for sorting purposes.`;
+      weapon_of_logging.INFO("addchar", "Replying to interaction with this message", replyString);
+      
       await interaction.reply(replyString);
     } catch (error) {
       if (error instanceof Error) {
@@ -91,8 +95,7 @@ module.exports = {
             error.name,
             error.message,
             error.stack,
-            interaction.content,
-            sessionId
+            interaction.content
           );
       }
     }

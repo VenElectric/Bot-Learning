@@ -36,7 +36,7 @@ module.exports = {
                 .setColor("#0099ff");
             if (tag === null || rollAmount === null) {
                 yield interaction.reply("Please enter a tag and number of dice rolls when you run this command. If you need help with this command, please use the /help slash command.");
-                LoggingClass_1.weapon_of_logging.NOTICE("CollectRolls", "tag or roll ammount is null", interaction.content, sessionId);
+                LoggingClass_1.weapon_of_logging.NOTICE("CollectRolls", "tag or roll ammount is null", interaction.content);
                 return;
             }
             try {
@@ -45,10 +45,12 @@ module.exports = {
                     filter: filter,
                     idle: 60000,
                 });
+                LoggingClass_1.weapon_of_logging.DEBUG("collectrolls", "Starting collector", "none");
                 yield interaction.reply(`**[Enter your rolls with the tag ${tag}]**\n Leave a comment after the tag if you need to separate different rolls for different characters.\n I.E. d20+3 tag Meridia`);
                 collector.on("collect", (m) => __awaiter(this, void 0, void 0, function* () {
                     var _a;
                     if (collector.collected.size > rollAmount) {
+                        LoggingClass_1.weapon_of_logging.DEBUG("collectrolls", "Stopping Collector", collector.collected);
                         collector.stop();
                     }
                     // regex to get character name out of comment
@@ -59,7 +61,7 @@ module.exports = {
                         .replace(tag, "")
                         .trim();
                     let roll = (0, parse_1.addBash)(commentArray[2].replace("```", "").replace('"', ""), "green");
-                    LoggingClass_1.weapon_of_logging.INFO("CollectRolls", "infocollected", { characterName: characterName, roll: roll, commentArray: commentArray }, sessionId);
+                    LoggingClass_1.weapon_of_logging.DEBUG("CollectRolls", "infocollected", { characterName: characterName, roll: roll, commentArray: commentArray });
                     if (characterName.length > 0) {
                         embed.addField("\u200b", `${(0, parse_1.addBash)(characterName, "blue")} ${roll}`, false);
                     }
@@ -68,17 +70,17 @@ module.exports = {
                             .fetch((_a = m.mentions.repliedUser) === null || _a === void 0 ? void 0 : _a.id)
                             .then((username) => {
                             let nickname = (0, parse_1.addBash)(username.nickname, "blue");
-                            LoggingClass_1.weapon_of_logging.INFO("CollectRolls", "nickname", nickname, sessionId);
+                            LoggingClass_1.weapon_of_logging.DEBUG("CollectRolls", "nickname", nickname);
                             embed.addField("\u200b", `${nickname} ${roll}`, false);
                         })
                             .catch((error) => {
-                            LoggingClass_1.weapon_of_logging.NOTICE(error.name, error.message, m, sessionId);
+                            LoggingClass_1.weapon_of_logging.CRITICAL(error.name, error.message, error.stack, m);
                             console.log(error);
                         });
                     }
                 }));
                 collector.on("end", (collected) => __awaiter(this, void 0, void 0, function* () {
-                    LoggingClass_1.weapon_of_logging.INFO("collected", "collectedrolls", collected, sessionId);
+                    LoggingClass_1.weapon_of_logging.INFO("collectrolls", "Rolls have finished collecting. Sending embed.", collected);
                     yield interaction.editReply("Collection ended");
                     yield interaction.channel.send({ embeds: [embed] });
                     // embed is being sent before the above code. So embed is empty when it is sent to the channel.
@@ -87,7 +89,7 @@ module.exports = {
             catch (error) {
                 console.log(error);
                 if (error instanceof Error) {
-                    LoggingClass_1.weapon_of_logging.CRITICAL(error.name, error.message, error.stack, interaction.content, sessionId);
+                    LoggingClass_1.weapon_of_logging.CRITICAL(error.name, error.message, error.stack, interaction.content);
                 }
             }
         });

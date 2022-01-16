@@ -8,262 +8,284 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.weapon_of_logging = void 0;
 const { LEVEL } = require("triple-beam");
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
+const LoggingTypes_1 = require("../Interfaces/LoggingTypes");
+const dayjs_1 = __importDefault(require("dayjs"));
 const { firestore } = require("firebase-admin");
 const { db } = require("../services/firebase-setup");
-const initRef = db.collection("sessions");
+const logRef = db.collection("logging");
+const chalk_1 = __importDefault(require("chalk"));
 const index_1 = require("../index");
-const ENUMS_1 = require("../Interfaces/ENUMS");
 require("dotenv").config();
-var LoggingTypes;
-(function (LoggingTypes) {
-    LoggingTypes["EMERGENCY"] = "EMERGENCY";
-    LoggingTypes["ALERT"] = "ALERT";
-    LoggingTypes["CRITICAL"] = "CRITICAL";
-    LoggingTypes["ERROR"] = "ERROR";
-    LoggingTypes["WARN"] = "WARN";
-    LoggingTypes["NOTICE"] = "NOTICE";
-    LoggingTypes["INFO"] = "INFO";
-    LoggingTypes["DEBUG"] = "DEBUG";
-})(LoggingTypes || (LoggingTypes = {}));
-function addLog(item, sessionId) {
-    let isUploaded;
-    let errorMsg;
-    initRef
-        .doc(sessionId)
-        .collection(ENUMS_1.collectionTypes.LOGGING)
-        .doc(item.id)
-        .set(item)
-        .then(() => {
-        isUploaded = true;
-        errorMsg = "";
-    })
-        .catch((error) => {
-        // error handling
-        console.log("ERRRASDF;LKJASD;FLKJAS;LDKJAS;LDFJAS;LKD");
-        if (errorMsg instanceof Error) {
-            console.log(error);
-            console.trace(error.name);
-            console.trace(error.msg);
-        }
-        isUploaded = false;
-        errorMsg = error;
+function addLog(item) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let errorMsg;
+        console.log(chalk_1.default.greenBright(item.id));
+        logRef
+            .doc(item.id)
+            .set(item)
+            .then(() => {
+            errorMsg = false;
+        })
+            .catch((error) => {
+            // error handling
+            errorMsg = error;
+        });
+        return Promise.resolve(errorMsg);
     });
-    return [isUploaded, errorMsg];
 }
 exports.weapon_of_logging = {
-    [LoggingTypes.EMERGENCY](errorName, errorMessage, stackTrace, data, sessionId) {
+    [LoggingTypes_1.LoggingTypes.EMERGENCY](errorName, errorMessage, stackTrace, data) {
         return __awaiter(this, void 0, void 0, function* () {
             let options = {
                 id: uuidv4(),
-                level: LoggingTypes.EMERGENCY,
-                [LEVEL]: LoggingTypes.EMERGENCY,
+                level: LoggingTypes_1.LoggingTypes.EMERGENCY,
+                [LEVEL]: LoggingTypes_1.LoggingTypes.EMERGENCY,
                 errorName: errorName,
                 errorMessage: errorMessage,
-                data: data,
+                data: JSON.stringify(data),
                 stackTrace: stackTrace,
                 date: firestore.Timestamp.now(),
             };
             try {
                 index_1.client.channels.fetch(process.env.MY_DISCORD).then((channel) => {
-                    channel.send(`Error: ${errorName} \n Message: ${errorMessage} \n Data: ${data}`);
+                    channel.send(`Error: ${errorName} \n Message: ${errorMessage} \n Data: ${data} \n Stack Trace: ${stackTrace}`);
+                }).catch((error) => {
+                    console.error(chalk_1.default.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`));
+                    console.error(error);
+                    exports.weapon_of_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`));
                 });
-                let [isUploaded, errorMsg] = addLog(options, sessionId);
+                let errorMsg = yield addLog(options);
                 if (errorMsg instanceof Error) {
-                    console.trace(isUploaded);
-                    console.trace(errorMsg);
+                    console.log(chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
+                    console.log(chalk_1.default.bgRedBright(errorMsg.message));
+                    exports.weapon_of_logging.DEBUG(errorMsg.name, errorMsg.message, chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
                 }
             }
             catch (error) {
-                console.error(options);
-                console.error(error);
-                return;
+                if (error instanceof Error) {
+                    console.error(chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
+                    console.error(error);
+                    exports.weapon_of_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
+                }
             }
         });
     },
-    [LoggingTypes.ALERT](errorName, errorMessage, stackTrace, data, sessionId) {
+    [LoggingTypes_1.LoggingTypes.ALERT](errorName, errorMessage, stackTrace, data) {
         return __awaiter(this, void 0, void 0, function* () {
             let options = {
                 id: uuidv4(),
-                level: LoggingTypes.ALERT,
-                [LEVEL]: LoggingTypes.ALERT,
+                level: LoggingTypes_1.LoggingTypes.ALERT,
+                [LEVEL]: LoggingTypes_1.LoggingTypes.ALERT,
                 errorName: errorName,
                 errorMessage: errorMessage,
-                data: data,
+                data: JSON.stringify(data),
                 stackTrace: stackTrace,
                 date: firestore.Timestamp.now(),
             };
             try {
                 index_1.client.channels.fetch(process.env.MY_DISCORD).then((channel) => {
-                    channel.send(`Error: ${errorName} \n Message: ${errorMessage} \n Data: ${data}`);
+                    channel.send(`Error: ${errorName} \n Message: ${errorMessage} \n Data: ${data} \n Stack Trace: ${stackTrace}`);
+                }).catch((error) => {
+                    console.error(chalk_1.default.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`));
+                    console.error(error);
+                    exports.weapon_of_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`));
                 });
-                let [isUploaded, errorMsg] = addLog(options, sessionId);
+                let errorMsg = yield addLog(options);
                 if (errorMsg instanceof Error) {
-                    console.trace(isUploaded);
-                    console.trace(errorMsg);
+                    console.log(chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
+                    console.log(chalk_1.default.bgRedBright(errorMsg.message));
+                    exports.weapon_of_logging.DEBUG(errorMsg.name, errorMsg.message, chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
                 }
             }
             catch (error) {
-                console.error(options);
-                console.error(error);
+                if (error instanceof Error) {
+                    console.error(chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
+                    console.error(error);
+                    exports.weapon_of_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
+                }
             }
         });
     },
-    [LoggingTypes.CRITICAL](errorName, errorMessage, stackTrace, data, sessionId) {
+    [LoggingTypes_1.LoggingTypes.CRITICAL](errorName, errorMessage, stackTrace, data) {
         return __awaiter(this, void 0, void 0, function* () {
             let options = {
                 id: uuidv4(),
-                level: LoggingTypes.CRITICAL,
-                [LEVEL]: LoggingTypes.CRITICAL,
+                level: LoggingTypes_1.LoggingTypes.CRITICAL,
+                [LEVEL]: LoggingTypes_1.LoggingTypes.CRITICAL,
                 errorName: errorName,
                 errorMessage: errorMessage,
                 stackTrace: stackTrace,
-                data: data,
+                data: JSON.stringify(data),
                 date: firestore.Timestamp.now(),
             };
             try {
                 index_1.client.channels.fetch(process.env.MY_DISCORD).then((channel) => {
-                    channel.send(`Error: ${errorName} \n Message: ${errorMessage} \n Data: ${data}`);
+                    channel.send(`Error: ${errorName} \n Message: ${errorMessage} \n Data: ${data} \n Stack Trace: ${stackTrace}`);
+                }).catch((error) => {
+                    console.error(chalk_1.default.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`));
+                    console.error(error);
+                    exports.weapon_of_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an error sending to the channel ${options[LEVEL]}`));
                 });
-                let [isUploaded, errorMsg] = addLog(options, sessionId);
+                let errorMsg = yield addLog(options);
                 if (errorMsg instanceof Error) {
-                    console.trace(isUploaded);
-                    console.trace(errorMsg);
+                    console.log(chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
+                    console.log(chalk_1.default.bgRedBright(errorMsg.message));
+                    exports.weapon_of_logging.DEBUG(errorMsg.name, errorMsg.message, chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
                 }
             }
             catch (error) {
-                console.error(options);
-                console.error(error);
+                if (error instanceof Error) {
+                    console.error(chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
+                    console.error(error);
+                    exports.weapon_of_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
+                }
             }
         });
     },
-    [LoggingTypes.ERROR](errorName, errorMessage, stackTrace, data, sessionId) {
+    [LoggingTypes_1.LoggingTypes.ERROR](errorName, errorMessage, stackTrace, data) {
         return __awaiter(this, void 0, void 0, function* () {
             let options = {
                 id: uuidv4(),
-                level: LoggingTypes.ERROR,
-                [LEVEL]: LoggingTypes.ERROR,
+                level: LoggingTypes_1.LoggingTypes.ERROR,
+                [LEVEL]: LoggingTypes_1.LoggingTypes.ERROR,
                 errorName: errorName,
                 errorMessage: errorMessage,
                 stackTrace: stackTrace,
-                data: data,
+                data: JSON.stringify(data),
                 date: firestore.Timestamp.now(),
             };
             try {
-                let [isUploaded, errorMsg] = addLog(options, sessionId);
+                let errorMsg = yield addLog(options);
                 if (errorMsg instanceof Error) {
-                    console.trace(isUploaded);
-                    console.trace(errorMsg);
+                    console.log(chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
+                    console.log(chalk_1.default.bgRedBright(errorMsg.message));
+                    exports.weapon_of_logging.DEBUG(errorMsg.name, errorMsg.message, chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
                 }
             }
             catch (error) {
-                console.error(options);
-                console.error(error);
+                if (error instanceof Error) {
+                    console.error(chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
+                    console.error(error);
+                    exports.weapon_of_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
+                }
             }
         });
     },
-    [LoggingTypes.WARN](errorName, errorMessage, data, sessionId) {
+    [LoggingTypes_1.LoggingTypes.WARN](errorName, errorMessage, data) {
         return __awaiter(this, void 0, void 0, function* () {
             let options = {
                 id: uuidv4(),
-                level: LoggingTypes.WARN,
-                [LEVEL]: LoggingTypes.WARN,
+                level: LoggingTypes_1.LoggingTypes.WARN,
+                [LEVEL]: LoggingTypes_1.LoggingTypes.WARN,
                 errorName: errorName,
                 errorMessage: errorMessage,
-                data: data,
+                data: JSON.stringify(data),
                 date: firestore.Timestamp.now(),
             };
             try {
-                let [isUploaded, errorMsg] = addLog(options, sessionId);
+                let errorMsg = yield addLog(options);
                 if (errorMsg instanceof Error) {
-                    console.trace(isUploaded);
-                    console.trace(errorMsg);
+                    console.log(chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
+                    console.log(chalk_1.default.bgRedBright(errorMsg.message));
+                    exports.weapon_of_logging.DEBUG(errorMsg.name, errorMsg.message, chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
                 }
             }
             catch (error) {
-                console.error(options);
-                console.error(error);
+                if (error instanceof Error) {
+                    console.error(chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
+                    console.error(error);
+                    exports.weapon_of_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
+                }
             }
         });
     },
-    [LoggingTypes.NOTICE](noticeName, noticeMessage, data, sessionId) {
+    [LoggingTypes_1.LoggingTypes.NOTICE](noticeName, noticeMessage, data) {
         return __awaiter(this, void 0, void 0, function* () {
             let options = {
                 id: uuidv4(),
-                level: LoggingTypes.NOTICE,
-                [LEVEL]: LoggingTypes.NOTICE,
+                level: LoggingTypes_1.LoggingTypes.NOTICE,
+                [LEVEL]: LoggingTypes_1.LoggingTypes.NOTICE,
                 errorName: noticeName,
                 errorMessage: noticeMessage,
-                data: data,
+                data: JSON.stringify(data),
                 date: firestore.Timestamp.now(),
             };
             try {
-                let [isUploaded, errorMsg] = addLog(options, sessionId);
+                let errorMsg = yield addLog(options);
                 if (errorMsg instanceof Error) {
-                    console.trace(isUploaded);
-                    console.trace(errorMsg);
+                    console.log(chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
+                    console.log(chalk_1.default.bgRedBright(errorMsg.message));
+                    exports.weapon_of_logging.DEBUG(errorMsg.name, errorMsg.message, chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
                 }
             }
             catch (error) {
-                console.error(options);
-                console.error(error);
+                if (error instanceof Error) {
+                    console.error(chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
+                    console.error(error);
+                    exports.weapon_of_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
+                }
             }
         });
     },
-    [LoggingTypes.INFO](infoName, infoMessage, data, sessionId) {
+    [LoggingTypes_1.LoggingTypes.INFO](infoName, infoMessage, data) {
         return __awaiter(this, void 0, void 0, function* () {
             let options = {
                 id: uuidv4(),
-                level: LoggingTypes.INFO,
-                [LEVEL]: LoggingTypes.INFO,
+                level: LoggingTypes_1.LoggingTypes.INFO,
+                [LEVEL]: LoggingTypes_1.LoggingTypes.INFO,
                 infoName: infoName,
                 infoMessage: infoMessage,
-                data: data,
+                data: JSON.stringify(data),
                 date: firestore.Timestamp.now(),
             };
             try {
-                let [isUploaded, errorMsg] = addLog(options, sessionId);
+                let errorMsg = yield addLog(options);
                 if (errorMsg instanceof Error) {
-                    console.trace(isUploaded);
-                    console.trace(errorMsg);
+                    console.log(chalk_1.default.bgRedBright(`There was an error logging to the database ${options[LEVEL]}`));
+                    console.log(chalk_1.default.bgRedBright(errorMsg.message));
+                    exports.weapon_of_logging.DEBUG(errorMsg.name, errorMsg.message, chalk_1.default.bgRedBright("There was an error logging to the database"));
                 }
             }
             catch (error) {
-                console.error(options);
-                console.error(error);
+                if (error instanceof Error) {
+                    console.error(chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
+                    console.error(error);
+                    exports.weapon_of_logging.DEBUG(error.name, error.message, chalk_1.default.bgRedBright(`There was an uncaught error. ${options[LEVEL]}`));
+                }
             }
         });
     },
-    [LoggingTypes.DEBUG](debugName, debugMessage, data, sessionId) {
+    [LoggingTypes_1.LoggingTypes.DEBUG](debugName, debugMessage, data) {
         return __awaiter(this, void 0, void 0, function* () {
             let options = {
                 id: uuidv4(),
-                level: LoggingTypes.INFO,
-                [LEVEL]: LoggingTypes.INFO,
+                level: LoggingTypes_1.LoggingTypes.DEBUG,
+                [LEVEL]: LoggingTypes_1.LoggingTypes.DEBUG,
                 debugName: debugName,
                 debugMessage: debugMessage,
-                data: data,
-                date: firestore.Timestamp.now(),
-                sessionId: sessionId,
+                adata: JSON.stringify(data),
+                date: (0, dayjs_1.default)()
             };
             try {
-                console.log(options);
                 fs.appendFile("logs.txt", JSON.stringify(options) + "\n", function (error) {
                     if (error) {
-                        return console.error(options, error);
+                        console.error(options, error);
+                        return error;
                     }
-                    console.log("Data written successfully!");
                     // Read the newly written file and print all of its content on the console
                 });
             }
             catch (error) {
-                console.error(options);
+                console.error(chalk_1.default.bgRedBright(`There was an error writing to the file. Level ${options[LEVEL]}`));
                 console.error(error);
-                return;
             }
         });
     },

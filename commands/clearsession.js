@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { db } = require("../services/firebase-setup");
+const LoggingClass_1 = require("../utilities/LoggingClass");
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("clearsessionlist")
@@ -18,8 +19,8 @@ module.exports = {
     execute(interaction) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let sessionid = interaction.channel.id;
-                const initRef = db.collection('sessions').doc(sessionid);
+                let sessionId = interaction.channel.id;
+                const initRef = db.collection('sessions').doc(sessionId);
                 const initSnapshot = yield initRef.collection("initiative").get();
                 const spellSnapshot = yield initRef.collection("spells").get();
                 const batch = db.batch();
@@ -30,6 +31,7 @@ module.exports = {
                     batch.delete(doc.ref);
                 });
                 yield batch.commit();
+                LoggingClass_1.weapon_of_logging.DEBUG("clearsession", "successful deletion of spells and initiative", "none");
                 yield interaction.reply("Reset Complete");
             }
             catch (error) {

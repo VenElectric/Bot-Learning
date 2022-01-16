@@ -8,21 +8,20 @@ module.exports = {
 		.setName("maths")
 		.setDescription("1+1 = ?"),
 	async execute(message:Message) {
-		let sessionId = message.channel.id
 		try{
 			let answer = evaluate(message.content)
-			weapon_of_logging.INFO("math", "Calculation", answer, sessionId)
+			weapon_of_logging.INFO("math", "Calculation complete", answer)
 			await message.reply(`Answer: ${answer}`);
 		}
 		catch (error){
 			if (error instanceof Error) {
 				await message.reply(error.message);
 				
-					weapon_of_logging.NOTICE(
+					weapon_of_logging.CRITICAL(
 						error.name,
 						error.message,
+						error.stack,
 						message.content,
-						sessionId
 					  );
 			  }
 			  
