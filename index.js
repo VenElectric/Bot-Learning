@@ -61,19 +61,22 @@ exports.client.once("ready", () => {
 // This updates immediately
 register_commands();
 exports.client.login(token);
-// client.guilds.fetch("723744588346556416").then((guild: any) => {
-//   guild.commands.set([])
-//   .then(console.log)
-//   .catch(console.error);
-// }).catch((error:any) => {
-//   console.log(error)
-// });
+let isBlocked = false;
 process.on("unhandledRejection", (error) => {
     if (error instanceof Error) {
-        weapon_of_logging.error({
-            message: error.message,
-            function: "Any Unhandled Rejection",
-        });
+        if (!isBlocked) {
+            exports.client.channels.fetch(process.env.MY_DISCORD).then((channel) => {
+                channel.send(`Unhandled Rejection ${error.name} `);
+            });
+            isBlocked = true;
+            setTimeout(() => {
+                isBlocked = false;
+                console.log(isBlocked);
+            }, 300000);
+        }
+        else {
+            return;
+        }
     }
 });
 io.on("connection", (socket) => {
@@ -85,7 +88,7 @@ io.on("connection", (socket) => {
 });
 exports.client.on("messageCreate", (message) => __awaiter(void 0, void 0, void 0, function* () {
     const regex = new RegExp(/(\/|\/[a-z]|\/[A-Z]|r)*\s*([d|D])([\d])+/);
-    const numreg = new RegExp(/(^\d\s*(\*|\+|\-|\/|=)\s*(\d|[a-z]))/);
+    const numreg = new RegExp(/([-+]?[0-9]*\.?[0-9]+[\/\+\-\*])+([-+]?[0-9]*\.?[0-9]+)/);
     // const prefix = new RegExp(/\/[a-z]|\/|[r|R]/);
     const rollcom = exports.client.commands.get("roll");
     const mathcom = exports.client.commands.get("maths");
@@ -101,7 +104,7 @@ exports.client.on("messageCreate", (message) => __awaiter(void 0, void 0, void 0
     }
     catch (error) {
         if (error instanceof Error) {
-            weapon_of_logging.error({
+            weapon_of_logging.notice({
                 message: error.message,
                 function: "messagecreate",
             });

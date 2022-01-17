@@ -18,10 +18,7 @@ module.exports = {
 				await message.reply(error.message);
 				
 					weapon_of_logging.error(
-						error.name,
-						error.message,
-						error.stack,
-						message.content,
+						{message: error.message, function:"maths"}
 					  );
 			  }
 			  

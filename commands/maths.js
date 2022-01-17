@@ -26,7 +26,7 @@ module.exports = {
             catch (error) {
                 if (error instanceof Error) {
                     yield message.reply(error.message);
-                    weapon_of_logging.error(error.name, error.message, error.stack, message.content);
+                    weapon_of_logging.error({ message: error.message, function: "maths" });
                 }
             }
         });

@@ -24,7 +24,7 @@ module.exports = {
         .setRequired(true))
         .addIntegerOption((option) => option
         .setName("initiativeroll")
-        .setDescription("Enter Initiative Dice Roll (no modifier added)")
+        .setDescription("Enter Initiative Dice Roll (NO MODIFIER ADDED)")
         .setRequired(true))
         .addIntegerOption((option) => option
         .setName("initiativemodifier")
@@ -53,7 +53,7 @@ module.exports = {
                 let options = {
                     id: uuidv4(),
                     characterName: name,
-                    initiative: initiativeRoll,
+                    initiative: initiativeRoll + initiativeModifier,
                     initiativeModifier: initiativeModifier,
                     roundOrder: 0,
                     isCurrent: false,

@@ -9,7 +9,11 @@ module.exports = {
     .setDescription("Replies with Pong!"),
   async execute(interaction: any) {
     weapon_of_logging.error({message: "send to discord channel test", function:"ping"})
+
+    
+   
     interaction.reply("Pong")
+    
   },
 };
 
