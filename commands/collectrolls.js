@@ -30,29 +30,62 @@ module.exports = {
         return __awaiter(this, void 0, void 0, function* () {
             const tag = interaction.options.getString("tag");
             const rollAmount = interaction.options.getInteger("rollamount");
-            const filter = (m) => m.content.includes(`${tag}`) && m.author.username === process.env.BOT_NAME;
+            const resetFilter = (m) => m.content.includes("reset");
+            const filter = (m) => m.content.includes(`${tag}`) &&
+                m.author.username === process.env.BOT_NAME;
             const embed = new MessageEmbed()
                 .setTitle(`Embed for the tag: ${tag}`)
                 .setColor("#0099ff");
-            weapon_of_logging.log({ level: "debug", message: `Tag: ${tag} RollAmount: ${rollAmount}`, function: "collectRolls" });
+            let isReset = false;
+            weapon_of_logging.log({
+                level: "debug",
+                message: `Tag: ${tag} RollAmount: ${rollAmount}`,
+                function: "collectRolls",
+            });
             if (tag === null || rollAmount === null) {
                 yield interaction.reply("Please enter a tag and number of dice rolls when you run this command. If you need help with this command, please use the /help slash command.");
-                weapon_of_logging.warn({ message: "tag or roll amount is null", function: "collectrolls" });
+                weapon_of_logging.warn({
+                    message: "tag or roll amount is null",
+                    function: "collectrolls",
+                });
                 return;
             }
             try {
-                weapon_of_logging.log({ level: "debug", message: "testing logger", function: "collectRolls" });
+                weapon_of_logging.log({
+                    level: "debug",
+                    message: "testing logger",
+                    function: "collectRolls",
+                });
                 // retest collector so that it does not collect the initial interaction
                 const collector = interaction.channel.createMessageCollector({
                     filter: filter,
                     idle: 60000,
                 });
-                weapon_of_logging.debug({ message: "initiating collector", function: "collectrolls" });
+                const resetCollector = interaction.channel.createMessageCollector({
+                    filter: resetFilter,
+                    idle: 60000,
+                });
+                weapon_of_logging.debug({
+                    message: "initiating collector",
+                    function: "collectrolls",
+                });
                 yield interaction.reply(`**[Enter your rolls with the tag ${tag}]**\n Leave a comment after the tag if you need to separate different rolls for different characters.\n I.E. d20+3 tag Meridia`);
+                resetCollector.on("collect", (m) => {
+                    isReset = true;
+                    collector.stop("reset");
+                    resetCollector.stop();
+                    weapon_of_logging.info({
+                        message: "Collector has been reset",
+                        function: "collectrolls",
+                    });
+                });
                 collector.on("collect", (m) => __awaiter(this, void 0, void 0, function* () {
                     var _a;
                     if (collector.collected.size > rollAmount) {
-                        weapon_of_logging.debug({ message: "stopping collector", function: "collectrolls" });
+                        weapon_of_logging.debug({
+                            message: "stopping collector",
+                            function: "collectrolls",
+                        });
                         collector.stop();
                     }
                     // regex to get character name out of comment
@@ -63,7 +96,10 @@ module.exports = {
                         .replace(tag, "")
                         .trim();
                     let roll = (0, parse_1.addBash)(commentArray[2].replace("```", "").replace('"', ""), "green");
-                    weapon_of_logging.debug({ message: `collected roll ${commentArray[2]}`, function: "collectrolls" });
+                    weapon_of_logging.debug({
+                        message: `collected roll ${commentArray[2]}`,
+                        function: "collectrolls",
+                    });
                     if (characterName.length > 0) {
                         embed.addField("\u200b", `${(0, parse_1.addBash)(characterName, "blue")} ${roll}`, false);
                     }
@@ -72,25 +108,45 @@ module.exports = {
                             .fetch((_a = m.mentions.repliedUser) === null || _a === void 0 ? void 0 : _a.id)
                             .then((username) => {
                             let nickname = (0, parse_1.addBash)(username.nickname, "blue");
-                            weapon_of_logging.debug({ message: "nickname successfully fetched", function: "collectrolls" });
+                            weapon_of_logging.debug({
+                                message: "nickname successfully fetched",
+                                function: "collectrolls",
+                            });
                             embed.addField("\u200b", `${nickname} ${roll}`, false);
                         })
                             .catch((error) => {
-                            weapon_of_logging.error({ message: "could not find guild member or uncaught error", function: "collectrolls" });
+                            weapon_of_logging.error({
+                                message: "could not find guild member or uncaught error",
+                                function: "collectrolls",
+                            });
                             console.log(error);
                         });
                     }
                 }));
                 collector.on("end", (collected) => __awaiter(this, void 0, void 0, function* () {
-                    weapon_of_logging.info({ message: "collector successuflly ended", function: "collectrolls" });
-                    yield interaction.editReply("Collection ended");
-                    yield interaction.channel.send({ embeds: [embed] });
-                    // embed is being sent before the above code. So embed is empty when it is sent to the channel.
+                    if (!isReset) {
+                        weapon_of_logging.info({
+                            message: "collector successuflly ended !isReset",
+                            function: "collectrolls",
+                        });
+                        yield interaction.editReply("Collection ended");
+                        yield interaction.channel.send({ embeds: [embed] });
+                    }
+                    else {
+                        weapon_of_logging.info({
+                            message: "collector successuflly ended else statement",
+                            function: "collectrolls",
+                        });
+                        yield interaction.editReply("Please use the /collectrolls command again to start the collector.");
+                    }
                 }));
             }
             catch (error) {
                 if (error instanceof Error) {
-                    weapon_of_logging.error({ message: error.message, function: "collectrolls" });
+                    weapon_of_logging.error({
+                        message: error.message,
+                        function: "collectrolls",
+                    });
                 }
             }
         });

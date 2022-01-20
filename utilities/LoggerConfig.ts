@@ -4,7 +4,44 @@ const winston = require("winston");
 const { db } = require("../services/firebase-setup");
 const { firestore } = require("firebase-admin");
 const { v4: uuidv4 } = require("uuid");
+const Logger = require('le_node');
 import { client } from "../index";
+require("dotenv").config();
+
+const logger = new Logger({
+  token:process.env.LOG_ENTRIES
+});
+
+class LogEntriesTransport extends Transport {
+    constructor(options: any) {
+      super(options);
+      this.params = options.params || ['level', 'message'];
+    }
+  
+    log(info:any, callback: Function) {
+      setImmediate(() => {
+        this.emit('logged', info);
+      });
+  
+      let result = Object.values(info).some((item:any) => item == null)
+
+      if (result){
+        throw new Error(`Parameters in a log can not be null.`)
+      }
+
+      if(info.level === "error"){
+        client.channels.fetch(process.env.MY_DISCORD).then((channel: any) => {
+          channel.send(`Critical Error Occurred. Please check logs`);
+        }).catch((error:any) => {
+          logger.info(error.message)
+        })
+      }
+
+      logger.log(info.level,{message: info.message, function: info.function})
+
+      callback();
+    }
+}
 
 class FirestoreTransport extends Transport {
   constructor(options: any) {
@@ -45,22 +82,22 @@ class FirestoreTransport extends Transport {
   }
 }
 
-const customLevels = {
-  levels :{
-    error: 0,
-    warn: 1,
-    info: 2,
-    http: 3,
-    debug: 5,
-  },
-  colors :{
-    info: 'cyan',
-    debug: 'blue',
-    http: 'cyan',
-    warn: 'yellow',
-    error: 'red'
-  }
-}
+// const customLevels = {
+//   levels :{
+//     error: 0,
+//     warn: 1,
+//     info: 2,
+//     http: 3,
+//     debug: 5,
+//   },
+//   colors :{
+//     info: 'cyan',
+//     debug: 'blue',
+//     http: 'cyan',
+//     warn: 'yellow',
+//     error: 'red'
+//   }
+// }
 
 const weapon_of_logging = winston.createLogger({
   levels :{
@@ -73,12 +110,30 @@ const weapon_of_logging = winston.createLogger({
   format: winston.format.json(),
   defaultMeta: { service: 'dungeon-bot' },
   transports: [
-    new FirestoreTransport({
-      collection: "logging",
+    new LogEntriesTransport({
       params: ["level", "message","function"],
       level: "debug"
     }),
   ],
 });
+
+// const weapon_of_logging = winston.createLogger({
+//   levels :{
+//     error: 0,
+//     warn: 1,
+//     info: 2,
+//     http: 3,
+//     debug: 5,
+//   },
+//   format: winston.format.json(),
+//   defaultMeta: { service: 'dungeon-bot' },
+//   transports: [
+//     new FirestoreTransport({
+//       collection: "logging",
+//       params: ["level", "message","function"],
+//       level: "debug"
+//     }),
+//   ],
+// });
 
 exports.logger = weapon_of_logging;
