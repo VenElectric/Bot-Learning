@@ -5,6 +5,15 @@ import { addBash } from "../services/parse";
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 require("dotenv").config();
 
+// Forseen issues/requests:
+// 1. Edit a collected response since player did not total something correctly or rolled the wrong dice.
+// 2. Entered in the wrong amount of players to rollamount, and people have already entered their dice rolls
+// Possibly combine this command with a second and third command (Add and Edit (need to differentiate from /addchar)) that allow the players to edit their responses
+// Maybe also allow a manual command to stop the collector (I.E. like the reset collector I created) instead of using "rollamount". Or a conjunction of both. 
+// Messaging on whether or not rollamount was entered. 
+// I.E. Since you didn't enter a roll amount, the DM will need to use the stop command (no slash "/") to stop collection and show results
+// And then with roll amount: The collection will stop after X results have been collected or after the idle time of XXX
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("collectrolls")
@@ -67,12 +76,12 @@ module.exports = {
         function: "collectrolls",
       });
       await interaction.reply(
-        `**[Enter your rolls with the tag ${tag}]**\n Leave a comment after the tag if you need to separate different rolls for different characters.\n I.E. d20+3 tag Meridia`
+        `Enter your rolls with the tag: \n\`\`\`css\n${tag}\n\`\`\` Leave a comment after the tag if you need to separate different rolls for different characters.\n I.E. \`\`\`\nd20 + 3 ${tag} Meridia\n\`\`\``
       );
 
       resetCollector.on("collect", (m: any) => {
         isReset = true;
-        collector.stop("reset");
+        collector.stop();
         resetCollector.stop();
         weapon_of_logging.info({
           message: "Collector has been reset",
