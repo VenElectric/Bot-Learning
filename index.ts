@@ -90,7 +90,7 @@ process.on("unhandledRejection", (error) => {
   if (error instanceof Error){
   if (!isBlocked){
     client.channels.fetch(process.env.MY_DISCORD).then((channel: any) => {
-      channel.send(`Unhandled Rejection ${error.name} `);})
+      channel.send(`Unhandled Rejection ${error.message} `);})
     isBlocked = true
     setTimeout(() => {
       isBlocked = false;

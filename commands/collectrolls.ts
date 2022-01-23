@@ -76,7 +76,7 @@ module.exports = {
         function: "collectrolls",
       });
       await interaction.reply(
-        `Enter your rolls with the tag: \n\`\`\`css\n${tag}\n\`\`\` Leave a comment after the tag if you need to separate different rolls for different characters.\n I.E. \`\`\`\nd20 + 3 ${tag} Meridia\n\`\`\``
+        `Enter your rolls with the tag: \n\`\`\`css\n${tag}\n\`\`\` Leave a comment after the tag if you need to separate different rolls for different characters.\n I.E. \`\`\`\nd20+3 ${tag} Meridia\n\`\`\``
       );
 
       resetCollector.on("collect", (m: any) => {
