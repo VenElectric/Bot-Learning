@@ -52,7 +52,7 @@ module.exports = {
             }
             catch (error) {
                 if (error instanceof Error) {
-                    weapon_of_logging.error({ message: error.message, function: "resort" });
+                    weapon_of_logging.alert({ message: error.message, function: "resort" });
                 }
             }
         });

@@ -17,7 +17,7 @@ module.exports = {
 			if (error instanceof Error) {
 				await message.reply(error.message);
 				
-					weapon_of_logging.error(
+					weapon_of_logging.alert(
 						{message: error.message, function:"maths"}
 					  );
 			  }

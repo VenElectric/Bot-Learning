@@ -57,12 +57,12 @@ function socketReceiver(socket, client) {
     });
     socket.on(LoggingTypes_1.LoggingTypes.ERROR, function (data) {
         return __awaiter(this, void 0, void 0, function* () {
-            weapon_of_logging.error({ message: data.message, function: data.function });
+            weapon_of_logging.alert({ message: data.message, function: data.function });
         });
     });
     socket.on(LoggingTypes_1.LoggingTypes.WARN, function (data) {
         return __awaiter(this, void 0, void 0, function* () {
-            weapon_of_logging.warn({ message: data.message, function: data.function });
+            weapon_of_logging.alert({ message: data.message, function: data.function });
         });
     });
     // DATABASE/INITIATIVE/SPELL SOCKETS
@@ -94,7 +94,7 @@ function socketReceiver(socket, client) {
                 respond(finalMessage);
             }
             if (finalMessage instanceof Error) {
-                weapon_of_logging.error({ message: finalMessage.message, function: "create_new SocketReceiver" });
+                weapon_of_logging.alert({ message: finalMessage.message, function: "create_new SocketReceiver" });
             }
         });
     });
@@ -102,7 +102,7 @@ function socketReceiver(socket, client) {
         return __awaiter(this, void 0, void 0, function* () {
             let finalMessage = yield dbCall.deleteSingle(data.payload, data.sessionId, data.collectionType);
             if (finalMessage instanceof Error) {
-                weapon_of_logging.error({ message: finalMessage.message, function: "DELETE_ONE SocketReceiver" });
+                weapon_of_logging.alert({ message: finalMessage.message, function: "DELETE_ONE SocketReceiver" });
             }
             let newList = yield dbCall.retrieveCollection(data.sessionId, data.collectionType);
             socket.broadcast.to(data.sessionId).emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL, newList);
@@ -127,7 +127,7 @@ function socketReceiver(socket, client) {
                 [isSorted, onDeck, sessionSize] = yield dbCall.getSession(data.sessionId);
             }
             if (initiative instanceof Error) {
-                weapon_of_logging.error({ message: initiative.message, function: "GET_INITIAL SOCKET RECEIVER" });
+                weapon_of_logging.alert({ message: initiative.message, function: "GET_INITIAL SOCKET RECEIVER" });
             }
             weapon_of_logging.debug({ message: "succesfully retrieved initiative", function: "GET_INITIAL SOCKET RECEIVER" });
             respond({ initiativeList: initiative, isSorted: isSorted });
@@ -137,7 +137,7 @@ function socketReceiver(socket, client) {
         return __awaiter(this, void 0, void 0, function* () {
             let finalMessage = yield initiativeFunctions.turnOrder(data.sessionId, initiativeFunctions.initiativeFunctionTypes.NEXT);
             if (finalMessage instanceof Error) {
-                weapon_of_logging.error(finalMessage.name, finalMessage.message, finalMessage.stack, data.payload);
+                weapon_of_logging.alert(finalMessage.name, finalMessage.message, finalMessage.stack, data.payload);
             }
             weapon_of_logging.info({ message: "succesfully retrieved next", function: "NEXT SOCKET RECEIVER" });
             let initiativeList = yield dbCall.retrieveCollection(data.sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE);
@@ -145,7 +145,7 @@ function socketReceiver(socket, client) {
                 .to(data.sessionId)
                 .emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL, initiativeList);
             if (finalMessage instanceof Error) {
-                weapon_of_logging.error({ message: finalMessage.message, function: "NEXT SOCKET RECEIVER" });
+                weapon_of_logging.alert({ message: finalMessage.message, function: "NEXT SOCKET RECEIVER" });
             }
             respond(finalMessage);
         });
@@ -154,14 +154,14 @@ function socketReceiver(socket, client) {
         return __awaiter(this, void 0, void 0, function* () {
             let finalMessage = yield initiativeFunctions.turnOrder(data.sessionId, initiativeFunctions.initiativeFunctionTypes.PREVIOUS);
             if (finalMessage instanceof Error) {
-                weapon_of_logging.error({ message: finalMessage.message, function: "PREVIOUS SOCKET RECEIVER" });
+                weapon_of_logging.alert({ message: finalMessage.message, function: "PREVIOUS SOCKET RECEIVER" });
             }
             let initiativeList = yield dbCall.retrieveCollection(data.sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE);
             socket.broadcast
                 .to(data.sessionId)
                 .emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL, initiativeList);
             if (finalMessage instanceof Error) {
-                weapon_of_logging.error({ message: finalMessage.message, function: "PREVIOUS SOCKET RECEIVER" });
+                weapon_of_logging.alert({ message: finalMessage.message, function: "PREVIOUS SOCKET RECEIVER" });
             }
             else {
                 weapon_of_logging.info({ message: "succesfully retrieved previous", function: "NEXT SOCKET RECEIVER" });
@@ -178,7 +178,7 @@ function socketReceiver(socket, client) {
                     .to(data.sessionId)
                     .emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL, finalMessage);
                 if (finalMessage instanceof Error) {
-                    weapon_of_logging.error({ message: finalMessage.message, function: "RESORT SOCKET RECEIVER" });
+                    weapon_of_logging.alert({ message: finalMessage.message, function: "RESORT SOCKET RECEIVER" });
                 }
                 respond(finalMessage);
             }
@@ -192,7 +192,7 @@ function socketReceiver(socket, client) {
             let newList = yield dbCall.retrieveCollection(data.sessionId, data.collectionType);
             socket.broadcast.to(data.sessionId).emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL, newList);
             if (finalMessage instanceof Error) {
-                weapon_of_logging.error({ message: finalMessage.message, function: "REROLL SOCKET RECEIVER" });
+                weapon_of_logging.alert({ message: finalMessage.message, function: "REROLL SOCKET RECEIVER" });
             }
             respond(finalMessage);
         });
@@ -205,11 +205,11 @@ function socketReceiver(socket, client) {
             }
             catch (error) {
                 if (error instanceof Error) {
-                    weapon_of_logging.error({ message: error.message, function: "UPDATE_ONE SOCKET RECEIVER" });
+                    weapon_of_logging.alert({ message: error.message, function: "UPDATE_ONE SOCKET RECEIVER" });
                 }
                 let finalMessage = yield dbCall.retrieveCollection(data.sessionId, data.CollectionType);
                 if (finalMessage instanceof Error) {
-                    weapon_of_logging.error({ message: finalMessage.message, function: "UPDATE_ONE SOCKET RECEIVER" });
+                    weapon_of_logging.alert({ message: finalMessage.message, function: "UPDATE_ONE SOCKET RECEIVER" });
                 }
                 let newList = yield dbCall.retrieveCollection(data.sessionId, data.CollectionType);
                 socket.broadcast.to(data.sessionId).emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ONE, newList);
@@ -231,7 +231,7 @@ function socketReceiver(socket, client) {
                     try {
                         let finalMessage = yield dbCall.updatecollectionRecord(record, data.collectionType, record.id, data.sessionId);
                         if (finalMessage instanceof Error) {
-                            weapon_of_logging.ALERT({ message: finalMessage.message, function: "UPDATE_ALL SOCKET RECEIVER" });
+                            weapon_of_logging.alert({ message: finalMessage.message, function: "UPDATE_ALL SOCKET RECEIVER" });
                             failures.push(record.id);
                         }
                         else {
@@ -241,7 +241,7 @@ function socketReceiver(socket, client) {
                     }
                     catch (error) {
                         if (error instanceof Error) {
-                            weapon_of_logging.error({ message: error.message, function: "UPDATE_ALL SOCKET RECEIVER" });
+                            weapon_of_logging.alert({ message: error.message, function: "UPDATE_ALL SOCKET RECEIVER" });
                             continue;
                         }
                     }
@@ -270,12 +270,12 @@ function socketReceiver(socket, client) {
             }
             catch (error) {
                 if (error instanceof ReferenceError) {
-                    weapon_of_logging.warn({ message: error.message, function: "ROUND_START SOCKET_RECEIVER" });
+                    weapon_of_logging.warning({ message: error.message, function: "ROUND_START SOCKET_RECEIVER" });
                     respond("No initiative to sort. Please add in initiative");
                 }
                 else if (error instanceof Error &&
                     !(error instanceof ReferenceError)) {
-                    weapon_of_logging.error({ message: error.message, function: "ROUND_START SOCKET_RECEIVER" });
+                    weapon_of_logging.alert({ message: error.message, function: "ROUND_START SOCKET_RECEIVER" });
                 }
             }
         });
@@ -309,7 +309,7 @@ function socketReceiver(socket, client) {
             }
             catch (error) {
                 if (error instanceof Error) {
-                    weapon_of_logging.error({ message: error.message, function: "DISCORD SOCKET_RECEIVER" });
+                    weapon_of_logging.alert({ message: error.message, function: "DISCORD SOCKET_RECEIVER" });
                     respond(error);
                 }
             }

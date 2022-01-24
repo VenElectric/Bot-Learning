@@ -111,7 +111,7 @@ function rerollDuplicates(dupes, initiativeList) {
     }
     catch (error) {
         if (error instanceof Error) {
-            weapon_of_logging.error({ message: error.message, function: "rerollDuplicates" });
+            weapon_of_logging.alert({ message: error.message, function: "rerollDuplicates" });
         }
     }
     weapon_of_logging.info({ message: "duplicate rerolls complete", function: "rerollDuplicates" });
@@ -200,12 +200,12 @@ function updateAllInitiative(initiativeList, sessionId, onDeck, isSorted, sessio
         // todo loggin and error handling
         let errorMsg = yield (0, database_common_1.updateSession)(sessionId, onDeck, isSorted, sessionSize);
         if (errorMsg instanceof Error) {
-            weapon_of_logging.error({ message: errorMsg.message, function: "updateAllInitiative" });
+            weapon_of_logging.alert({ message: errorMsg.message, function: "updateAllInitiative" });
         }
         for (let record of initiativeList) {
             let errorMsg2 = (0, database_common_1.updatecollectionRecord)(record, constants_1.initiativeCollection, record.id, sessionId);
             if (errorMsg2 instanceof Error) {
-                weapon_of_logging.error({ message: errorMsg.message, function: "updateAllInitiative" });
+                weapon_of_logging.alert({ message: errorMsg.message, function: "updateAllInitiative" });
             }
             else {
                 weapon_of_logging.debug({ message: "finished updating collection record", function: "updateAllInitiative" });
@@ -233,7 +233,7 @@ function sortedtoFalse(sessionId) {
                 let errorMsg2 = yield (0, database_common_1.updateSession)(sessionId, onDeck, false, sessionSize);
                 notSorted = true;
                 if (errorMsg2 instanceof Error) {
-                    weapon_of_logging.error({ message: errorMsg2.message, function: "sortedtoFalse" });
+                    weapon_of_logging.alert({ message: errorMsg2.message, function: "sortedtoFalse" });
                 }
             }
             else {
@@ -243,7 +243,7 @@ function sortedtoFalse(sessionId) {
         }
         catch (error) {
             if (error instanceof Error) {
-                weapon_of_logging.error({ message: error.message, function: "sortedtoFalse" });
+                weapon_of_logging.alert({ message: error.message, function: "sortedtoFalse" });
             }
         }
         return [errorMsg, notSorted];
@@ -357,7 +357,7 @@ function nextpreviousDatabase(sessionId, toFalse, toTrue, newOnDeck) {
         }
         catch (error) {
             if (error instanceof Error) {
-                weapon_of_logging.error({ message: error.message, function: "nextpreviousDatabase" });
+                weapon_of_logging.alert({ message: error.message, function: "nextpreviousDatabase" });
             }
             errorMsg = error;
             // error logging

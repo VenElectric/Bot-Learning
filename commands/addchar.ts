@@ -71,7 +71,7 @@ module.exports = {
       );
 
       if (errorMsg instanceof Error){
-        weapon_of_logging.error(
+        weapon_of_logging.alert(
           errorMsg.name,
           errorMsg.message,
           errorMsg.stack,
@@ -90,7 +90,7 @@ module.exports = {
       await interaction.reply(replyString);
     } catch (error) {
       if (error instanceof Error) {
-          weapon_of_logging.error({message:error.message,function:"addchar"});
+          weapon_of_logging.alert({message:error.message,function:"addchar"});
       }
     }
   },

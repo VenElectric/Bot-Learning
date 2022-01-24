@@ -113,7 +113,7 @@ function rerollDuplicates(dupes: InitiativeObject[], initiativeList: InitiativeO
     }
   } catch (error) {
     if (error instanceof Error){
-      weapon_of_logging.error({message: error.message, function:"rerollDuplicates"})
+      weapon_of_logging.alert({message: error.message, function:"rerollDuplicates"})
     }
    
   }
@@ -230,7 +230,7 @@ export async function updateAllInitiative(
     sessionSize
   );
   if (errorMsg instanceof Error) {
-    weapon_of_logging.error(
+    weapon_of_logging.alert(
       {message: errorMsg.message, function:"updateAllInitiative"}
     );
   }
@@ -243,7 +243,7 @@ export async function updateAllInitiative(
       sessionId
     );
     if (errorMsg2 instanceof Error) {
-      weapon_of_logging.error(
+      weapon_of_logging.alert(
         {message: errorMsg.message, function:"updateAllInitiative"}
 
       );
@@ -284,7 +284,7 @@ export async function sortedtoFalse(sessionId: string) {
       notSorted = true;
 
       if (errorMsg2 instanceof Error) {
-        weapon_of_logging.error(
+        weapon_of_logging.alert(
           {message: errorMsg2.message, function:"sortedtoFalse"}
 
         );
@@ -297,7 +297,7 @@ export async function sortedtoFalse(sessionId: string) {
     }
   } catch (error) {
     if (error instanceof Error) {
-      weapon_of_logging.error(
+      weapon_of_logging.alert(
         {message: error.message, function:"sortedtoFalse"}
       );
     }
@@ -444,7 +444,7 @@ async function nextpreviousDatabase(
     currentName = toTrueSnapshot.docs[0].data().characterName;
   } catch (error: any) {
     if (error instanceof Error) {
-      weapon_of_logging.error(
+      weapon_of_logging.alert(
        {message: error.message, function: "nextpreviousDatabase"}
 
       );

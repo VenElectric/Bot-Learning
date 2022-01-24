@@ -59,7 +59,7 @@ module.exports = {
       });
     } catch (error) {
       if (error instanceof Error) {
-        weapon_of_logging.error(
+        weapon_of_logging.alert(
           {message: error.message, function:"resort"}
         );
       }

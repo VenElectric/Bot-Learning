@@ -58,7 +58,7 @@ export function socketReceiver(socket: Socket, client: any) {
 
   
   socket.on(LoggingTypes.ERROR, async function (data: any) {
-   weapon_of_logging.error(
+   weapon_of_logging.alert(
     {message: data.message, function: data.function}
     );
  
@@ -66,7 +66,7 @@ export function socketReceiver(socket: Socket, client: any) {
  
   socket.on(LoggingTypes.WARN, async function (data: any) {
     
-   weapon_of_logging.warn(
+   weapon_of_logging.alert(
     {message: data.message, function: data.function}
     );
    
@@ -115,7 +115,7 @@ export function socketReceiver(socket: Socket, client: any) {
         respond(finalMessage);
       }
       if (finalMessage instanceof Error) {
-       weapon_of_logging.error(
+       weapon_of_logging.alert(
           {message: finalMessage.message, function: "create_new SocketReceiver"}
         );
       }
@@ -130,7 +130,7 @@ export function socketReceiver(socket: Socket, client: any) {
         data.collectionType
       );
       if (finalMessage instanceof Error) {
-        weapon_of_logging.error(
+        weapon_of_logging.alert(
           {message: finalMessage.message, function: "DELETE_ONE SocketReceiver"}
         );
       }
@@ -166,7 +166,7 @@ export function socketReceiver(socket: Socket, client: any) {
       }
       
       if (initiative instanceof Error) {
-        weapon_of_logging.error(
+        weapon_of_logging.alert(
           {message: initiative.message, function: "GET_INITIAL SOCKET RECEIVER"}
         );
       
@@ -185,7 +185,7 @@ export function socketReceiver(socket: Socket, client: any) {
       initiativeFunctions.initiativeFunctionTypes.NEXT
     );
     if (finalMessage instanceof Error) {
-      weapon_of_logging.error(
+      weapon_of_logging.alert(
         finalMessage.name,
         finalMessage.message,
         finalMessage.stack,
@@ -205,7 +205,7 @@ export function socketReceiver(socket: Socket, client: any) {
       .to(data.sessionId)
       .emit(EmitTypes.UPDATE_ALL, initiativeList);
     if (finalMessage instanceof Error) {
-     weapon_of_logging.error(
+     weapon_of_logging.alert(
       {message:finalMessage.message, function: "NEXT SOCKET RECEIVER"}
 
       );
@@ -220,7 +220,7 @@ export function socketReceiver(socket: Socket, client: any) {
         initiativeFunctions.initiativeFunctionTypes.PREVIOUS
       );
       if (finalMessage instanceof Error) {
-        weapon_of_logging.error(
+        weapon_of_logging.alert(
           {message:finalMessage.message, function: "PREVIOUS SOCKET RECEIVER"}
         );
       }
@@ -232,7 +232,7 @@ export function socketReceiver(socket: Socket, client: any) {
         .to(data.sessionId)
         .emit(EmitTypes.UPDATE_ALL, initiativeList);
       if (finalMessage instanceof Error) {
-        weapon_of_logging.error(
+        weapon_of_logging.alert(
           {message:finalMessage.message, function: "PREVIOUS SOCKET RECEIVER"}
         );
       } else {
@@ -254,7 +254,7 @@ export function socketReceiver(socket: Socket, client: any) {
         .to(data.sessionId)
         .emit(EmitTypes.UPDATE_ALL, finalMessage);
       if (finalMessage instanceof Error) {
-        weapon_of_logging.error(
+        weapon_of_logging.alert(
           {message:finalMessage.message, function: "RESORT SOCKET RECEIVER"}
         );
       }
@@ -276,7 +276,7 @@ export function socketReceiver(socket: Socket, client: any) {
       );
       socket.broadcast.to(data.sessionId).emit(EmitTypes.UPDATE_ALL, newList);
       if (finalMessage instanceof Error) {
-        weapon_of_logging.error(
+        weapon_of_logging.alert(
           {message:finalMessage.message, function: "REROLL SOCKET RECEIVER"}
         );
       }
@@ -291,7 +291,7 @@ export function socketReceiver(socket: Socket, client: any) {
       }
       catch(error){
         if (error instanceof Error) {
-          weapon_of_logging.error(
+          weapon_of_logging.alert(
             {message:error.message, function: "UPDATE_ONE SOCKET RECEIVER"}
           );
       }
@@ -300,7 +300,7 @@ export function socketReceiver(socket: Socket, client: any) {
 
 
         if (finalMessage instanceof Error) {
-          weapon_of_logging.error(
+          weapon_of_logging.alert(
             {message:finalMessage.message, function: "UPDATE_ONE SOCKET RECEIVER"}
           );
         }
@@ -337,7 +337,7 @@ export function socketReceiver(socket: Socket, client: any) {
           );
 
           if (finalMessage instanceof Error) {
-            weapon_of_logging.ALERT(
+            weapon_of_logging.alert(
               {message:finalMessage.message, function: "UPDATE_ALL SOCKET RECEIVER"}
             );
             failures.push(record.id);
@@ -349,7 +349,7 @@ export function socketReceiver(socket: Socket, client: any) {
           }
         } catch (error) {
           if (error instanceof Error) {
-            weapon_of_logging.error(
+            weapon_of_logging.alert(
               {message:error.message, function: "UPDATE_ALL SOCKET RECEIVER"}
             );
             continue;
@@ -396,7 +396,7 @@ export function socketReceiver(socket: Socket, client: any) {
         }
       } catch (error) {
         if (error instanceof ReferenceError) {
-          weapon_of_logging.warn(
+          weapon_of_logging.warning(
             {message: error.message, function: "ROUND_START SOCKET_RECEIVER"}
           );
           respond("No initiative to sort. Please add in initiative");
@@ -404,7 +404,7 @@ export function socketReceiver(socket: Socket, client: any) {
           error instanceof Error &&
           !(error instanceof ReferenceError)
         ) {
-          weapon_of_logging.error(
+          weapon_of_logging.alert(
             {message: error.message, function: "ROUND_START SOCKET_RECEIVER"}
           );
         }
@@ -461,7 +461,7 @@ export function socketReceiver(socket: Socket, client: any) {
       }
     } catch (error) {
       if (error instanceof Error) {
-        weapon_of_logging.error(
+        weapon_of_logging.alert(
          {message: error.message, function: "DISCORD SOCKET_RECEIVER"}
         );
         respond(error);

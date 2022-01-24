@@ -63,7 +63,7 @@ module.exports = {
                 weapon_of_logging.debug({ message: "Grabbing initial values for character", function: "addchar" });
                 let errorMsg = yield (0, database_common_1.addSingle)(options, sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE);
                 if (errorMsg instanceof Error) {
-                    weapon_of_logging.error(errorMsg.name, errorMsg.message, errorMsg.stack, options);
+                    weapon_of_logging.alert(errorMsg.name, errorMsg.message, errorMsg.stack, options);
                 }
                 else {
                     weapon_of_logging.debug({ message: "Grabbing initial values for character", function: "addchar" });
@@ -74,7 +74,7 @@ module.exports = {
             }
             catch (error) {
                 if (error instanceof Error) {
-                    weapon_of_logging.error({ message: error.message, function: "addchar" });
+                    weapon_of_logging.alert({ message: error.message, function: "addchar" });
                 }
             }
         });

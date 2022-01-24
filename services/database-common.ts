@@ -27,7 +27,7 @@ export async function addSingle(item: InitiativeObject | SpellObject, sessionId:
       // error handling
       console.trace(error);
       if (error instanceof Error) {
-        weapon_of_logging.error(
+        weapon_of_logging.alert(
           {message: error.message, function:"addSingle"}
         );
     }
@@ -56,7 +56,7 @@ export function deleteSingle(
     .catch((error: any) => {
       if (error instanceof Error) {
         errorMsg = error;
-        weapon_of_logging.error(
+        weapon_of_logging.alert(
           {message: error.message, function:"deleteSingle"}
 
         );
@@ -78,7 +78,7 @@ export function updateCollectionItem(value: any, collection:string, docId: strin
   }
   catch(error){
     if (error instanceof Error){
-      weapon_of_logging.error({message: error.message, function: "updateCollection"});
+      weapon_of_logging.alert({message: error.message, function: "updateCollection"});
     }
   }
 }
@@ -104,7 +104,7 @@ export function updatecollectionRecord(
     })
     .catch((error: any) => {
       if (error instanceof Error) {
-        weapon_of_logging.error(
+        weapon_of_logging.alert(
           {message: error.message, function: "updateCollectionRecord"}
 
         );
@@ -133,14 +133,14 @@ export async function retrieveCollection(
       // logging
     }
     if (snapshot.docs === undefined) {
-      weapon_of_logging.warn({message: "snapshot.docs is undefined", function:"retrieveCollection"});
-      // weapon_of_logging.warn("snapshot.docs === undefined","none",collection,sessionId)
+      weapon_of_logging.warning({message: "snapshot.docs is undefined", function:"retrieveCollection"});
+      // weapon_of_logging.warning("snapshot.docs === undefined","none",collection,sessionId)
       // throw ReferenceError(`snapshot.docs is undefined sessionId: ${sessionId} collection: ${collection}`); 
     }
   }
   catch(error){
     if (error instanceof Error) {
-      weapon_of_logging.error(
+      weapon_of_logging.alert(
         {message: error.message, function: "updateCollectionRecord"}
 
       );
@@ -166,7 +166,7 @@ export async function updateSession(
     if (error instanceof Error) {
       errorMsg = error.message;
       if (error instanceof Error) {
-        weapon_of_logging.error(
+        weapon_of_logging.alert(
          {message: error.message, function: "updatesession"}
         );
       }
@@ -199,7 +199,7 @@ export async function getSession(sessionId: string): Promise<[isSorted:boolean,o
         initRef.doc(sessionId).set({ isSorted: false, onDeck: 0, sessionSize:0 }, { merge: true }).then(() => 
         {weapon_of_logging.info({message: "setting session data success",function: "getSession"})}).catch((error:any) => {
           if (error instanceof Error) {
-            weapon_of_logging.error(
+            weapon_of_logging.alert(
               {message: error.message, function: "updatesession"}
 
             );
@@ -214,7 +214,7 @@ export async function getSession(sessionId: string): Promise<[isSorted:boolean,o
     }
      catch (error) {
     if (error instanceof Error) {
-      weapon_of_logging.error(
+      weapon_of_logging.alert(
         {message: error.message, function: "updatesession"}
       );
     }

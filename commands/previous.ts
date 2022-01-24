@@ -11,7 +11,7 @@ module.exports = {
 		let [errorMsg, currentTurn] = await turnOrder(interaction.channel.id, initiativeFunctionTypes.PREVIOUS)
 
 		if (errorMsg instanceof Error){
-			weapon_of_logging.error(
+			weapon_of_logging.alert(
 				{message: errorMsg.message, function:"next"}
 			  );
 		}

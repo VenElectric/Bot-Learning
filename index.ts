@@ -127,7 +127,7 @@ client.on("messageCreate", async (message: Message) => {
     }
   } catch (error) {
     if (error instanceof Error) {
-      weapon_of_logging.notice({
+      weapon_of_logging.alert({
         message: error.message,
         function: "messagecreate",
       });
@@ -169,7 +169,7 @@ client.on("interactionCreate", async (interaction: SelectMenuInteraction) => {
     }
   } catch (error) {
     if (error instanceof Error) {
-      weapon_of_logging.error({
+      weapon_of_logging.alert({
         message: error.message,
         function: "interactioncreate for menus",
       });
@@ -194,7 +194,8 @@ client.on("interactionCreate", async (interaction: BaseCommandInteraction) => {
     await command.execute(interaction);
   } catch (error) {
     if (error instanceof Error) {
-      weapon_of_logging.warn({
+      console.log(error);
+      weapon_of_logging.warning({
         message: error.message,
         function: "interactioncreate for slash commands",
       });

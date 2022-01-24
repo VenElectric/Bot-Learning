@@ -62,7 +62,7 @@ module.exports = {
             catch (error) {
                 if (error instanceof Error) {
                     console.log(error);
-                    weapon_of_logging.warn({ message: error.message, function: "roll" });
+                    weapon_of_logging.warning({ message: error.message, function: "roll" });
                 }
                 yield message.reply("There was an error with the dice roll. Please try again with the correct dice format.");
             }

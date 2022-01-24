@@ -18,7 +18,7 @@ module.exports = {
         .setDescription("Replies with Pong!"),
     execute(interaction) {
         return __awaiter(this, void 0, void 0, function* () {
-            weapon_of_logging.error({ message: "send to discord channel test", function: "ping" });
+            weapon_of_logging.alert({ message: "send to discord channel test", function: "ping" });
             interaction.reply("Pong");
         });
     },

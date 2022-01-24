@@ -8,7 +8,7 @@ module.exports = {
     .setName("ping")
     .setDescription("Replies with Pong!"),
   async execute(interaction: any) {
-    weapon_of_logging.error({message: "send to discord channel test", function:"ping"})
+    weapon_of_logging.alert({message: "send to discord channel test", function:"ping"})
 
     
    

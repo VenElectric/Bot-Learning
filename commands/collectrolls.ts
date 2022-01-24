@@ -50,7 +50,7 @@ module.exports = {
       await interaction.reply(
         "Please enter a tag and number of dice rolls when you run this command. If you need help with this command, please use the /help slash command."
       );
-      weapon_of_logging.warn({
+      weapon_of_logging.warning({
         message: "tag or roll amount is null",
         function: "collectrolls",
       });
@@ -134,7 +134,7 @@ module.exports = {
               embed.addField("\u200b", `${nickname} ${roll}`, false);
             })
             .catch((error: any) => {
-              weapon_of_logging.error({
+              weapon_of_logging.alert({
                 message: "could not find guild member or uncaught error",
                 function: "collectrolls",
               });
@@ -165,7 +165,7 @@ module.exports = {
       });
     } catch (error) {
       if (error instanceof Error) {
-        weapon_of_logging.error({
+        weapon_of_logging.alert({
           message: error.message,
           function: "collectrolls",
         });

@@ -28,7 +28,7 @@ module.exports = {
                     weapon_of_logging.debug({ message: "reset of session values successufl", function: "clearsessionlist" });
                 }).catch((error) => {
                     if (error instanceof Error) {
-                        weapon_of_logging.error({ message: "error resetting session values", function: "clearsessionlist" });
+                        weapon_of_logging.alert({ message: "error resetting session values", function: "clearsessionlist" });
                     }
                 });
                 initSnapshot.docs.forEach((doc) => {

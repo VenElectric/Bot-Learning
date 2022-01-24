@@ -32,7 +32,7 @@ function addSingle(item, sessionId, collection) {
             // error handling
             console.trace(error);
             if (error instanceof Error) {
-                weapon_of_logging.error({ message: error.message, function: "addSingle" });
+                weapon_of_logging.alert({ message: error.message, function: "addSingle" });
             }
             errorMsg = error;
         });
@@ -55,7 +55,7 @@ function deleteSingle(itemId, sessionId, collection) {
         .catch((error) => {
         if (error instanceof Error) {
             errorMsg = error;
-            weapon_of_logging.error({ message: error.message, function: "deleteSingle" });
+            weapon_of_logging.alert({ message: error.message, function: "deleteSingle" });
         }
     });
     return Promise.resolve(errorMsg);
@@ -74,7 +74,7 @@ function updateCollectionItem(value, collection, docId, sessionId, valueName) {
     }
     catch (error) {
         if (error instanceof Error) {
-            weapon_of_logging.error({ message: error.message, function: "updateCollection" });
+            weapon_of_logging.alert({ message: error.message, function: "updateCollection" });
         }
     }
 }
@@ -95,7 +95,7 @@ item, collection, docId, sessionId) {
     })
         .catch((error) => {
         if (error instanceof Error) {
-            weapon_of_logging.error({ message: error.message, function: "updateCollectionRecord" });
+            weapon_of_logging.alert({ message: error.message, function: "updateCollectionRecord" });
         }
         errorMsg = error;
     });
@@ -116,14 +116,14 @@ function retrieveCollection(sessionId, collection) {
                 // logging
             }
             if (snapshot.docs === undefined) {
-                weapon_of_logging.warn({ message: "snapshot.docs is undefined", function: "retrieveCollection" });
-                // weapon_of_logging.warn("snapshot.docs === undefined","none",collection,sessionId)
+                weapon_of_logging.warning({ message: "snapshot.docs is undefined", function: "retrieveCollection" });
+                // weapon_of_logging.warning("snapshot.docs === undefined","none",collection,sessionId)
                 // throw ReferenceError(`snapshot.docs is undefined sessionId: ${sessionId} collection: ${collection}`); 
             }
         }
         catch (error) {
             if (error instanceof Error) {
-                weapon_of_logging.error({ message: error.message, function: "updateCollectionRecord" });
+                weapon_of_logging.alert({ message: error.message, function: "updateCollectionRecord" });
             }
         }
         weapon_of_logging.info({ message: "collection retrieved", function: "retrieveCollection" });
@@ -144,7 +144,7 @@ function updateSession(sessionId, onDeck, isSorted, sessionSize) {
             if (error instanceof Error) {
                 errorMsg = error.message;
                 if (error instanceof Error) {
-                    weapon_of_logging.error({ message: error.message, function: "updatesession" });
+                    weapon_of_logging.alert({ message: error.message, function: "updatesession" });
                 }
             }
         }
@@ -173,7 +173,7 @@ function getSession(sessionId) {
             else {
                 initRef.doc(sessionId).set({ isSorted: false, onDeck: 0, sessionSize: 0 }, { merge: true }).then(() => { weapon_of_logging.info({ message: "setting session data success", function: "getSession" }); }).catch((error) => {
                     if (error instanceof Error) {
-                        weapon_of_logging.error({ message: error.message, function: "updatesession" });
+                        weapon_of_logging.alert({ message: error.message, function: "updatesession" });
                         isSorted = false;
                         onDeck = 0;
                         sessionSize = 0;
@@ -183,7 +183,7 @@ function getSession(sessionId) {
         }
         catch (error) {
             if (error instanceof Error) {
-                weapon_of_logging.error({ message: error.message, function: "updatesession" });
+                weapon_of_logging.alert({ message: error.message, function: "updatesession" });
             }
         }
         return Promise.resolve([isSorted, onDeck, sessionSize]);

@@ -61,7 +61,7 @@ module.exports = {
     } catch (error) {
       if (error instanceof Error) {
         console.log(error)
-        weapon_of_logging.warn(
+        weapon_of_logging.warning(
           {message: error.message, function:"roll"}
         );
       }

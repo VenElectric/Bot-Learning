@@ -20,7 +20,7 @@ module.exports = {
         return __awaiter(this, void 0, void 0, function* () {
             let [errorMsg, currentTurn] = yield turnOrder(interaction.channel.id, initiativeFunctionTypes.NEXT);
             if (errorMsg instanceof Error) {
-                weapon_of_logging.error({ message: errorMsg.message, function: "next" });
+                weapon_of_logging.alert({ message: errorMsg.message, function: "next" });
             }
             else {
                 weapon_of_logging.info({ message: "next turn success", function: "next" });

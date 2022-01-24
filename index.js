@@ -66,7 +66,7 @@ process.on("unhandledRejection", (error) => {
     if (error instanceof Error) {
         if (!isBlocked) {
             exports.client.channels.fetch(process.env.MY_DISCORD).then((channel) => {
-                channel.send(`Unhandled Rejection ${error.name} `);
+                channel.send(`Unhandled Rejection ${error.message} `);
             });
             isBlocked = true;
             setTimeout(() => {
@@ -104,7 +104,7 @@ exports.client.on("messageCreate", (message) => __awaiter(void 0, void 0, void 0
     }
     catch (error) {
         if (error instanceof Error) {
-            weapon_of_logging.notice({
+            weapon_of_logging.alert({
                 message: error.message,
                 function: "messagecreate",
             });
@@ -141,7 +141,7 @@ exports.client.on("interactionCreate", (interaction) => __awaiter(void 0, void 0
     }
     catch (error) {
         if (error instanceof Error) {
-            weapon_of_logging.error({
+            weapon_of_logging.alert({
                 message: error.message,
                 function: "interactioncreate for menus",
             });
@@ -165,7 +165,8 @@ exports.client.on("interactionCreate", (interaction) => __awaiter(void 0, void 0
     }
     catch (error) {
         if (error instanceof Error) {
-            weapon_of_logging.warn({
+            console.log(error);
+            weapon_of_logging.warning({
                 message: error.message,
                 function: "interactioncreate for slash commands",
             });
