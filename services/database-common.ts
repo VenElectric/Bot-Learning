@@ -3,17 +3,40 @@ const { db } = require("./firebase-setup");
 const { v4: uuidv4 } = require("uuid");
 const initRef = db.collection("sessions");
 import { collectionTypes } from "../Interfaces/ServerCommunicationTypes";
-const weapon_of_logging = require("../utilities/LoggerConfig").logger
-import {SessionData,InitiativeObject,SpellObject} from "../Interfaces/GameSessionTypes";
-import { isInitiativeObject, isSpellObject, isSessionData } from "../utilities/TypeChecking";
+const weapon_of_logging = require("../utilities/LoggerConfig").logger;
+import {
+  SessionData,
+  InitiativeObject,
+  SpellObject,
+  StatusEffect,
+  CharacterStatus,
+  CharacterStatusFirestore,
+} from "../Interfaces/GameSessionTypes";
+import {
+  isInitiativeObject,
+  isSpellObject,
+  isSessionData,
+  isDoubleArray,
+} from "../utilities/TypeChecking";
 import chalk from "chalk";
 
-
-
-
-export async function addSingle(item: InitiativeObject | SpellObject, sessionId: string, collection: collectionTypes) {
+function separateArrays(characterIds: CharacterStatus[][]) {
+  return { target: characterIds[1], source: characterIds[0] };
+}
+export async function addSingle(
+  item: InitiativeObject | SpellObject,
+  sessionId: string,
+  collection: collectionTypes
+) {
   let errorMsg: any;
-  // check if doc exists
+
+  if (collection === "spells") {
+    if (isSpellObject(item)) {
+      if (isDoubleArray(item.characterIds)) {
+        item.characterIds = separateArrays(item.characterIds);
+      }
+    }
+  }
   initRef
     .doc(sessionId)
     .collection(collection)
@@ -21,20 +44,24 @@ export async function addSingle(item: InitiativeObject | SpellObject, sessionId:
     .set(item)
     .then(() => {
       errorMsg = false;
-      weapon_of_logging.info({message: `added item to collection ${collection}`, function:"addSingle"})
+      weapon_of_logging.info({
+        message: `added item to collection ${collection}`,
+        function: "addSingle",
+      });
     })
     .catch((error: any) => {
       // error handling
       console.trace(error);
       if (error instanceof Error) {
-        weapon_of_logging.alert(
-          {message: error.message, function:"addSingle"}
-        );
-    }
+        weapon_of_logging.alert({
+          message: error.message,
+          function: "addSingle",
+        });
+      }
       errorMsg = error;
     });
 
-    return Promise.resolve(errorMsg)
+  return Promise.resolve(errorMsg);
 }
 
 export function deleteSingle(
@@ -43,7 +70,7 @@ export function deleteSingle(
   collection: string
 ) {
   // check if doc exists
-  let errorMsg:any;
+  let errorMsg: any;
   initRef
     .doc(sessionId)
     .collection(collection)
@@ -51,34 +78,53 @@ export function deleteSingle(
     .delete()
     .then(() => {
       errorMsg = false;
-      weapon_of_logging.info({message: `successfully deleted from ${collection}`, function:"deleteSingle"})
+      weapon_of_logging.info({
+        message: `successfully deleted from ${collection}`,
+        function: "deleteSingle",
+      });
     })
     .catch((error: any) => {
       if (error instanceof Error) {
         errorMsg = error;
-        weapon_of_logging.alert(
-          {message: error.message, function:"deleteSingle"}
-
-        );
-    }
+        weapon_of_logging.alert({
+          message: error.message,
+          function: "deleteSingle",
+        });
+      }
     });
-    return Promise.resolve(errorMsg)
+  return Promise.resolve(errorMsg);
 }
 
-export function updateCollectionItem(value: any, collection:string, docId: string, sessionId: string, valueName: string){
+export function updateCollectionItem(
+  value: any,
+  collection: string,
+  docId: string,
+  sessionId: string,
+  valueName: string
+) {
   try {
-    weapon_of_logging.debug({message: {docId, collection, value, valueName}, function:"deleteSingle"})
-    initRef.doc(sessionId)
-    .collection(collection)
-    .doc(docId)
-    .set({[valueName]: value}, {merge:true})
-    .then(() => {
-      weapon_of_logging.info({message:`successfully updated ${valueName} in ${collection}`, function: "updateCollection"})
-    })
-  }
-  catch(error){
-    if (error instanceof Error){
-      weapon_of_logging.alert({message: error.message, function: "updateCollection"});
+    weapon_of_logging.debug({
+      message: { docId, collection, value, valueName },
+      function: "updateCollectionItem",
+    });
+    initRef
+      .doc(sessionId)
+      .collection(collection)
+      .doc(docId)
+      .set({ [valueName]: value }, { merge: true })
+      .then(() => {
+        weapon_of_logging.info({
+          message: `successfully updated ${valueName} in ${collection}`,
+          function: "updateCollection",
+        });
+      });
+  } catch (error) {
+    console.log(error)
+    if (error instanceof Error) {
+      weapon_of_logging.alert({
+        message: error.message,
+        function: "updateCollection",
+      });
     }
   }
 }
@@ -90,29 +136,58 @@ export function updatecollectionRecord(
   docId: string,
   sessionId: string
 ) {
-  let errorMsg:any;
+  let errorMsg: any;
 
-  weapon_of_logging.debug({message: {docId, collection}, function:"updateCollectionRecord"})
+  weapon_of_logging.debug({
+    message: { docId, collection },
+    function: "updateCollectionRecord",
+  });
+  if (collection === "spells") {
+    weapon_of_logging.debug({
+      message: "Collection === spells",
+      function: "updateCollectionRecord",
+    });
+    if (isSpellObject(item)) {
+      weapon_of_logging.debug({
+        message: "isSpellObject",
+        function: "updateCollectionRecord",
+      });
+      if (isDoubleArray(item.characterIds)) {
+        weapon_of_logging.debug({
+          message: "isDoubleArray",
+          function: "updateCollectionRecord",
+        });
+        item.characterIds = separateArrays(item.characterIds);
+        weapon_of_logging.debug({
+          message: item.characterIds,
+          function: "updateCollectionRecord",
+        });
+      }
+    }
+  }
   initRef
     .doc(sessionId)
     .collection(collection)
     .doc(docId)
     .set(item, { merge: true })
     .then(() => {
-      weapon_of_logging.info({message: `success updating collection ${collection}`, function: "updateCollectionRecord"})
+      weapon_of_logging.info({
+        message: `success updating collection ${collection}`,
+        function: "updateCollectionRecord",
+      });
       errorMsg = false;
     })
     .catch((error: any) => {
       if (error instanceof Error) {
-        weapon_of_logging.alert(
-          {message: error.message, function: "updateCollectionRecord"}
-
-        );
+        weapon_of_logging.alert({
+          message: error.message,
+          function: "updateCollectionRecord",
+        });
       }
-      
+
       errorMsg = error;
     });
-  return Promise.resolve(errorMsg)
+  return Promise.resolve(errorMsg);
 }
 
 export async function retrieveCollection(
@@ -120,65 +195,94 @@ export async function retrieveCollection(
   collection: string
 ): Promise<InitiativeObject[] | SpellObject[]> {
   let databaseList: any = [];
-  console.info(sessionId)
-  console.info(collection)
-  try{
+  console.info(sessionId);
+  console.info(collection);
+  try {
     let snapshot = await initRef.doc(sessionId).collection(collection).get();
 
     if (snapshot.docs !== undefined) {
-      
       snapshot.forEach((doc: any) => {
         databaseList.push({ ...doc.data() });
       });
       // logging
     }
     if (snapshot.docs === undefined) {
-      weapon_of_logging.warning({message: "snapshot.docs is undefined", function:"retrieveCollection"});
+      weapon_of_logging.warning({
+        message: "snapshot.docs is undefined",
+        function: "retrieveCollection",
+      });
       // weapon_of_logging.warning("snapshot.docs === undefined","none",collection,sessionId)
-      // throw ReferenceError(`snapshot.docs is undefined sessionId: ${sessionId} collection: ${collection}`); 
+      // throw ReferenceError(`snapshot.docs is undefined sessionId: ${sessionId} collection: ${collection}`);
     }
-  }
-  catch(error){
+  } catch (error) {
     if (error instanceof Error) {
-      weapon_of_logging.alert(
-        {message: error.message, function: "updateCollectionRecord"}
-
-      );
+      weapon_of_logging.alert({
+        message: error.message,
+        function: "updateCollectionRecord",
+      });
     }
   }
-  weapon_of_logging.info({message: "collection retrieved", function:"retrieveCollection"});
+  weapon_of_logging.info({
+    message: "collection retrieved",
+    function: "retrieveCollection",
+  });
   // weapon_of_logging.info("retrieveCollection", "complete",databaseList,sessionId)
   return Promise.resolve(databaseList);
 }
 
+export async function retrieveRecord(docId: string, sessionId: string, collectionType: collectionTypes){
+  try {
+    const record = await initRef.doc(sessionId).collection(collectionType.toLowerCase()).doc(docId).get();
+    weapon_of_logging.debug({message: record.data().id, function: "retrieveRecord"})
+    return record.data();
+  }
+  catch(error){
+    weapon_of_logging.alert({message: `Could not find collection item: ${docId} Type: ${collectionType}`, function:"getRecord"})
+  }
+}
+
 export async function updateSession(
   sessionId: string,
-  onDeck: number,
-  isSorted: boolean,
-  sessionSize: number
+  onDeck?: number,
+  isSorted?: boolean,
+  sessionSize?: number
 ) {
-  let errorMsg:any
+  let errorMsg: any;
   // check if doc exists
   try {
-    initRef.doc(sessionId).set({ onDeck: onDeck, isSorted: isSorted, sessionSize: sessionSize }, { merge: true });
-    errorMsg = false
+    if (onDeck) {
+      initRef.doc(sessionId).set({ onDeck: onDeck }, { merge: true });
+      errorMsg = false;
+    }
+    if (isSorted !== undefined) {
+      initRef.doc(sessionId).set({ isSorted: isSorted }, { merge: true });
+      errorMsg = false;
+    }
+    if (sessionSize) {
+      initRef.doc(sessionId).set({ sessionSize: sessionSize }, { merge: true });
+      errorMsg = false;
+    }
   } catch (error) {
     if (error instanceof Error) {
       errorMsg = error.message;
       if (error instanceof Error) {
-        weapon_of_logging.alert(
-         {message: error.message, function: "updatesession"}
-        );
+        weapon_of_logging.alert({
+          message: error.message,
+          function: "updatesession",
+        });
       }
     }
   }
-  weapon_of_logging.info(
-    {message: "updateSession set", function: "updatesession"}
-   );
-  return Promise.resolve(errorMsg)
+  weapon_of_logging.info({
+    message: "updateSession set",
+    function: "updatesession",
+  });
+  return Promise.resolve(errorMsg);
 }
 
-export async function getSession(sessionId: string): Promise<[isSorted:boolean,onDeck:number,sessionSize:number]> {
+export async function getSession(
+  sessionId: string
+): Promise<[isSorted: boolean, onDeck: number, sessionSize: number]> {
   // check if doc + items exist
   let snapshot = await initRef.doc(sessionId).get();
   //@ts-ignore
@@ -188,37 +292,75 @@ export async function getSession(sessionId: string): Promise<[isSorted:boolean,o
   //@ts-ignore
   let sessionSize;
   try {
-    if (snapshot.data() != undefined){
+    if (snapshot.data() != undefined) {
       isSorted = snapshot.data().isSorted;
       onDeck = snapshot.data().onDeck;
-      sessionSize = snapshot.data().sessionSize
-      weapon_of_logging.debug({message: "snapshot.data is not undefined",function: "getSession"})
-    }
-      else {
-  
-        initRef.doc(sessionId).set({ isSorted: false, onDeck: 0, sessionSize:0 }, { merge: true }).then(() => 
-        {weapon_of_logging.info({message: "setting session data success",function: "getSession"})}).catch((error:any) => {
+      sessionSize = snapshot.data().sessionSize;
+      weapon_of_logging.debug({
+        message: "snapshot.data is not undefined",
+        function: "getSession",
+      });
+    } else {
+      initRef
+        .doc(sessionId)
+        .set({ isSorted: false, onDeck: 0, sessionSize: 0 }, { merge: true })
+        .then(() => {
+          weapon_of_logging.info({
+            message: "setting session data success",
+            function: "getSession",
+          });
+        })
+        .catch((error: any) => {
           if (error instanceof Error) {
-            weapon_of_logging.alert(
-              {message: error.message, function: "updatesession"}
-
-            );
+            weapon_of_logging.alert({
+              message: error.message,
+              function: "updatesession",
+            });
             isSorted = false;
             onDeck = 0;
             sessionSize = 0;
           }
         });
-
-        
-      }
     }
-     catch (error) {
+  } catch (error) {
     if (error instanceof Error) {
-      weapon_of_logging.alert(
-        {message: error.message, function: "updatesession"}
-      );
+      weapon_of_logging.alert({
+        message: error.message,
+        function: "updatesession",
+      });
     }
   }
 
   return Promise.resolve([isSorted, onDeck, sessionSize]);
+}
+
+export async function deleteSession(sessionId: string) {
+  const initRef = db.collection("sessions").doc(sessionId);
+  const initSnapshot = await initRef.collection("initiative").get();
+  const spellSnapshot = await initRef.collection("spells").get();
+  const batch = db.batch();
+
+  initRef
+    .set({ isSorted: false, onDeck: 0, sessionSize: 0 }, { merge: true })
+    .then(() => {
+      weapon_of_logging.debug({
+        message: "reset of session values successufl",
+        function: "clearsessionlist",
+      });
+    })
+    .catch((error: any) => {
+      if (error instanceof Error) {
+        weapon_of_logging.alert({
+          message: "error resetting session values",
+          function: "clearsessionlist",
+        });
+      }
+    });
+  initSnapshot.docs.forEach((doc: any) => {
+    batch.delete(doc.ref);
+  });
+  spellSnapshot.docs.forEach((doc: any) => {
+    batch.delete(doc.ref);
+  });
+  await batch.commit();
 }

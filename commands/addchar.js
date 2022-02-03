@@ -14,6 +14,8 @@ const { v4: uuidv4 } = require("uuid");
 const database_common_1 = require("../services/database-common");
 const ServerCommunicationTypes_1 = require("../Interfaces/ServerCommunicationTypes");
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
+const index_1 = require("../index");
+const ServerCommunicationTypes_2 = require("../Interfaces/ServerCommunicationTypes");
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("addchar")
@@ -70,6 +72,7 @@ module.exports = {
                 }
                 let replyString = `Your character, ${name}, has been added with an initiative of ${initiativeRoll} + ${initiativeModifier} = ${initiativeRoll + initiativeModifier}. You can edit this on the website component using the /link command. \n Any rolled nat 20's have 100 added on for sorting purposes.`;
                 weapon_of_logging.info({ message: `Replying to interaction: ${replyString}`, function: "addchar" });
+                index_1.io.to(interaction.channel.id).emit(ServerCommunicationTypes_2.EmitTypes.CREATE_NEW, { payload: options, collectionType: ServerCommunicationTypes_1.collectionTypes.INITIATIVE });
                 yield interaction.reply(replyString);
             }
             catch (error) {

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.client = void 0;
+exports.client = exports.io = void 0;
 const fs = require("fs");
 const { Client, Collection, Intents, MessageEmbed } = require("discord.js");
 const express = require("express");
@@ -23,7 +23,7 @@ const SocketReceiver_1 = require("./services/SocketReceiver");
 const weapon_of_logging = require("./utilities/LoggerConfig").logger;
 require("dotenv").config();
 const token = process.env.DISCORD_TOKEN;
-const io = require("socket.io")(server, {
+exports.io = require("socket.io")(server, {
     cors: {
         origin: process.env.HOST_URL,
         methods: ["GET", "POST"],
@@ -79,12 +79,12 @@ process.on("unhandledRejection", (error) => {
         }
     }
 });
-io.on("connection", (socket) => {
+exports.io.on("connection", (socket) => {
     socket.on("create", function (room) {
         socket.join(room);
         weapon_of_logging.info({ message: "room joined", function: "create" });
     });
-    (0, SocketReceiver_1.socketReceiver)(socket, exports.client);
+    (0, SocketReceiver_1.socketReceiver)(socket, exports.client, exports.io);
 });
 exports.client.on("messageCreate", (message) => __awaiter(void 0, void 0, void 0, function* () {
     const regex = new RegExp(/(\/|\/[a-z]|\/[A-Z]|r)*\s*([d|D])([\d])+/);

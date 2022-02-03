@@ -1,5 +1,5 @@
 import { collectionTypes } from "../Interfaces/ServerCommunicationTypes";
-import {SessionData,InitiativeObject,SpellObject} from "../Interfaces/GameSessionTypes";
+import {SessionData,InitiativeObject,SpellObject, CharacterStatus} from "../Interfaces/GameSessionTypes";
 
 export function isSessionData(payload: any): payload is SessionData {
     if (payload as SessionData) {
@@ -47,6 +47,15 @@ export function isSessionData(payload: any): payload is SessionData {
     }
     if (collection === collectionTypes.SPELLS){
       return isSpellObject(item);
+    }
+  }
+
+  export function isDoubleArray(payload: any): payload is CharacterStatus[][] {
+    if (payload as CharacterStatus[][]) {
+      return true;
+    }
+    else {
+      return false;
     }
   }
   

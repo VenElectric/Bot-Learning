@@ -3,14 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommandErrorEnums = exports.LoggingTypes = void 0;
 var LoggingTypes;
 (function (LoggingTypes) {
-    LoggingTypes["EMERGENCY"] = "EMERGENCY";
-    LoggingTypes["ALERT"] = "ALERT";
-    LoggingTypes["CRITICAL"] = "CRITICAL";
-    LoggingTypes["ERROR"] = "ERROR";
-    LoggingTypes["WARN"] = "WARN";
-    LoggingTypes["NOTICE"] = "NOTICE";
-    LoggingTypes["INFO"] = "INFO";
-    LoggingTypes["DEBUG"] = "DEBUG";
+    LoggingTypes["alert"] = "alert";
+    LoggingTypes["warning"] = "warning";
+    LoggingTypes["info"] = "info";
+    LoggingTypes["debug"] = "debug";
 })(LoggingTypes = exports.LoggingTypes || (exports.LoggingTypes = {}));
 var CommandErrorEnums;
 (function (CommandErrorEnums) {

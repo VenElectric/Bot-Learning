@@ -4,14 +4,17 @@ exports.SpellContextEnums = exports.InitiativeContextEnums = exports.collectionT
 var EmitTypes;
 (function (EmitTypes) {
     EmitTypes["GET_INITIAL"] = "GET_INITIAL";
+    EmitTypes["GET_SPELLS"] = "GET_SPELLS";
     EmitTypes["NEXT"] = "NEXT";
     EmitTypes["PREVIOUS"] = "PREVIOUS";
     EmitTypes["ROUND_START"] = "ROUND_START";
-    EmitTypes["UPDATE_ONE"] = "UPDATE_ONE";
     EmitTypes["UPDATE_ALL"] = "UPDATE_ALL";
     EmitTypes["DELETE_ONE"] = "DELETE_ONE";
     EmitTypes["DELETE_ALL"] = "DELETE_ALL";
     EmitTypes["CREATE_NEW"] = "CREATE_NEW";
+    EmitTypes["UPDATE_ITEM"] = "UPDATE_ITEM";
+    EmitTypes["UPDATE_RECORD"] = "UPDATE_RECORD";
+    EmitTypes["UPDATE_SESSION"] = "UPDATE_SESSION";
     EmitTypes["RE_ROLL"] = "RE_ROLL";
     EmitTypes["RESORT"] = "RESORT";
     EmitTypes["DISCORD"] = "DISCORD";

@@ -11,8 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 const { SlashCommandBuilder } = require("@discordjs/builders");
-// import { webComponent, devWeb } from "../services/constants"
-// const { hyperlink } = require('@discordjs/builders');
+require("dotenv").config();
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("link")
@@ -20,9 +19,9 @@ module.exports = {
     execute(interaction) {
         return __awaiter(this, void 0, void 0, function* () {
             weapon_of_logging.info({ message: "sending link url", function: "link" });
-            yield interaction.reply("Website is down for maintenance!");
-            // let url = `${devWeb}/session/${interaction.channel.id}`
-            // await interaction.reply(`Here is the URL for your session: ${url} \nThis URL is specific to this channel. If you need to change the session to a different text channel then please use the /changechannel slash command.`);
+            let url = `${process.env.HOST_URL}/session/${interaction.channel.id}`;
+            weapon_of_logging.debug({ message: process.env.HOST_URL, function: "link" });
+            yield interaction.reply(`Here is the URL for your session: ${url} \nThis URL is specific to this channel. If you need to change the session to a different text channel then please use the /changechannel slash command.`);
         });
     },
 };

@@ -1,6 +1,6 @@
 // get session embed (initiative list in table format)
 const { SlashCommandBuilder } = require("@discordjs/builders");
-import { finalizeInitiative } from "../services/initiative";
+import { finalizeInitiative, resortInitiative } from "../services/initiative";
 import { retrieveCollection, getSession } from "../services/database-common";
 const weapon_of_logging = require("../utilities/LoggerConfig").logger
 import { InitiativeObject } from "../Interfaces/GameSessionTypes";
@@ -23,13 +23,7 @@ module.exports = {
         {message: "getting initiative records", function:"listinitiative"}
       );
       let [isSorted, onDeck, sessionSize] = await getSession(sessionId);
-      let sortedList = await finalizeInitiative(
-        newList,
-        isSorted,
-        sessionId,
-        onDeck,
-        isSorted
-      );
+      let sortedList = resortInitiative(newList);
       let initEmbed = initiativeEmbed(sortedList);
       weapon_of_logging.debug(
         {message: "sorted initiative and creating embed", function:"listinitiative"}

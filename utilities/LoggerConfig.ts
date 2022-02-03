@@ -15,7 +15,7 @@ const logger = new Logger({
 class LogEntriesTransport extends Transport {
   constructor(options: any) {
     super(options);
-    this.params = options.params || ["level", "message"];
+    this.params = options.params || ["level", "message", "function", "itemId"];
   }
 
   log(info: any, callback: Function) {
@@ -39,12 +39,12 @@ class LogEntriesTransport extends Transport {
           logger.info(error.message);
         });
     }
-    console.log(info.level);
     if (info.level) {
-      console.log(typeof(info.level));
       logger.log(String(info.level), {
         message: info.message,
         function: info.function,
+        itemId: info.itemId,
+        ...info
       });
     }
     else{
@@ -80,7 +80,7 @@ class FirestoreTransport extends Transport {
 
     let docId = uuidv4();
 
-    if (info.level === "error") {
+    if (info.level === "alert") {
       client.channels.fetch(process.env.MY_DISCORD).then((channel: any) => {
         channel.send(`Critical Error Occurred. Please check logs`);
       });
@@ -122,7 +122,7 @@ const weapon_of_logging = winston.createLogger({
   defaultMeta: { service: "dungeon-bot" },
   transports: [
     new LogEntriesTransport({
-      params: ["level", "message", "function"],
+      params: ["level", "message", "function", "itemId"],
       level: "debug",
     }),
   ],

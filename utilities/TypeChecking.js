@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.collectionequalsObject = exports.isSpellObjectArray = exports.isInitiativeObjectArray = exports.isSpellObject = exports.isInitiativeObject = exports.isSessionData = void 0;
+exports.isDoubleArray = exports.collectionequalsObject = exports.isSpellObjectArray = exports.isInitiativeObjectArray = exports.isSpellObject = exports.isInitiativeObject = exports.isSessionData = void 0;
 const ServerCommunicationTypes_1 = require("../Interfaces/ServerCommunicationTypes");
 function isSessionData(payload) {
     if (payload) {
@@ -56,3 +56,12 @@ function collectionequalsObject(collection, item) {
     }
 }
 exports.collectionequalsObject = collectionequalsObject;
+function isDoubleArray(payload) {
+    if (payload) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+exports.isDoubleArray = isDoubleArray;

@@ -28,7 +28,7 @@ module.exports = {
                 let newList = (yield (0, database_common_1.retrieveCollection)(sessionId, "initiative"));
                 weapon_of_logging.info({ message: "getting initiative records", function: "listinitiative" });
                 let [isSorted, onDeck, sessionSize] = yield (0, database_common_1.getSession)(sessionId);
-                let sortedList = yield (0, initiative_1.finalizeInitiative)(newList, isSorted, sessionId, onDeck, isSorted);
+                let sortedList = (0, initiative_1.resortInitiative)(newList);
                 let initEmbed = (0, create_embed_1.initiativeEmbed)(sortedList);
                 weapon_of_logging.debug({ message: "sorted initiative and creating embed", function: "listinitiative" });
                 yield interaction.reply({ embeds: [initEmbed] });

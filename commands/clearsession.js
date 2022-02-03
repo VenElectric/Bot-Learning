@@ -12,6 +12,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { db } = require("../services/firebase-setup");
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
+const ServerCommunicationTypes_1 = require("../Interfaces/ServerCommunicationTypes");
+const database_common_1 = require("../services/database-common");
+const index_1 = require("../index");
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("clearsessionlist")
@@ -20,25 +23,12 @@ module.exports = {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let sessionId = interaction.channel.id;
-                const initRef = db.collection('sessions').doc(sessionId);
-                const initSnapshot = yield initRef.collection("initiative").get();
-                const spellSnapshot = yield initRef.collection("spells").get();
-                const batch = db.batch();
-                initRef.set({ isSorted: false, onDeck: 0, sessionSize: 0 }, { merge: true }).then(() => {
-                    weapon_of_logging.debug({ message: "reset of session values successufl", function: "clearsessionlist" });
-                }).catch((error) => {
-                    if (error instanceof Error) {
-                        weapon_of_logging.alert({ message: "error resetting session values", function: "clearsessionlist" });
-                    }
+                yield (0, database_common_1.deleteSession)(sessionId);
+                weapon_of_logging.debug({
+                    message: "reset of spells and initiative",
+                    function: "clearsessionlist",
                 });
-                initSnapshot.docs.forEach((doc) => {
-                    batch.delete(doc.ref);
-                });
-                spellSnapshot.docs.forEach((doc) => {
-                    batch.delete(doc.ref);
-                });
-                yield batch.commit();
-                weapon_of_logging.debug({ message: "reset of spells and initiative", function: "clearsessionlist" });
+                index_1.io.to(interaction.channel.id).emit(ServerCommunicationTypes_1.EmitTypes.DELETE_ALL);
                 yield interaction.reply("Reset Complete");
             }
             catch (error) {

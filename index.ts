@@ -34,7 +34,7 @@ require("dotenv").config();
 
 const token = process.env.DISCORD_TOKEN;
 
-const io = require("socket.io")(server, {
+export const io = require("socket.io")(server, {
   cors: {
     origin: process.env.HOST_URL,
     methods: ["GET", "POST"],
@@ -108,7 +108,7 @@ io.on("connection", (socket: Socket) => {
     socket.join(room);
     weapon_of_logging.info({ message: "room joined", function: "create" });
   });
-  socketReceiver(socket, client);
+  socketReceiver(socket, client, io);
 });
 
 client.on("messageCreate", async (message: Message) => {

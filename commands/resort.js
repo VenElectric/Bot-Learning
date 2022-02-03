@@ -10,10 +10,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const { finalizeInitiative, retrieveSession, } = require("../services/initiative");
+const { finalizeInitiative } = require("../services/initiative");
 const { db } = require("../services/firebase-setup");
-const { createEmbed } = require("../services/create-embed");
+const create_embed_1 = require("../services/create-embed");
+const ServerCommunicationTypes_1 = require("../Interfaces/ServerCommunicationTypes");
+const database_common_1 = require("../services/database-common");
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
+const index_1 = require("../index");
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("resort")
@@ -26,7 +29,7 @@ module.exports = {
                     .collection("sessions")
                     .doc(interaction.channel.id)
                     .get();
-                let initiativeList = yield retrieveSession(interaction.channel.id);
+                let initiativeList = yield (0, database_common_1.retrieveCollection)(interaction.channel.id, ServerCommunicationTypes_1.collectionTypes.INITIATIVE);
                 weapon_of_logging.info({ message: "successfully retrieved session data", function: "resort" });
                 if (snapshot.data().isSorted) {
                     newList = yield finalizeInitiative(initiativeList, false, interaction.channel.id, 2, true);
@@ -42,16 +45,21 @@ module.exports = {
                     }
                     newList = yield finalizeInitiative(initiativeList, true, interaction.channel.id, 2, false);
                     weapon_of_logging.debug({ message: "isSorted is undefined", function: "resort" });
+                    index_1.io.to(interaction.channel.id).emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL, {
+                        payload: newList,
+                        collectionType: ServerCommunicationTypes_1.collectionTypes.INITIATIVE,
+                    });
                 }
-                let initiativeEmbed = createEmbed(newList);
+                let embed = (0, create_embed_1.initiativeEmbed)(newList);
                 weapon_of_logging.info({ message: "resort complete", function: "resort" });
                 yield interaction.reply({
                     content: "Initiative has been resorted.",
-                    embeds: [initiativeEmbed],
+                    embeds: [embed],
                 });
             }
             catch (error) {
                 if (error instanceof Error) {
+                    console.log(error);
                     weapon_of_logging.alert({ message: error.message, function: "resort" });
                 }
             }
