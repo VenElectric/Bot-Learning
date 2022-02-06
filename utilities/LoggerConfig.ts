@@ -29,7 +29,7 @@ class LogEntriesTransport extends Transport {
       throw new Error(`Parameters in a log can not be null.`);
     }
 
-    if (info.level === "error") {
+    if (info.level === "alert") {
       client.channels
         .fetch(process.env.MY_DISCORD)
         .then((channel: any) => {
@@ -79,7 +79,7 @@ class FirestoreTransport extends Transport {
     }
 
     let docId = uuidv4();
-
+    console.info(info.level);
     if (info.level === "alert") {
       client.channels.fetch(process.env.MY_DISCORD).then((channel: any) => {
         channel.send(`Critical Error Occurred. Please check logs`);

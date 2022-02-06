@@ -55,11 +55,12 @@ module.exports = {
 
       weapon_of_logging.debug({ message: "embed created", function: "start" });
       setTimeout(() => {
-        io.to(interaction.channel.id).emit(EmitTypes.UPDATE_ALL, {
+        io.to(interaction.channel.id).emit(EmitTypes.UPDATE_ALL_INITIATIVE, {
           payload: newList,
           collectionType: collectionTypes.INITIATIVE,
           isSorted: true,
         });
+        io.to(interaction.channel.id).emit(EmitTypes.ROUND_START)
       }, 300);
       await interaction.reply({
         content: "Rounds have been started.",

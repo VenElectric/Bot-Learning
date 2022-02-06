@@ -14,7 +14,7 @@ import { statusEmbed } from "../services/create-embed";
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("prev")
+    .setName("previous")
     .setDescription("Move Turn Order Backwards"),
   async execute(interaction: any) {
     let [errorMsg, currentTurn, currentStatuses, currentId] = await turnOrder(

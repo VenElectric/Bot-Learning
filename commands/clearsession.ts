@@ -17,7 +17,8 @@ module.exports = {
         message: "reset of spells and initiative",
         function: "clearsessionlist",
       });
-      io.to(interaction.channel.id).emit(EmitTypes.DELETE_ALL)
+      io.to(interaction.channel.id).emit(EmitTypes.DELETE_ALL_INITIATIVE)
+      io.to(interaction.channel.id).emit(EmitTypes.DELETE_ALL_SPELL)
       await interaction.reply("Reset Complete");
     } catch (error) {
       console.log("error", error);

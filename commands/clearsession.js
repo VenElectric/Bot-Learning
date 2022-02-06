@@ -28,7 +28,8 @@ module.exports = {
                     message: "reset of spells and initiative",
                     function: "clearsessionlist",
                 });
-                index_1.io.to(interaction.channel.id).emit(ServerCommunicationTypes_1.EmitTypes.DELETE_ALL);
+                index_1.io.to(interaction.channel.id).emit(ServerCommunicationTypes_1.EmitTypes.DELETE_ALL_INITIATIVE);
+                index_1.io.to(interaction.channel.id).emit(ServerCommunicationTypes_1.EmitTypes.DELETE_ALL_SPELL);
                 yield interaction.reply("Reset Complete");
             }
             catch (error) {

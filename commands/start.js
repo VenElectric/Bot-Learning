@@ -51,11 +51,12 @@ module.exports = {
                 let embed = initiativeEmbed(newList);
                 weapon_of_logging.debug({ message: "embed created", function: "start" });
                 setTimeout(() => {
-                    index_1.io.to(interaction.channel.id).emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL, {
+                    index_1.io.to(interaction.channel.id).emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL_INITIATIVE, {
                         payload: newList,
                         collectionType: ServerCommunicationTypes_1.collectionTypes.INITIATIVE,
                         isSorted: true,
                     });
+                    index_1.io.to(interaction.channel.id).emit(ServerCommunicationTypes_1.EmitTypes.ROUND_START);
                 }, 300);
                 yield interaction.reply({
                     content: "Rounds have been started.",

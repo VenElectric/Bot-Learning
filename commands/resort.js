@@ -29,6 +29,7 @@ module.exports = {
                     .collection("sessions")
                     .doc(interaction.channel.id)
                     .get();
+                let isSorted = snapshot.data().isSorted;
                 let initiativeList = yield (0, database_common_1.retrieveCollection)(interaction.channel.id, ServerCommunicationTypes_1.collectionTypes.INITIATIVE);
                 weapon_of_logging.info({ message: "successfully retrieved session data", function: "resort" });
                 if (snapshot.data().isSorted) {
@@ -43,15 +44,16 @@ module.exports = {
                     for (let item in initiativeList) {
                         initiativeList[item].isCurrent = false;
                     }
+                    isSorted = true;
                     newList = yield finalizeInitiative(initiativeList, true, interaction.channel.id, 2, false);
                     weapon_of_logging.debug({ message: "isSorted is undefined", function: "resort" });
-                    index_1.io.to(interaction.channel.id).emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL, {
-                        payload: newList,
-                        collectionType: ServerCommunicationTypes_1.collectionTypes.INITIATIVE,
-                    });
                 }
                 let embed = (0, create_embed_1.initiativeEmbed)(newList);
                 weapon_of_logging.info({ message: "resort complete", function: "resort" });
+                index_1.io.to(interaction.channel.id).emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL_INITIATIVE, {
+                    payload: newList,
+                    isSorted: isSorted,
+                });
                 yield interaction.reply({
                     content: "Initiative has been resorted.",
                     embeds: [embed],

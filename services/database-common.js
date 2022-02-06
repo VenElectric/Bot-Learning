@@ -9,11 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteSession = exports.getSession = exports.updateSession = exports.retrieveRecord = exports.retrieveCollection = exports.updatecollectionRecord = exports.updateCollectionItem = exports.deleteSingle = exports.addSingle = void 0;
+exports.deleteCollection = exports.deleteSession = exports.getSession = exports.updateSession = exports.retrieveRecord = exports.retrieveCollection = exports.updatecollectionRecord = exports.updateCollection = exports.updateCollectionItem = exports.deleteSingle = exports.addSingle = void 0;
 //@ts-ignore
 const { db } = require("./firebase-setup");
 const { v4: uuidv4 } = require("uuid");
 const initRef = db.collection("sessions");
+const ServerCommunicationTypes_1 = require("../Interfaces/ServerCommunicationTypes");
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 const TypeChecking_1 = require("../utilities/TypeChecking");
 function separateArrays(characterIds) {
@@ -102,7 +103,6 @@ function updateCollectionItem(value, collection, docId, sessionId, valueName) {
         });
     }
     catch (error) {
-        console.log(error);
         if (error instanceof Error) {
             weapon_of_logging.alert({
                 message: error.message,
@@ -112,6 +112,31 @@ function updateCollectionItem(value, collection, docId, sessionId, valueName) {
     }
 }
 exports.updateCollectionItem = updateCollectionItem;
+function updateCollection(sessionId, collectionType, payload) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const docRef = db
+                .collection("sessions")
+                .doc(sessionId)
+                .collection(collectionType);
+            const batch = db.batch();
+            for (const record of payload) {
+                const recordRef = docRef.doc(record.id);
+                batch.set(recordRef, record);
+            }
+            yield batch.commit();
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                weapon_of_logging.alert({
+                    message: error.message,
+                    function: `updateCollection ${collectionType}`,
+                });
+            }
+        }
+    });
+}
+exports.updateCollection = updateCollection;
 function updatecollectionRecord(
 // check if doc/collection exists
 item, collection, docId, sessionId) {
@@ -170,8 +195,6 @@ exports.updatecollectionRecord = updatecollectionRecord;
 function retrieveCollection(sessionId, collection) {
     return __awaiter(this, void 0, void 0, function* () {
         let databaseList = [];
-        console.info(sessionId);
-        console.info(collection);
         try {
             let snapshot = yield initRef.doc(sessionId).collection(collection).get();
             if (snapshot.docs !== undefined) {
@@ -185,8 +208,6 @@ function retrieveCollection(sessionId, collection) {
                     message: "snapshot.docs is undefined",
                     function: "retrieveCollection",
                 });
-                // weapon_of_logging.warning("snapshot.docs === undefined","none",collection,sessionId)
-                // throw ReferenceError(`snapshot.docs is undefined sessionId: ${sessionId} collection: ${collection}`);
             }
         }
         catch (error) {
@@ -209,12 +230,22 @@ exports.retrieveCollection = retrieveCollection;
 function retrieveRecord(docId, sessionId, collectionType) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const record = yield initRef.doc(sessionId).collection(collectionType.toLowerCase()).doc(docId).get();
-            weapon_of_logging.debug({ message: record.data().id, function: "retrieveRecord" });
+            const record = yield initRef
+                .doc(sessionId)
+                .collection(collectionType.toLowerCase())
+                .doc(docId)
+                .get();
+            weapon_of_logging.debug({
+                message: record.data().id,
+                function: "retrieveRecord",
+            });
             return record.data();
         }
         catch (error) {
-            weapon_of_logging.alert({ message: `Could not find collection item: ${docId} Type: ${collectionType}`, function: "getRecord" });
+            weapon_of_logging.alert({
+                message: `Could not find collection item: ${docId} Type: ${collectionType}`,
+                function: "getRecord",
+            });
         }
     });
 }
@@ -313,33 +344,48 @@ function getSession(sessionId) {
 exports.getSession = getSession;
 function deleteSession(sessionId) {
     return __awaiter(this, void 0, void 0, function* () {
-        const initRef = db.collection("sessions").doc(sessionId);
-        const initSnapshot = yield initRef.collection("initiative").get();
-        const spellSnapshot = yield initRef.collection("spells").get();
-        const batch = db.batch();
-        initRef
-            .set({ isSorted: false, onDeck: 0, sessionSize: 0 }, { merge: true })
-            .then(() => {
-            weapon_of_logging.debug({
-                message: "reset of session values successufl",
-                function: "clearsessionlist",
-            });
-        })
-            .catch((error) => {
+        try {
+            yield deleteCollection(sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE);
+            yield deleteCollection(sessionId, ServerCommunicationTypes_1.collectionTypes.SPELLS);
+        }
+        catch (error) {
             if (error instanceof Error) {
                 weapon_of_logging.alert({
-                    message: "error resetting session values",
-                    function: "clearsessionlist",
+                    message: error.message,
+                    function: "deleteSession",
                 });
             }
-        });
-        initSnapshot.docs.forEach((doc) => {
-            batch.delete(doc.ref);
-        });
-        spellSnapshot.docs.forEach((doc) => {
+        }
+    });
+}
+exports.deleteSession = deleteSession;
+function deleteCollection(sessionId, collectionType) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const docRef = db.collection("sessions").doc(sessionId);
+        const docSnapshot = yield docRef.collection(collectionType).get();
+        const batch = db.batch();
+        if (collectionType === ServerCommunicationTypes_1.collectionTypes.INITIATIVE) {
+            docRef
+                .set({ isSorted: false, onDeck: 0, sessionSize: 0 }, { merge: true })
+                .then(() => {
+                weapon_of_logging.debug({
+                    message: "reset of session values successufl",
+                    function: "clearsessionlist",
+                });
+            })
+                .catch((error) => {
+                if (error instanceof Error) {
+                    weapon_of_logging.alert({
+                        message: "error resetting session values",
+                        function: "clearsessionlist",
+                    });
+                }
+            });
+        }
+        docSnapshot.docs.forEach((doc) => {
             batch.delete(doc.ref);
         });
         yield batch.commit();
     });
 }
-exports.deleteSession = deleteSession;
+exports.deleteCollection = deleteCollection;

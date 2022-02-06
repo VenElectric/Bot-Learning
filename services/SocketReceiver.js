@@ -30,7 +30,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.socketReceiver = void 0;
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
-const GameSessionTypes_1 = require("../Interfaces/GameSessionTypes");
 const ServerCommunicationTypes_1 = require("../Interfaces/ServerCommunicationTypes");
 const TypeChecking_1 = require("../utilities/TypeChecking");
 const LoggingTypes_1 = require("../Interfaces/LoggingTypes");
@@ -73,7 +72,7 @@ function socketReceiver(socket, client, io) {
         });
     });
     // DATABASE/INITIATIVE/SPELL SOCKETS
-    socket.on(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW, function (data) {
+    socket.on(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_INITIATIVE, function (data) {
         return __awaiter(this, void 0, void 0, function* () {
             let finalMessage;
             weapon_of_logging.debug({
@@ -84,21 +83,9 @@ function socketReceiver(socket, client, io) {
                 finalMessage = yield dbCall.addSingle(data.payload, data.sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE);
                 dbCall.updateSession(data.sessionId, undefined, false);
                 // where should this broadcast to?
-                socket.broadcast.to(data.sessionId).emit(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW, {
-                    payload: data.payload,
-                    collectionType: ServerCommunicationTypes_1.collectionTypes.INITIATIVE,
-                });
-            }
-            if (data.collectionType === ServerCommunicationTypes_1.collectionTypes.SPELLS) {
-                finalMessage = yield dbCall.addSingle(data.payload, data.sessionId, ServerCommunicationTypes_1.collectionTypes.SPELLS);
-                weapon_of_logging.debug({
-                    message: data.payload,
-                    function: "Create new socket receiver",
-                });
-                socket.broadcast.to(data.sessionId).emit(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW, {
-                    payload: data.payload,
-                    collectionType: ServerCommunicationTypes_1.collectionTypes.SPELLS,
-                });
+                socket.broadcast
+                    .to(data.sessionId)
+                    .emit(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_INITIATIVE, data.payload);
             }
             else {
                 finalMessage = `Invalid Collection Type. Type Sent: ${data.collectionType}`;
@@ -106,73 +93,131 @@ function socketReceiver(socket, client, io) {
             if (finalMessage instanceof Error) {
                 weapon_of_logging.alert({
                     message: finalMessage.message,
-                    function: "create_new SocketReceiver",
+                    function: ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_SPELL,
+                    docId: data.payload.id,
                 });
             }
         });
     });
-    socket.on(ServerCommunicationTypes_1.EmitTypes.DELETE_ONE, function (data) {
+    socket.on(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_SPELL, function (data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let finalMessage;
+            if (data.collectionType === ServerCommunicationTypes_1.collectionTypes.SPELLS) {
+                finalMessage = yield dbCall.addSingle(data.payload, data.sessionId, ServerCommunicationTypes_1.collectionTypes.SPELLS);
+                weapon_of_logging.info({
+                    message: `Spell successfully added`,
+                    function: "Create new socket receiver",
+                    docId: data.payload.id,
+                });
+                socket.broadcast
+                    .to(data.sessionId)
+                    .emit(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_SPELL, data.payload);
+            }
+            else {
+                finalMessage = `Invalid Collection Type. Type Sent: ${data.collectionType}`;
+            }
+            if (finalMessage instanceof Error) {
+                weapon_of_logging.alert({
+                    message: finalMessage.message,
+                    function: ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_SPELL,
+                    docId: data.payload.id,
+                });
+            }
+        });
+    });
+    socket.on(ServerCommunicationTypes_1.EmitTypes.DELETE_ONE_INITIATIVE, function (data) {
         return __awaiter(this, void 0, void 0, function* () {
             if (data.docId !== undefined) {
-                let finalMessage = yield dbCall.deleteSingle(data.docId, data.sessionId, data.collectionType);
+                let finalMessage = yield dbCall.deleteSingle(data.docId, data.sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE);
                 if (finalMessage instanceof Error) {
                     weapon_of_logging.alert({
                         message: finalMessage.message,
+                        function: ServerCommunicationTypes_1.EmitTypes.DELETE_ONE_INITIATIVE,
+                        docId: data.docId,
+                    });
+                }
+                let [isSorted, onDeck, sessionSize] = yield dbCall.getSession(data.sessionId);
+                sessionSize -= 1;
+                isSorted = false;
+                onDeck = 0;
+                let errorMsg = yield dbCall.updateSession(data.sessionId, onDeck, isSorted, sessionSize);
+                socket.broadcast
+                    .to(data.sessionId)
+                    .emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_SESSION, false);
+                if (errorMsg instanceof Error) {
+                    weapon_of_logging.alert({
+                        message: errorMsg.message,
                         function: "DELETE_ONE SocketReceiver",
                     });
                 }
-                if (data.collectionType === ServerCommunicationTypes_1.collectionTypes.INITIATIVE) {
-                    let [isSorted, onDeck, sessionSize] = yield dbCall.getSession(data.sessionId);
-                    sessionSize -= 1;
-                    isSorted = false;
-                    onDeck = 0;
-                    let errorMsg = yield dbCall.updateSession(data.sessionId, onDeck, isSorted, sessionSize);
-                    socket.broadcast
-                        .to(data.sessionId)
-                        .emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_SESSION, false);
-                    if (errorMsg instanceof Error) {
-                        weapon_of_logging.alert({
-                            message: errorMsg.message,
-                            function: "DELETE_ONE SocketReceiver",
-                        });
-                    }
-                }
-                socket.broadcast.to(data.sessionId).emit(ServerCommunicationTypes_1.EmitTypes.DELETE_ONE, {
-                    id: data.docId,
-                    collectionType: data.collectionType,
-                });
+                socket.broadcast
+                    .to(data.sessionId)
+                    .emit(ServerCommunicationTypes_1.EmitTypes.DELETE_ONE_INITIATIVE, data.docId);
             }
         });
     });
-    socket.on(ServerCommunicationTypes_1.EmitTypes.DELETE_ALL, function (sessionId) {
+    socket.on(ServerCommunicationTypes_1.EmitTypes.DELETE_ONE_SPELL, function (data) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield dbCall.deleteSession(sessionId);
-            let errorMsg = yield dbCall.updateSession(sessionId, 0, false, 0);
-            if (errorMsg instanceof Error) {
-                weapon_of_logging.alert({
-                    message: errorMsg.message,
-                    function: "DELETE_ONE SocketReceiver",
-                });
+            if (data.docId !== undefined) {
+                let finalMessage = yield dbCall.deleteSingle(data.docId, data.sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE);
+                if (finalMessage instanceof Error) {
+                    weapon_of_logging.alert({
+                        message: finalMessage.message,
+                        function: ServerCommunicationTypes_1.EmitTypes.DELETE_ONE_SPELL,
+                        docId: data.docId,
+                    });
+                }
+                socket.broadcast
+                    .to(data.sessionId)
+                    .emit(ServerCommunicationTypes_1.EmitTypes.DELETE_ONE_SPELL, data.docId);
+            }
+        });
+    });
+    socket.on(ServerCommunicationTypes_1.EmitTypes.DELETE_ALL_INITIATIVE, function (sessionId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield dbCall.deleteCollection(sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE);
+            }
+            catch (error) {
+                if (error instanceof Error) {
+                    weapon_of_logging.alert({
+                        message: error.message,
+                        function: ServerCommunicationTypes_1.EmitTypes.DELETE_ALL_INITIATIVE,
+                    });
+                }
             }
             socket.broadcast.to(sessionId).emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_SESSION, false);
-            socket.broadcast.to(sessionId).emit(ServerCommunicationTypes_1.EmitTypes.DELETE_ALL);
+            socket.broadcast.to(sessionId).emit(ServerCommunicationTypes_1.EmitTypes.DELETE_ALL_INITIATIVE);
         });
     });
-    socket.on(ServerCommunicationTypes_1.EmitTypes.GET_INITIAL, function (data, respond) {
+    socket.on(ServerCommunicationTypes_1.EmitTypes.DELETE_ALL_SPELL, function (sessionId) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sessionId = data.sessionId;
+            try {
+                yield dbCall.deleteCollection(sessionId, ServerCommunicationTypes_1.collectionTypes.SPELLS);
+            }
+            catch (error) {
+                if (error instanceof Error) {
+                    weapon_of_logging.alert({
+                        message: error.message,
+                        function: ServerCommunicationTypes_1.EmitTypes.DELETE_ALL_SPELL,
+                    });
+                }
+            }
+            socket.broadcast.to(sessionId).emit(ServerCommunicationTypes_1.EmitTypes.DELETE_ALL_SPELL);
+        });
+    });
+    socket.on(ServerCommunicationTypes_1.EmitTypes.GET_INITIAL, function (sessionId, respond) {
+        return __awaiter(this, void 0, void 0, function* () {
             let initiative;
             let isSorted;
             let onDeck;
             let sessionSize;
             weapon_of_logging.debug({
                 message: "retrieving initial data",
-                function: "GET_INITIAL SOCKET RECEIVER",
+                function: ServerCommunicationTypes_1.EmitTypes.GET_INITIAL,
             });
-            if (data.sessionId !== undefined) {
-                initiative = (yield dbCall.retrieveCollection(data.sessionId, data.collectionType));
-                [isSorted, onDeck, sessionSize] = yield dbCall.getSession(data.sessionId);
-            }
+            initiative = (yield dbCall.retrieveCollection(sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE));
+            [isSorted, onDeck, sessionSize] = yield dbCall.getSession(sessionId);
             if (isSorted) {
                 if (initiative !== undefined) {
                     initiative = initiativeFunctions.resortInitiative(initiative);
@@ -181,141 +226,156 @@ function socketReceiver(socket, client, io) {
             if (initiative instanceof Error) {
                 weapon_of_logging.alert({
                     message: initiative.message,
-                    function: "GET_INITIAL SOCKET RECEIVER",
+                    function: ServerCommunicationTypes_1.EmitTypes.GET_INITIAL,
                 });
             }
             weapon_of_logging.debug({
                 message: "succesfully retrieved initiative",
-                function: "GET_INITIAL SOCKET RECEIVER",
+                function: ServerCommunicationTypes_1.EmitTypes.GET_INITIAL,
             });
             respond({ initiativeList: initiative, isSorted: isSorted });
         });
     });
-    socket.on(ServerCommunicationTypes_1.EmitTypes.GET_SPELLS, function (data, respond) {
+    socket.on(ServerCommunicationTypes_1.EmitTypes.GET_SPELLS, function (sessionId, respond) {
         return __awaiter(this, void 0, void 0, function* () {
             let spells;
             weapon_of_logging.debug({
                 message: "retrieving initial spell data",
-                function: "GET_SPELLS SOCKET RECEIVER",
+                function: ServerCommunicationTypes_1.EmitTypes.GET_SPELLS,
             });
-            if (data.sessionId !== undefined) {
-                spells = yield dbCall.retrieveCollection(data.sessionId, data.collectionType);
-            }
+            spells = yield dbCall.retrieveCollection(sessionId, ServerCommunicationTypes_1.collectionTypes.SPELLS);
             if (spells instanceof Error) {
                 weapon_of_logging.alert({
                     message: spells.message,
-                    function: "GET_INITIAL SOCKET RECEIVER",
+                    function: ServerCommunicationTypes_1.EmitTypes.GET_SPELLS,
                 });
             }
             weapon_of_logging.debug({
                 message: "succesfully retrieved spells",
-                function: "GET_SPELLS SOCKET RECEIVER",
+                function: ServerCommunicationTypes_1.EmitTypes.GET_SPELLS,
             });
-            respond({ spells: spells });
+            respond(spells);
         });
     });
-    socket.on(ServerCommunicationTypes_1.EmitTypes.NEXT, function (data) {
+    socket.on(ServerCommunicationTypes_1.EmitTypes.NEXT, function (sessionId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const [errorMsg, currentName, currentStatuses, currentId] = yield (0, initiative_1.turnOrder)(data.sessionId, initiativeFunctions.initiativeFunctionTypes.NEXT);
-            console.log(currentStatuses);
-            if (errorMsg instanceof Error) {
-                weapon_of_logging.alert(errorMsg.name, errorMsg.message, errorMsg.stack, data.payload);
-            }
-            weapon_of_logging.info({
-                message: "succesfully retrieved next",
-                function: "NEXT SOCKET RECEIVER",
-            });
-            setTimeout(() => __awaiter(this, void 0, void 0, function* () {
-                let record = yield dbCall.retrieveRecord(currentId, data.sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE);
-                weapon_of_logging.info({
-                    message: record,
-                    function: "next SOCKET RECEIER",
-                });
-                io.to(data.sessionId).emit(ServerCommunicationTypes_1.EmitTypes.NEXT, record);
-                const statuses = (0, create_embed_1.statusEmbed)(currentName, currentStatuses);
-                channelSend(client, { embeds: [statuses] }, data.sessionId);
-            }), 300);
-        });
-    });
-    socket.on(ServerCommunicationTypes_1.EmitTypes.PREVIOUS, function (data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const [errorMsg, currentName, currentStatuses, currentId] = yield (0, initiative_1.turnOrder)(data.sessionId, initiativeFunctions.initiativeFunctionTypes.PREVIOUS);
+            const [errorMsg, currentName, currentStatuses, currentId] = yield (0, initiative_1.turnOrder)(sessionId, initiativeFunctions.initiativeFunctionTypes.NEXT);
+            weapon_of_logging.debug({ message: "next turn and statuses retrieved", function: ServerCommunicationTypes_1.EmitTypes.NEXT, docId: currentId });
             if (errorMsg instanceof Error) {
                 weapon_of_logging.alert({
                     message: errorMsg.message,
-                    function: "PREVIOUS SOCKET RECEIVER",
+                    function: ServerCommunicationTypes_1.EmitTypes.NEXT,
                 });
             }
+            weapon_of_logging.info({
+                message: "succesfully retrieved next",
+                function: ServerCommunicationTypes_1.EmitTypes.NEXT,
+            });
             setTimeout(() => __awaiter(this, void 0, void 0, function* () {
-                let record = yield dbCall.retrieveRecord(currentId, data.sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE);
+                let record = yield dbCall.retrieveRecord(currentId, sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE);
                 weapon_of_logging.info({
                     message: record,
-                    function: "previous SOCKET RECEIER",
+                    function: ServerCommunicationTypes_1.EmitTypes.NEXT,
                 });
-                io.to(data.sessionId).emit(ServerCommunicationTypes_1.EmitTypes.PREVIOUS, record);
+                io.to(sessionId).emit(ServerCommunicationTypes_1.EmitTypes.NEXT, record);
                 const statuses = (0, create_embed_1.statusEmbed)(currentName, currentStatuses);
-                channelSend(client, { embeds: [statuses] }, data.sessionId);
+                channelSend(client, { embeds: [statuses] }, sessionId);
             }), 300);
         });
     });
-    socket.on(ServerCommunicationTypes_1.EmitTypes.RESORT, function (data, respond) {
+    socket.on(ServerCommunicationTypes_1.EmitTypes.PREVIOUS, function (sessionId) {
         return __awaiter(this, void 0, void 0, function* () {
-            let initiativeList = (yield dbCall.retrieveCollection(data.sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE));
+            const [errorMsg, currentName, currentStatuses, currentId] = yield (0, initiative_1.turnOrder)(sessionId, initiativeFunctions.initiativeFunctionTypes.PREVIOUS);
+            if (errorMsg instanceof Error) {
+                weapon_of_logging.alert({
+                    message: errorMsg.message,
+                    function: ServerCommunicationTypes_1.EmitTypes.PREVIOUS,
+                });
+            }
+            setTimeout(() => __awaiter(this, void 0, void 0, function* () {
+                let record = yield dbCall.retrieveRecord(currentId, sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE);
+                weapon_of_logging.info({
+                    message: record,
+                    function: ServerCommunicationTypes_1.EmitTypes.PREVIOUS,
+                });
+                io.to(sessionId).emit(ServerCommunicationTypes_1.EmitTypes.PREVIOUS, record);
+                const statuses = (0, create_embed_1.statusEmbed)(currentName, currentStatuses);
+                channelSend(client, { embeds: [statuses] }, sessionId);
+            }), 300);
+        });
+    });
+    socket.on(ServerCommunicationTypes_1.EmitTypes.RESORT, function (sessionId, respond) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let initiativeList = yield dbCall.retrieveCollection(sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE);
             if ((0, TypeChecking_1.isInitiativeObjectArray)(initiativeList)) {
-                let finalMessage = initiativeFunctions.resortInitiative(initiativeList);
-                socket.broadcast.to(data.sessionId).emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL, {
-                    payload: finalMessage,
-                    collectionType: ServerCommunicationTypes_1.collectionTypes.INITIATIVE,
-                });
-                if (finalMessage instanceof Error) {
-                    weapon_of_logging.alert({
-                        message: finalMessage.message,
-                        function: "RESORT SOCKET RECEIVER",
+                try {
+                    initiativeList = initiativeFunctions.resortInitiative(initiativeList);
+                    weapon_of_logging.info({
+                        message: "Resort Complete",
+                        function: ServerCommunicationTypes_1.EmitTypes.RESORT,
                     });
+                    socket.broadcast.to(sessionId).emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL_INITIATIVE, {
+                        payload: initiativeList,
+                        collectionType: ServerCommunicationTypes_1.collectionTypes.INITIATIVE,
+                    });
+                    respond(initiativeList);
                 }
-                respond(finalMessage);
-            }
-        });
-    });
-    socket.on(ServerCommunicationTypes_1.EmitTypes.RE_ROLL, function (data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (data.docId) {
-                let initiativeList = data.payload;
-                let docId = data.docId;
-                let finalMessage = yield dbCall.updatecollectionRecord(initiativeList, data.collectionType, docId, data.sessionId);
-                socket.broadcast.to(data.sessionId).emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ITEM, {
-                    payload: {
-                        toUpdate: initiativeList.initiative,
-                        ObjectType: GameSessionTypes_1.InitiativeObjectEnums.initiative,
-                        docId: data.docId,
-                    },
-                    collectionType: ServerCommunicationTypes_1.collectionTypes.INITIATIVE,
-                });
-                if (finalMessage instanceof Error) {
-                    weapon_of_logging.alert({
-                        message: finalMessage.message,
-                        function: "REROLL SOCKET RECEIVER",
-                    });
+                catch (error) {
+                    if (error instanceof Error) {
+                        weapon_of_logging.alert({
+                            message: error.message,
+                            function: ServerCommunicationTypes_1.EmitTypes.RESORT,
+                        });
+                    }
                 }
             }
         });
     });
-    socket.on(ServerCommunicationTypes_1.EmitTypes.UPDATE_ITEM, function (data) {
+    // socket.on(EmitTypes.RE_ROLL, async function (data: InitiativeSocketDataObject) {
+    //   if (data.docId) {
+    //     let initiativeList = data.payload as InitiativeObject;
+    //     let docId = data.docId;
+    //     let finalMessage = await dbCall.updatecollectionRecord(
+    //       initiativeList,
+    //       data.collectionType,
+    //       docId,
+    //       data.sessionId
+    //     );
+    //     socket.broadcast.to(data.sessionId).emit(EmitTypes.UPDATE_ITEM, {
+    //       payload: {
+    //         toUpdate: initiativeList.initiative,
+    //         ObjectType: InitiativeObjectEnums.initiative,
+    //         docId: data.docId,
+    //       },
+    //       collectionType: collectionTypes.INITIATIVE,
+    //     });
+    //     if (finalMessage instanceof Error) {
+    //       weapon_of_logging.alert({
+    //         message: finalMessage.message,
+    //         function: "REROLL SOCKET RECEIVER",
+    //       });
+    //     }
+    //   }
+    // });
+    socket.on(ServerCommunicationTypes_1.EmitTypes.UPDATE_ITEM_INITIATIVE, function (data) {
         return __awaiter(this, void 0, void 0, function* () {
             weapon_of_logging.debug({
                 message: "updating one value",
-                function: "UPDATE ONE SOCKET RECEIVER",
+                function: ServerCommunicationTypes_1.EmitTypes.UPDATE_ITEM_INITIATIVE,
+                docId: data.docId,
             });
             if (data.docId) {
                 try {
-                    dbCall.updateCollectionItem(data.toUpdate, data.collectionType.toLowerCase(), data.docId, data.sessionId, data.ObjectType);
-                    socket.broadcast.to(data.sessionId).emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ITEM, {
+                    dbCall.updateCollectionItem(data.toUpdate, ServerCommunicationTypes_1.collectionTypes.INITIATIVE, data.docId, data.sessionId, data.ObjectType);
+                    socket.broadcast
+                        .to(data.sessionId)
+                        .emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ITEM_INITIATIVE, {
                         payload: {
                             toUpdate: data.toUpdate,
                             ObjectType: data.ObjectType,
                             docId: data.docId,
                         },
-                        collectionType: data.collectionType,
+                        collectionType: ServerCommunicationTypes_1.collectionTypes.INITIATIVE,
                     });
                     // probably do not need this
                 }
@@ -323,48 +383,104 @@ function socketReceiver(socket, client, io) {
                     if (error instanceof Error) {
                         weapon_of_logging.alert({
                             message: error.message,
-                            function: "UPDATE_ONE SOCKET RECEIVER",
+                            function: ServerCommunicationTypes_1.EmitTypes.UPDATE_ITEM_INITIATIVE,
+                            docId: data.docId,
                         });
                     }
                 }
             }
         });
     });
-    socket.on(ServerCommunicationTypes_1.EmitTypes.UPDATE_RECORD, function (data) {
+    socket.on(ServerCommunicationTypes_1.EmitTypes.UPDATE_ITEM_SPELL, function (data) {
         return __awaiter(this, void 0, void 0, function* () {
             weapon_of_logging.debug({
                 message: "updating one value",
-                function: "UPDATE RECORD SOCKET RECEIVER",
+                function: "UPDATE ONE SOCKET RECEIVER",
+            });
+            if (data.docId) {
+                try {
+                    dbCall.updateCollectionItem(data.toUpdate, ServerCommunicationTypes_1.collectionTypes.SPELLS, data.docId, data.sessionId, data.ObjectType);
+                    socket.broadcast
+                        .to(data.sessionId)
+                        .emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ITEM_SPELL, {
+                        payload: {
+                            toUpdate: data.toUpdate,
+                            ObjectType: data.ObjectType,
+                            docId: data.docId,
+                        },
+                        collectionType: data.collectionType,
+                    });
+                }
+                catch (error) {
+                    if (error instanceof Error) {
+                        weapon_of_logging.alert({
+                            message: error.message,
+                            function: ServerCommunicationTypes_1.EmitTypes.UPDATE_ITEM_SPELL,
+                        });
+                    }
+                }
+            }
+        });
+    });
+    socket.on(ServerCommunicationTypes_1.EmitTypes.UPDATE_RECORD_INITIATIVE, function (data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            weapon_of_logging.debug({
+                message: "updating one value",
+                function: ServerCommunicationTypes_1.EmitTypes.UPDATE_RECORD_INITIATIVE,
+                docId: data.payload.id,
             });
             try {
-                if (data.docId == undefined) {
-                    weapon_of_logging.warning({
-                        message: "missing docid",
-                        function: "UPDATE RECORD SOCKET RECEIVER",
-                    });
-                    return;
-                }
-                yield dbCall.updatecollectionRecord(data.payload, data.collectionType, data.docId, data.sessionId);
+                yield dbCall.updatecollectionRecord(data.payload, ServerCommunicationTypes_1.collectionTypes.INITIATIVE, data.payload.id, data.sessionId);
                 weapon_of_logging.debug({
-                    message: data.collectionType,
-                    function: "update record",
+                    message: "update complete, broadcasting to room",
+                    function: ServerCommunicationTypes_1.EmitTypes.UPDATE_RECORD_INITIATIVE,
+                    docId: data.payload.id,
                 });
-                socket.broadcast.to(data.sessionId).emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_RECORD, {
-                    payload: data.payload,
-                    collectionType: data.collectionType,
-                });
+                socket.broadcast
+                    .to(data.sessionId)
+                    .emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_RECORD_INITIATIVE, data.payload);
             }
             catch (error) {
                 if (error instanceof Error) {
                     weapon_of_logging.alert({
                         message: error.message,
-                        function: "UPDATE RECORD SOCKET RECEIVER",
+                        function: ServerCommunicationTypes_1.EmitTypes.UPDATE_RECORD_INITIATIVE,
+                        docId: data.payload.id,
                     });
                 }
             }
         });
     });
-    socket.on(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL, function (data) {
+    socket.on(ServerCommunicationTypes_1.EmitTypes.UPDATE_RECORD_SPELL, function (data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            weapon_of_logging.debug({
+                message: "updating one value",
+                function: ServerCommunicationTypes_1.EmitTypes.UPDATE_RECORD_SPELL,
+                docId: data.payload.id,
+            });
+            try {
+                yield dbCall.updatecollectionRecord(data.payload, ServerCommunicationTypes_1.collectionTypes.SPELLS, data.payload.id, data.sessionId);
+                weapon_of_logging.debug({
+                    message: data.collectionType,
+                    function: ServerCommunicationTypes_1.EmitTypes.UPDATE_RECORD_SPELL,
+                    docId: data.payload.id,
+                });
+                socket.broadcast
+                    .to(data.sessionId)
+                    .emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_RECORD_SPELL, data.payload);
+            }
+            catch (error) {
+                if (error instanceof Error) {
+                    weapon_of_logging.alert({
+                        message: error.message,
+                        function: ServerCommunicationTypes_1.EmitTypes.UPDATE_RECORD_SPELL,
+                        docId: data.payload.id,
+                    });
+                }
+            }
+        });
+    });
+    socket.on(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL_INITIATIVE, function (data) {
         return __awaiter(this, void 0, void 0, function* () {
             let isSorted;
             if (data.isSorted !== undefined) {
@@ -374,125 +490,117 @@ function socketReceiver(socket, client, io) {
                     function: "UPDATE_ALL SOCKET RECEIVER",
                 });
             }
-            if ((0, TypeChecking_1.isInitiativeObjectArray)(data.payload) ||
-                (0, TypeChecking_1.isSpellObjectArray)(data.payload)) {
-                for (let record of data.payload) {
-                    try {
-                        let finalMessage = yield dbCall.updatecollectionRecord(record, data.collectionType, record.id, data.sessionId);
-                        if (finalMessage instanceof Error) {
-                            weapon_of_logging.alert({
-                                message: finalMessage.message,
+            try {
+                yield dbCall.updateCollection(data.sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE, data.payload);
+                setTimeout(() => __awaiter(this, void 0, void 0, function* () {
+                    let initiativeList = yield dbCall.retrieveCollection(data.sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE);
+                    if ((0, TypeChecking_1.isInitiativeObjectArray)(initiativeList)) {
+                        if (data.isSorted !== undefined) {
+                            if (data.isSorted) {
+                                weapon_of_logging.debug({
+                                    message: `data.isSorted is: ${data.isSorted}`,
+                                    function: "UPDATE_ALL SOCKET RECEIVER",
+                                });
+                                initiativeList = (0, initiative_1.resortInitiative)(initiativeList);
+                            }
+                        }
+                        if (data.resetOnDeck) {
+                            weapon_of_logging.debug({
+                                message: `resortOndeck: ${data.resetOnDeck}`,
                                 function: "UPDATE_ALL SOCKET RECEIVER",
                             });
+                            const trueIndex = initiativeList
+                                .map((item) => item.isCurrent)
+                                .indexOf(true);
+                            let OnDeck = initiativeList[trueIndex].roundOrder + 1;
+                            const errorMsg = dbCall.updateSession(data.sessionId, OnDeck, undefined, initiativeList.length);
+                            socket.broadcast
+                                .to(data.sessionId)
+                                .emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL_INITIATIVE, {
+                                payload: initiativeList,
+                                collectionType: ServerCommunicationTypes_1.collectionTypes.INITIATIVE,
+                                isSorted: true,
+                            });
+                            if (errorMsg instanceof Error) {
+                                weapon_of_logging.alert({
+                                    message: errorMsg.message,
+                                    function: "UPDATE_ALL SOCKET RECEIVER",
+                                });
+                            }
                         }
                         else {
-                            weapon_of_logging.info({
-                                message: "Collection was updated successfully",
-                                function: "UPDATE_ALL SOCKET RECEIVER",
+                            socket.broadcast
+                                .to(data.sessionId)
+                                .emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL_INITIATIVE, {
+                                payload: initiativeList,
+                                collectionType: ServerCommunicationTypes_1.collectionTypes.INITIATIVE,
+                                isSorted: data.isSorted,
                             });
                         }
                     }
-                    catch (error) {
-                        if (error instanceof Error) {
-                            weapon_of_logging.alert({
-                                message: error.message,
-                                function: "UPDATE_ALL SOCKET RECEIVER",
-                            });
-                            continue;
-                        }
-                    }
+                }), 200);
+            }
+            catch (error) {
+                if (error instanceof Error) {
+                    weapon_of_logging.alert({
+                        message: error.message,
+                        function: ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL_INITIATIVE,
+                    });
                 }
             }
-            setTimeout(() => __awaiter(this, void 0, void 0, function* () {
-                if (data.collectionType === ServerCommunicationTypes_1.collectionTypes.INITIATIVE) {
-                    let initiativeList = (yield dbCall.retrieveCollection(data.sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE));
-                    if (data.isSorted !== undefined) {
-                        if (data.isSorted) {
-                            weapon_of_logging.debug({
-                                message: `data.isSorted is: ${data.isSorted}`,
-                                function: "UPDATE_ALL SOCKET RECEIVER",
-                            });
-                            initiativeList = (0, initiative_1.resortInitiative)(initiativeList);
-                        }
-                    }
-                    if (data.resetOnDeck) {
-                        weapon_of_logging.debug({
-                            message: `resortOndeck: ${data.resetOnDeck}`,
-                            function: "UPDATE_ALL SOCKET RECEIVER",
-                        });
-                        const trueIndex = initiativeList
-                            .map((item) => item.isCurrent)
-                            .indexOf(true);
-                        let OnDeck = initiativeList[trueIndex].roundOrder + 1;
-                        const errorMsg = dbCall.updateSession(data.sessionId, OnDeck, undefined, initiativeList.length);
-                        socket.broadcast.to(data.sessionId).emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL, {
-                            payload: initiativeList,
-                            collectionType: ServerCommunicationTypes_1.collectionTypes.INITIATIVE,
-                            isSorted: true,
-                        });
-                        if (errorMsg instanceof Error) {
-                            weapon_of_logging.alert({
-                                message: errorMsg.message,
-                                function: "UPDATE_ALL SOCKET RECEIVER",
-                            });
-                        }
-                    }
-                    else {
-                        socket.broadcast.to(data.sessionId).emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL, {
-                            payload: initiativeList,
-                            collectionType: ServerCommunicationTypes_1.collectionTypes.INITIATIVE,
-                            isSorted: data.isSorted,
-                        });
-                    }
-                    weapon_of_logging.debug({
-                        message: "update to initiative successful",
-                        function: "UPDATE all socket receiver",
-                    });
-                    weapon_of_logging.debug({
-                        message: `isSorted is: ${data.isSorted}`,
-                        function: "UPDATE_ALL SOCKET RECEIVER",
-                    });
-                    return;
-                }
-                if (data.collectionType === ServerCommunicationTypes_1.collectionTypes.SPELLS) {
-                    const spells = yield dbCall.retrieveCollection(data.sessionId, ServerCommunicationTypes_1.collectionTypes.SPELLS);
-                    socket.broadcast.to(data.sessionId).emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL, {
-                        payload: spells,
-                        collectionType: ServerCommunicationTypes_1.collectionTypes.SPELLS,
-                    });
-                }
-            }), 200);
         });
     });
-    socket.on(ServerCommunicationTypes_1.EmitTypes.ROUND_START, function (data, respond) {
+    socket.on(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL_SPELL, function (data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let initiativeList = yield dbCall.retrieveCollection(data.sessionId, data.collectionType);
+                yield dbCall.updateCollection(data.sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE, data.payload);
+                socket.broadcast
+                    .to(data.sessionId)
+                    .emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL_INITIATIVE, {
+                    payload: data.payload,
+                    collectionType: ServerCommunicationTypes_1.collectionTypes.SPELLS,
+                });
+            }
+            catch (error) {
+                if (error instanceof Error) {
+                    weapon_of_logging.alert({
+                        message: error.message,
+                        function: ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL_SPELL,
+                    });
+                }
+            }
+        });
+    });
+    socket.on(ServerCommunicationTypes_1.EmitTypes.ROUND_START, function (sessionId, respond) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let initiativeList = yield dbCall.retrieveCollection(sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE);
                 weapon_of_logging.debug({
                     message: "starting round start, initiative retrieved",
                     function: "ROUND_START SOCKET_RECEIVER",
                 });
                 if ((0, TypeChecking_1.isInitiativeObjectArray)(initiativeList)) {
-                    let finalMessage = yield initiativeFunctions.finalizeInitiative(initiativeList, true, data.sessionId);
-                    const startEmbed = (0, create_embed_1.initiativeEmbed)(finalMessage);
-                    channelSend(client, { embeds: [startEmbed], content: "Rounds have started" }, data.sessionId);
+                    initiativeList = yield initiativeFunctions.finalizeInitiative(initiativeList, true, sessionId);
+                    const startEmbed = (0, create_embed_1.initiativeEmbed)(initiativeList);
+                    channelSend(client, { embeds: [startEmbed], content: "Rounds have started" }, sessionId);
                     weapon_of_logging.info({
                         message: "initiative sorted and being emitted",
                         function: "ROUND_START SOCKET_RECEIVER",
                     });
-                    socket.broadcast.to(data.sessionId).emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL, {
-                        payload: finalMessage,
+                    socket.broadcast.to(sessionId).emit(ServerCommunicationTypes_1.EmitTypes.ROUND_START);
+                    socket.broadcast.to(sessionId).emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL_INITIATIVE, {
+                        payload: initiativeList,
                         collectionType: ServerCommunicationTypes_1.collectionTypes.INITIATIVE,
                         isSorted: true,
                     });
-                    respond(finalMessage);
+                    respond(initiativeList);
                 }
             }
             catch (error) {
                 if (error instanceof ReferenceError) {
                     weapon_of_logging.warning({
                         message: error.message,
-                        function: "ROUND_START SOCKET_RECEIVER",
+                        function: ServerCommunicationTypes_1.EmitTypes.ROUND_START,
                     });
                     respond("No initiative to sort. Please add in initiative");
                 }
@@ -500,7 +608,7 @@ function socketReceiver(socket, client, io) {
                     !(error instanceof ReferenceError)) {
                     weapon_of_logging.alert({
                         message: error.message,
-                        function: "ROUND_START SOCKET_RECEIVER",
+                        function: ServerCommunicationTypes_1.EmitTypes.ROUND_START,
                     });
                 }
             }
@@ -514,10 +622,15 @@ function socketReceiver(socket, client, io) {
                     let newList = (yield dbCall.retrieveCollection(data.sessionId, data.collectionType));
                     weapon_of_logging.info({
                         message: `retrieving ${data.collectionType} for discord embed`,
-                        function: "DISCORD SOCKET_RECEIVER",
+                        function: ServerCommunicationTypes_1.EmitTypes.DISCORD,
                     });
                     let [isSorted, onDeck, sessionSize] = yield dbCall.getSession(data.sessionId);
-                    sortedList = yield initiativeFunctions.finalizeInitiative(newList, false, data.sessionId);
+                    if (isSorted) {
+                        sortedList = (0, initiative_1.resortInitiative)(newList);
+                    }
+                    else {
+                        sortedList = yield initiativeFunctions.finalizeInitiative(newList, false, data.sessionId);
+                    }
                     let initEmbed = (0, create_embed_1.initiativeEmbed)(sortedList);
                     channelSend(client, { embeds: [initEmbed] }, data.sessionId);
                 }
@@ -525,11 +638,11 @@ function socketReceiver(socket, client, io) {
                     let newList = (yield dbCall.retrieveCollection(data.sessionId, data.collectionType));
                     weapon_of_logging.info({
                         message: `retrieving ${data.collectionType} for discord embed`,
-                        function: "DISCORD SOCKET_RECEIVER",
+                        function: ServerCommunicationTypes_1.EmitTypes.DISCORD,
                     });
                     weapon_of_logging.debug({
                         message: newList,
-                        function: "DISCORD SOCKET_RECEIVER",
+                        function: ServerCommunicationTypes_1.EmitTypes.DISCORD,
                     });
                     let spellsEmbed = (0, create_embed_1.spellEmbed)(newList);
                     channelSend(client, { embeds: [spellsEmbed] }, data.sessionId);
@@ -537,7 +650,7 @@ function socketReceiver(socket, client, io) {
                 else {
                     weapon_of_logging.debug({
                         message: "Enum not recognized",
-                        function: "DISCORD SOCKET_RECEIVER",
+                        function: ServerCommunicationTypes_1.EmitTypes.DISCORD,
                     });
                 }
             }
@@ -545,7 +658,7 @@ function socketReceiver(socket, client, io) {
                 if (error instanceof Error) {
                     weapon_of_logging.alert({
                         message: error.message,
-                        function: "DISCORD SOCKET_RECEIVER",
+                        function: ServerCommunicationTypes_1.EmitTypes.DISCORD,
                     });
                 }
             }

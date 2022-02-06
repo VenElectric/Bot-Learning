@@ -1,5 +1,6 @@
 //@ts-ignore
 const { db } = require("./firebase-setup");
+import { writeBatch, doc, collection } from "firebase/firestore";
 const { v4: uuidv4 } = require("uuid");
 const initRef = db.collection("sessions");
 import { collectionTypes } from "../Interfaces/ServerCommunicationTypes";
@@ -19,6 +20,7 @@ import {
   isDoubleArray,
 } from "../utilities/TypeChecking";
 import chalk from "chalk";
+import { CommandErrorEnums } from "../Interfaces/LoggingTypes";
 
 function separateArrays(characterIds: CharacterStatus[][]) {
   return { target: characterIds[1], source: characterIds[0] };
@@ -119,11 +121,37 @@ export function updateCollectionItem(
         });
       });
   } catch (error) {
-    console.log(error)
     if (error instanceof Error) {
       weapon_of_logging.alert({
         message: error.message,
         function: "updateCollection",
+      });
+    }
+  }
+}
+
+export async function updateCollection(
+  sessionId: string,
+  collectionType: collectionTypes,
+  payload: SpellObject[] | InitiativeObject[]
+) {
+  try {
+    const docRef = db
+      .collection("sessions")
+      .doc(sessionId)
+      .collection(collectionType);
+      const batch = db.batch();
+
+    for (const record of payload) {
+      const recordRef = docRef.doc(record.id);
+      batch.set(recordRef, record);
+    }
+    await batch.commit();
+  } catch (error) {
+    if (error instanceof Error) {
+      weapon_of_logging.alert({
+        message: error.message,
+        function: `updateCollection ${collectionType}`,
       });
     }
   }
@@ -195,8 +223,6 @@ export async function retrieveCollection(
   collection: string
 ): Promise<InitiativeObject[] | SpellObject[]> {
   let databaseList: any = [];
-  console.info(sessionId);
-  console.info(collection);
   try {
     let snapshot = await initRef.doc(sessionId).collection(collection).get();
 
@@ -211,8 +237,6 @@ export async function retrieveCollection(
         message: "snapshot.docs is undefined",
         function: "retrieveCollection",
       });
-      // weapon_of_logging.warning("snapshot.docs === undefined","none",collection,sessionId)
-      // throw ReferenceError(`snapshot.docs is undefined sessionId: ${sessionId} collection: ${collection}`);
     }
   } catch (error) {
     if (error instanceof Error) {
@@ -230,14 +254,27 @@ export async function retrieveCollection(
   return Promise.resolve(databaseList);
 }
 
-export async function retrieveRecord(docId: string, sessionId: string, collectionType: collectionTypes){
+export async function retrieveRecord(
+  docId: string,
+  sessionId: string,
+  collectionType: collectionTypes
+) {
   try {
-    const record = await initRef.doc(sessionId).collection(collectionType.toLowerCase()).doc(docId).get();
-    weapon_of_logging.debug({message: record.data().id, function: "retrieveRecord"})
+    const record = await initRef
+      .doc(sessionId)
+      .collection(collectionType.toLowerCase())
+      .doc(docId)
+      .get();
+    weapon_of_logging.debug({
+      message: record.data().id,
+      function: "retrieveRecord",
+    });
     return record.data();
-  }
-  catch(error){
-    weapon_of_logging.alert({message: `Could not find collection item: ${docId} Type: ${collectionType}`, function:"getRecord"})
+  } catch (error) {
+    weapon_of_logging.alert({
+      message: `Could not find collection item: ${docId} Type: ${collectionType}`,
+      function: "getRecord",
+    });
   }
 }
 
@@ -335,31 +372,47 @@ export async function getSession(
 }
 
 export async function deleteSession(sessionId: string) {
-  const initRef = db.collection("sessions").doc(sessionId);
-  const initSnapshot = await initRef.collection("initiative").get();
-  const spellSnapshot = await initRef.collection("spells").get();
+  try {
+    await deleteCollection(sessionId, collectionTypes.INITIATIVE);
+    await deleteCollection(sessionId, collectionTypes.SPELLS);
+  } catch (error) {
+    if (error instanceof Error) {
+      weapon_of_logging.alert({
+        message: error.message,
+        function: "deleteSession",
+      });
+    }
+  }
+}
+
+export async function deleteCollection(
+  sessionId: string,
+  collectionType: collectionTypes
+) {
+  const docRef = db.collection("sessions").doc(sessionId);
+  const docSnapshot = await docRef.collection(collectionType).get();
   const batch = db.batch();
 
-  initRef
-    .set({ isSorted: false, onDeck: 0, sessionSize: 0 }, { merge: true })
-    .then(() => {
-      weapon_of_logging.debug({
-        message: "reset of session values successufl",
-        function: "clearsessionlist",
-      });
-    })
-    .catch((error: any) => {
-      if (error instanceof Error) {
-        weapon_of_logging.alert({
-          message: "error resetting session values",
+  if (collectionType === collectionTypes.INITIATIVE) {
+    docRef
+      .set({ isSorted: false, onDeck: 0, sessionSize: 0 }, { merge: true })
+      .then(() => {
+        weapon_of_logging.debug({
+          message: "reset of session values successufl",
           function: "clearsessionlist",
         });
-      }
-    });
-  initSnapshot.docs.forEach((doc: any) => {
-    batch.delete(doc.ref);
-  });
-  spellSnapshot.docs.forEach((doc: any) => {
+      })
+      .catch((error: any) => {
+        if (error instanceof Error) {
+          weapon_of_logging.alert({
+            message: "error resetting session values",
+            function: "clearsessionlist",
+          });
+        }
+      });
+  }
+
+  docSnapshot.docs.forEach((doc: any) => {
     batch.delete(doc.ref);
   });
   await batch.commit();

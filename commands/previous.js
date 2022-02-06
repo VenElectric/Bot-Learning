@@ -18,7 +18,7 @@ const ServerCommunicationTypes_1 = require("../Interfaces/ServerCommunicationTyp
 const create_embed_1 = require("../services/create-embed");
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName("prev")
+        .setName("previous")
         .setDescription("Move Turn Order Backwards"),
     execute(interaction) {
         return __awaiter(this, void 0, void 0, function* () {

@@ -88,7 +88,7 @@ module.exports = {
         initiativeRoll + initiativeModifier
       }. You can edit this on the website component using the /link command. \n Any rolled nat 20's have 100 added on for sorting purposes.`;
       weapon_of_logging.info({message: `Replying to interaction: ${replyString}`, function:"addchar"});
-      io.to(interaction.channel.id).emit(EmitTypes.CREATE_NEW,{payload: options, collectionType: collectionTypes.INITIATIVE})
+      io.to(interaction.channel.id).emit(EmitTypes.CREATE_NEW_INITIATIVE,options)
       await interaction.reply(replyString);
     } catch (error) {
       if (error instanceof Error) {
