@@ -9,27 +9,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteCollection = exports.deleteSession = exports.getSession = exports.updateSession = exports.retrieveRecord = exports.retrieveCollection = exports.updatecollectionRecord = exports.updateCollection = exports.updateCollectionItem = exports.deleteSingle = exports.addSingle = void 0;
+exports.deleteCollection = exports.deleteSession = exports.getSession = exports.updateSession = exports.retrieveRecord = exports.retrieveCollection = exports.updatecollectionRecord = exports.updateCollection = exports.updateCollectionItem = exports.deleteSingle = exports.addSingle = exports.separateArrays = void 0;
 //@ts-ignore
 const { db } = require("./firebase-setup");
 const { v4: uuidv4 } = require("uuid");
 const initRef = db.collection("sessions");
 const ServerCommunicationTypes_1 = require("../Interfaces/ServerCommunicationTypes");
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
-const TypeChecking_1 = require("../utilities/TypeChecking");
 function separateArrays(characterIds) {
     return { target: characterIds[1], source: characterIds[0] };
 }
+exports.separateArrays = separateArrays;
 function addSingle(item, sessionId, collection) {
     return __awaiter(this, void 0, void 0, function* () {
         let errorMsg;
-        if (collection === "spells") {
-            if ((0, TypeChecking_1.isSpellObject)(item)) {
-                if ((0, TypeChecking_1.isDoubleArray)(item.characterIds)) {
-                    item.characterIds = separateArrays(item.characterIds);
-                }
-            }
-        }
         initRef
             .doc(sessionId)
             .collection(collection)
@@ -130,7 +123,7 @@ function updateCollection(sessionId, collectionType, payload) {
             if (error instanceof Error) {
                 weapon_of_logging.alert({
                     message: error.message,
-                    function: `updateCollection ${collectionType}`,
+                    function: `updateCollection ${collectionType} ${payload[0].id}`,
                 });
             }
         }
@@ -145,29 +138,6 @@ item, collection, docId, sessionId) {
         message: { docId, collection },
         function: "updateCollectionRecord",
     });
-    if (collection === "spells") {
-        weapon_of_logging.debug({
-            message: "Collection === spells",
-            function: "updateCollectionRecord",
-        });
-        if ((0, TypeChecking_1.isSpellObject)(item)) {
-            weapon_of_logging.debug({
-                message: "isSpellObject",
-                function: "updateCollectionRecord",
-            });
-            if ((0, TypeChecking_1.isDoubleArray)(item.characterIds)) {
-                weapon_of_logging.debug({
-                    message: "isDoubleArray",
-                    function: "updateCollectionRecord",
-                });
-                item.characterIds = separateArrays(item.characterIds);
-                weapon_of_logging.debug({
-                    message: item.characterIds,
-                    function: "updateCollectionRecord",
-                });
-            }
-        }
-    }
     initRef
         .doc(sessionId)
         .collection(collection)

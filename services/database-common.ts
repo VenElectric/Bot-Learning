@@ -22,7 +22,7 @@ import {
 import chalk from "chalk";
 import { CommandErrorEnums } from "../Interfaces/LoggingTypes";
 
-function separateArrays(characterIds: CharacterStatus[][]) {
+export function separateArrays(characterIds: CharacterStatus[][]) {
   return { target: characterIds[1], source: characterIds[0] };
 }
 export async function addSingle(
@@ -31,14 +31,6 @@ export async function addSingle(
   collection: collectionTypes
 ) {
   let errorMsg: any;
-
-  if (collection === "spells") {
-    if (isSpellObject(item)) {
-      if (isDoubleArray(item.characterIds)) {
-        item.characterIds = separateArrays(item.characterIds);
-      }
-    }
-  }
   initRef
     .doc(sessionId)
     .collection(collection)
@@ -141,7 +133,6 @@ export async function updateCollection(
       .doc(sessionId)
       .collection(collectionType);
       const batch = db.batch();
-
     for (const record of payload) {
       const recordRef = docRef.doc(record.id);
       batch.set(recordRef, record);
@@ -151,7 +142,7 @@ export async function updateCollection(
     if (error instanceof Error) {
       weapon_of_logging.alert({
         message: error.message,
-        function: `updateCollection ${collectionType}`,
+        function: `updateCollection ${collectionType} ${payload[0].id}`,
       });
     }
   }
@@ -170,29 +161,6 @@ export function updatecollectionRecord(
     message: { docId, collection },
     function: "updateCollectionRecord",
   });
-  if (collection === "spells") {
-    weapon_of_logging.debug({
-      message: "Collection === spells",
-      function: "updateCollectionRecord",
-    });
-    if (isSpellObject(item)) {
-      weapon_of_logging.debug({
-        message: "isSpellObject",
-        function: "updateCollectionRecord",
-      });
-      if (isDoubleArray(item.characterIds)) {
-        weapon_of_logging.debug({
-          message: "isDoubleArray",
-          function: "updateCollectionRecord",
-        });
-        item.characterIds = separateArrays(item.characterIds);
-        weapon_of_logging.debug({
-          message: item.characterIds,
-          function: "updateCollectionRecord",
-        });
-      }
-    }
-  }
   initRef
     .doc(sessionId)
     .collection(collection)

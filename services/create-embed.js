@@ -37,8 +37,9 @@ function statusEmbed(character, statusArray) {
     const embed = new MessageEmbed();
     embed.setTitle(`Current Turn: ${character}`);
     if (statusArray.length > 0) {
+        embed.addField(`Effects`, constants_1.escapeChar);
         for (let record of statusArray) {
-            embed.addField(`Effects`, record.spellName);
+            embed.addField(constants_1.escapeChar, record.spellName);
         }
     }
     else {

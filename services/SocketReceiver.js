@@ -79,21 +79,16 @@ function socketReceiver(socket, client, io) {
                 message: data.payload,
                 function: "Create new socket receiver",
             });
-            if (data.collectionType === ServerCommunicationTypes_1.collectionTypes.INITIATIVE) {
-                finalMessage = yield dbCall.addSingle(data.payload, data.sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE);
-                dbCall.updateSession(data.sessionId, undefined, false);
-                // where should this broadcast to?
-                socket.broadcast
-                    .to(data.sessionId)
-                    .emit(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_INITIATIVE, data.payload);
-            }
-            else {
-                finalMessage = `Invalid Collection Type. Type Sent: ${data.collectionType}`;
-            }
+            finalMessage = yield dbCall.addSingle(data.payload, data.sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE);
+            dbCall.updateSession(data.sessionId, undefined, false);
+            // where should this broadcast to?
+            socket.broadcast
+                .to(data.sessionId)
+                .emit(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_INITIATIVE, data.payload);
             if (finalMessage instanceof Error) {
                 weapon_of_logging.alert({
                     message: finalMessage.message,
-                    function: ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_SPELL,
+                    function: ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_INITIATIVE,
                     docId: data.payload.id,
                 });
             }
@@ -102,20 +97,16 @@ function socketReceiver(socket, client, io) {
     socket.on(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_SPELL, function (data) {
         return __awaiter(this, void 0, void 0, function* () {
             let finalMessage;
-            if (data.collectionType === ServerCommunicationTypes_1.collectionTypes.SPELLS) {
-                finalMessage = yield dbCall.addSingle(data.payload, data.sessionId, ServerCommunicationTypes_1.collectionTypes.SPELLS);
-                weapon_of_logging.info({
-                    message: `Spell successfully added`,
-                    function: "Create new socket receiver",
-                    docId: data.payload.id,
-                });
-                socket.broadcast
-                    .to(data.sessionId)
-                    .emit(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_SPELL, data.payload);
-            }
-            else {
-                finalMessage = `Invalid Collection Type. Type Sent: ${data.collectionType}`;
-            }
+            const spellRecord = Object.assign({}, data.payload);
+            finalMessage = yield dbCall.addSingle(spellRecord, data.sessionId, ServerCommunicationTypes_1.collectionTypes.SPELLS);
+            weapon_of_logging.info({
+                message: `Spell successfully added`,
+                function: "Create new socket receiver",
+                docId: data.payload.id,
+            });
+            socket.broadcast
+                .to(data.sessionId)
+                .emit(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_SPELL, data.payload);
             if (finalMessage instanceof Error) {
                 weapon_of_logging.alert({
                     message: finalMessage.message,
@@ -159,7 +150,7 @@ function socketReceiver(socket, client, io) {
     socket.on(ServerCommunicationTypes_1.EmitTypes.DELETE_ONE_SPELL, function (data) {
         return __awaiter(this, void 0, void 0, function* () {
             if (data.docId !== undefined) {
-                let finalMessage = yield dbCall.deleteSingle(data.docId, data.sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE);
+                let finalMessage = yield dbCall.deleteSingle(data.docId, data.sessionId, ServerCommunicationTypes_1.collectionTypes.SPELLS);
                 if (finalMessage instanceof Error) {
                     weapon_of_logging.alert({
                         message: finalMessage.message,
@@ -260,7 +251,11 @@ function socketReceiver(socket, client, io) {
     socket.on(ServerCommunicationTypes_1.EmitTypes.NEXT, function (sessionId) {
         return __awaiter(this, void 0, void 0, function* () {
             const [errorMsg, currentName, currentStatuses, currentId] = yield (0, initiative_1.turnOrder)(sessionId, initiativeFunctions.initiativeFunctionTypes.NEXT);
-            weapon_of_logging.debug({ message: "next turn and statuses retrieved", function: ServerCommunicationTypes_1.EmitTypes.NEXT, docId: currentId });
+            weapon_of_logging.debug({
+                message: "next turn and statuses retrieved",
+                function: ServerCommunicationTypes_1.EmitTypes.NEXT,
+                docId: currentId,
+            });
             if (errorMsg instanceof Error) {
                 weapon_of_logging.alert({
                     message: errorMsg.message,
@@ -316,7 +311,7 @@ function socketReceiver(socket, client, io) {
                     });
                     socket.broadcast.to(sessionId).emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL_INITIATIVE, {
                         payload: initiativeList,
-                        collectionType: ServerCommunicationTypes_1.collectionTypes.INITIATIVE,
+                        isSorted: true,
                     });
                     respond(initiativeList);
                 }
@@ -331,32 +326,6 @@ function socketReceiver(socket, client, io) {
             }
         });
     });
-    // socket.on(EmitTypes.RE_ROLL, async function (data: InitiativeSocketDataObject) {
-    //   if (data.docId) {
-    //     let initiativeList = data.payload as InitiativeObject;
-    //     let docId = data.docId;
-    //     let finalMessage = await dbCall.updatecollectionRecord(
-    //       initiativeList,
-    //       data.collectionType,
-    //       docId,
-    //       data.sessionId
-    //     );
-    //     socket.broadcast.to(data.sessionId).emit(EmitTypes.UPDATE_ITEM, {
-    //       payload: {
-    //         toUpdate: initiativeList.initiative,
-    //         ObjectType: InitiativeObjectEnums.initiative,
-    //         docId: data.docId,
-    //       },
-    //       collectionType: collectionTypes.INITIATIVE,
-    //     });
-    //     if (finalMessage instanceof Error) {
-    //       weapon_of_logging.alert({
-    //         message: finalMessage.message,
-    //         function: "REROLL SOCKET RECEIVER",
-    //       });
-    //     }
-    //   }
-    // });
     socket.on(ServerCommunicationTypes_1.EmitTypes.UPDATE_ITEM_INITIATIVE, function (data) {
         return __awaiter(this, void 0, void 0, function* () {
             weapon_of_logging.debug({
@@ -366,16 +335,18 @@ function socketReceiver(socket, client, io) {
             });
             if (data.docId) {
                 try {
-                    dbCall.updateCollectionItem(data.toUpdate, ServerCommunicationTypes_1.collectionTypes.INITIATIVE, data.docId, data.sessionId, data.ObjectType);
+                    const newObject = Object.assign({
+                        toUpdate: data.toUpdate,
+                        docId: data.docId,
+                    });
+                    dbCall.updateCollectionItem(newObject.toUpdate, ServerCommunicationTypes_1.collectionTypes.INITIATIVE, newObject.docId, data.sessionId, data.ObjectType);
+                    console.log(data.toUpdate);
                     socket.broadcast
                         .to(data.sessionId)
                         .emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ITEM_INITIATIVE, {
-                        payload: {
-                            toUpdate: data.toUpdate,
-                            ObjectType: data.ObjectType,
-                            docId: data.docId,
-                        },
-                        collectionType: ServerCommunicationTypes_1.collectionTypes.INITIATIVE,
+                        toUpdate: data.toUpdate,
+                        ObjectType: data.ObjectType,
+                        docId: data.docId,
                     });
                     // probably do not need this
                 }
@@ -459,9 +430,11 @@ function socketReceiver(socket, client, io) {
                 docId: data.payload.id,
             });
             try {
-                yield dbCall.updatecollectionRecord(data.payload, ServerCommunicationTypes_1.collectionTypes.SPELLS, data.payload.id, data.sessionId);
+                const spellRecord = Object.assign({}, data.payload);
+                console.log(spellRecord);
+                yield dbCall.updatecollectionRecord(spellRecord, ServerCommunicationTypes_1.collectionTypes.SPELLS, data.payload.id, data.sessionId);
                 weapon_of_logging.debug({
-                    message: data.collectionType,
+                    message: ServerCommunicationTypes_1.collectionTypes.SPELLS,
                     function: ServerCommunicationTypes_1.EmitTypes.UPDATE_RECORD_SPELL,
                     docId: data.payload.id,
                 });
@@ -512,13 +485,18 @@ function socketReceiver(socket, client, io) {
                             const trueIndex = initiativeList
                                 .map((item) => item.isCurrent)
                                 .indexOf(true);
-                            let OnDeck = initiativeList[trueIndex].roundOrder + 1;
+                            let OnDeck;
+                            if (initiativeList[trueIndex].roundOrder === initiativeList.length) {
+                                OnDeck = 1;
+                            }
+                            else {
+                                OnDeck = initiativeList[trueIndex].roundOrder + 1;
+                            }
                             const errorMsg = dbCall.updateSession(data.sessionId, OnDeck, undefined, initiativeList.length);
                             socket.broadcast
                                 .to(data.sessionId)
                                 .emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL_INITIATIVE, {
                                 payload: initiativeList,
-                                collectionType: ServerCommunicationTypes_1.collectionTypes.INITIATIVE,
                                 isSorted: true,
                             });
                             if (errorMsg instanceof Error) {
@@ -533,7 +511,6 @@ function socketReceiver(socket, client, io) {
                                 .to(data.sessionId)
                                 .emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL_INITIATIVE, {
                                 payload: initiativeList,
-                                collectionType: ServerCommunicationTypes_1.collectionTypes.INITIATIVE,
                                 isSorted: data.isSorted,
                             });
                         }
@@ -553,13 +530,11 @@ function socketReceiver(socket, client, io) {
     socket.on(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL_SPELL, function (data) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                yield dbCall.updateCollection(data.sessionId, ServerCommunicationTypes_1.collectionTypes.INITIATIVE, data.payload);
+                let spellRecord = [...data.payload];
+                yield dbCall.updateCollection(data.sessionId, ServerCommunicationTypes_1.collectionTypes.SPELLS, spellRecord);
                 socket.broadcast
                     .to(data.sessionId)
-                    .emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL_INITIATIVE, {
-                    payload: data.payload,
-                    collectionType: ServerCommunicationTypes_1.collectionTypes.SPELLS,
-                });
+                    .emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ALL_SPELL, data.payload);
             }
             catch (error) {
                 if (error instanceof Error) {

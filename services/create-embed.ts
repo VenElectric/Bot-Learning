@@ -39,8 +39,9 @@ export function statusEmbed(character: string, statusArray: StatusEffect[]) {
   const embed = new MessageEmbed();
   embed.setTitle(`Current Turn: ${character}`);
   if (statusArray.length > 0) {
+    embed.addField(`Effects`, escapeChar)
     for (let record of statusArray) {
-      embed.addField(`Effects`, record.spellName);
+      embed.addField(escapeChar, record.spellName);
     }
   }
   else {
