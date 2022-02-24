@@ -4,6 +4,10 @@ export enum EmitTypes {
   NEXT = "NEXT",
   PREVIOUS = "PREVIOUS",
   ROUND_START = "ROUND_START",
+  GET_INITIAL_ROLLS = "GET_INITIAL_ROLLS",
+  CREATE_NEW_ROLL = "CREATE_NEW_ROLL",
+  UPDATE_ROLL_RECORD = "UPDATE_ROLL_RECORD",
+  DELETE_ONE_ROLL = "DELETE_ONE_ROLL",
   UPDATE_ALL_INITIATIVE = "UPDATE_ALL_INITIATIVE",
   DELETE_ONE_INITIATIVE = "DELETE_ONE_INITIATIVE",
   DELETE_ALL_INITIATIVE = "DELETE_ALL_INITIATIVE",
@@ -20,14 +24,16 @@ export enum EmitTypes {
   RE_ROLL = "RE_ROLL",
   RESORT = "RESORT",
   DISCORD = "DISCORD",
+  DISCORD_ROLL = "DISCORD_ROLL",
   REMOVE_STATUS_EFFECT = "REMOVE_STATUS_EFFECT",
-  ADD_STATUS_EFFECT = "ADD_STATUS_EFFECT"
+  ADD_STATUS_EFFECT = "ADD_STATUS_EFFECT",
 }
 
 export enum collectionTypes {
   INITIATIVE = "initiative",
   SPELLS = "spells",
   LOGGING = "logging",
+  ROLLS = "rolls",
 }
 
 export enum InitiativeContextEnums {
@@ -53,5 +59,5 @@ export enum SpellContextEnums {
 }
 
 export interface SocketLogging {
-  error: Error
+  error: Error;
 }

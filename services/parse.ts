@@ -40,7 +40,7 @@ export function parseRoll(msg:string[]){
 	return {comment:comment,rollex:rollex}
 }
 
-export function addBash(item: string, color:string){
+export function addBash(item: any, color:string){
 	let final = "";
 	switch (color.toLowerCase()){
 		case "green":

@@ -37,6 +37,7 @@ const dbCall = __importStar(require("./database-common"));
 const initiative_1 = require("../services/initiative");
 const initiativeFunctions = __importStar(require("../services/initiative"));
 const create_embed_1 = require("./create-embed");
+const parse_1 = require("./parse");
 function channelSend(client, item, sessionId) {
     client.channels.fetch(sessionId).then((channel) => {
         channel.send(item);
@@ -72,6 +73,43 @@ function socketReceiver(socket, client, io) {
         });
     });
     // DATABASE/INITIATIVE/SPELL SOCKETS
+    socket.on(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_ROLL, function (data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            weapon_of_logging.debug({
+                message: `adding roll ${data.rollData.id}`,
+                function: ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_ROLL,
+            });
+            yield dbCall.addSingle(data.rollData, data.sessionId, ServerCommunicationTypes_1.collectionTypes.ROLLS);
+            socket.broadcast
+                .to(data.sessionId)
+                .emit(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_ROLL, data.rollData);
+        });
+    });
+    socket.on(ServerCommunicationTypes_1.EmitTypes.UPDATE_ROLL_RECORD, function (data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            weapon_of_logging.debug({
+                message: "updating roll",
+                function: ServerCommunicationTypes_1.EmitTypes.UPDATE_ROLL_RECORD,
+            });
+            yield dbCall.updatecollectionRecord(data.rollData, ServerCommunicationTypes_1.collectionTypes.ROLLS, data.rollData.id, data.sessionId);
+            socket.broadcast
+                .to(data.sessionId)
+                .emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ROLL_RECORD, data.rollData);
+        });
+    });
+    socket.on(ServerCommunicationTypes_1.EmitTypes.DELETE_ONE_ROLL, function (data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield dbCall.deleteSingle(data.docId, data.sessionId, ServerCommunicationTypes_1.collectionTypes.ROLLS);
+            socket.broadcast
+                .to(data.sessionId)
+                .emit(ServerCommunicationTypes_1.EmitTypes.DELETE_ONE_ROLL, data.docId);
+        });
+    });
+    socket.on(ServerCommunicationTypes_1.EmitTypes.DISCORD_ROLL, function (data) {
+        const finalRoll = (0, parse_1.addBash)(data.payload.output, "green");
+        const finalComment = (0, parse_1.addBash)(data.comment, "blue");
+        channelSend(client, { content: `Roll Results: ${finalRoll} ${finalComment}` }, data.sessionId);
+    });
     socket.on(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_INITIATIVE, function (data) {
         return __awaiter(this, void 0, void 0, function* () {
             let finalMessage;
@@ -246,6 +284,16 @@ function socketReceiver(socket, client, io) {
                 function: ServerCommunicationTypes_1.EmitTypes.GET_SPELLS,
             });
             respond(spells);
+        });
+    });
+    socket.on(ServerCommunicationTypes_1.EmitTypes.GET_INITIAL_ROLLS, function (sessionId, respond) {
+        return __awaiter(this, void 0, void 0, function* () {
+            weapon_of_logging.debug({
+                message: "retrieving initial roll data",
+                function: ServerCommunicationTypes_1.EmitTypes.GET_INITIAL_ROLLS,
+            });
+            const rolls = yield dbCall.retrieveCollection(sessionId, ServerCommunicationTypes_1.collectionTypes.ROLLS);
+            respond(rolls);
         });
     });
     socket.on(ServerCommunicationTypes_1.EmitTypes.NEXT, function (sessionId) {

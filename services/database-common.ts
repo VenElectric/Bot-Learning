@@ -6,27 +6,17 @@ const initRef = db.collection("sessions");
 import { collectionTypes } from "../Interfaces/ServerCommunicationTypes";
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 import {
-  SessionData,
   InitiativeObject,
   SpellObject,
-  StatusEffect,
   CharacterStatus,
-  CharacterStatusFirestore,
+  RollObject,
 } from "../Interfaces/GameSessionTypes";
-import {
-  isInitiativeObject,
-  isSpellObject,
-  isSessionData,
-  isDoubleArray,
-} from "../utilities/TypeChecking";
-import chalk from "chalk";
-import { CommandErrorEnums } from "../Interfaces/LoggingTypes";
 
 export function separateArrays(characterIds: CharacterStatus[][]) {
   return { target: characterIds[1], source: characterIds[0] };
 }
 export async function addSingle(
-  item: InitiativeObject | SpellObject,
+  item: InitiativeObject | SpellObject | RollObject,
   sessionId: string,
   collection: collectionTypes
 ) {
@@ -150,7 +140,7 @@ export async function updateCollection(
 
 export function updatecollectionRecord(
   // check if doc/collection exists
-  item: InitiativeObject | SpellObject,
+  item: InitiativeObject | SpellObject | RollObject,
   collection: string,
   docId: string,
   sessionId: string

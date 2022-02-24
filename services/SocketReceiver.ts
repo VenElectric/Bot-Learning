@@ -6,6 +6,7 @@ import {
   InitiativeObjectEnums,
   SpellObjectEnums,
   CharacterStatus,
+  RollObject,
 } from "../Interfaces/GameSessionTypes";
 import {
   collectionTypes,
@@ -17,6 +18,8 @@ import * as dbCall from "./database-common";
 import { turnOrder, resortInitiative } from "../services/initiative";
 import * as initiativeFunctions from "../services/initiative";
 import { initiativeEmbed, spellEmbed, statusEmbed } from "./create-embed";
+import { DiceRoll } from "@dice-roller/rpg-dice-roller";
+import { addBash } from "./parse";
 
 export interface InitiativeSocketDataArray {
   payload: InitiativeObject[];
@@ -93,7 +96,60 @@ export function socketReceiver(socket: Socket, client: any, io: any) {
   });
 
   // DATABASE/INITIATIVE/SPELL SOCKETS
+  socket.on(
+    EmitTypes.CREATE_NEW_ROLL,
+    async function (data: { rollData: RollObject; sessionId: string }) {
+      weapon_of_logging.debug({
+        message: `adding roll ${data.rollData.id}`,
+        function: EmitTypes.CREATE_NEW_ROLL,
+      });
+      await dbCall.addSingle(
+        data.rollData,
+        data.sessionId,
+        collectionTypes.ROLLS
+      );
 
+      socket.broadcast
+        .to(data.sessionId)
+        .emit(EmitTypes.CREATE_NEW_ROLL, data.rollData);
+    }
+  );
+  socket.on(
+    EmitTypes.UPDATE_ROLL_RECORD,
+    async function (data: { rollData: RollObject; sessionId: string }) {
+      weapon_of_logging.debug({
+        message: "updating roll",
+        function: EmitTypes.UPDATE_ROLL_RECORD,
+      });
+      await dbCall.updatecollectionRecord(
+        data.rollData,
+        collectionTypes.ROLLS,
+        data.rollData.id,
+        data.sessionId
+      );
+
+      socket.broadcast
+        .to(data.sessionId)
+        .emit(EmitTypes.UPDATE_ROLL_RECORD, data.rollData);
+    }
+  );
+  socket.on(
+    EmitTypes.DELETE_ONE_ROLL,
+    async function (data: { docId: string; sessionId: string }) {
+      await dbCall.deleteSingle(data.docId, data.sessionId, collectionTypes.ROLLS);
+        socket.broadcast
+        .to(data.sessionId)
+        .emit(EmitTypes.DELETE_ONE_ROLL, data.docId);
+    }
+  );
+  socket.on(EmitTypes.DISCORD_ROLL, function(data: {payload: DiceRoll, comment: string, sessionId: string}) {
+    const finalRoll = addBash(data.payload.output, "green");
+    const finalComment = addBash(data.comment, "blue");
+
+    channelSend(client,{content: `Roll Results: ${finalRoll} ${finalComment}`}, data.sessionId)
+
+
+  })
   socket.on(
     EmitTypes.CREATE_NEW_INITIATIVE,
     async function (data: InitiativeSocketDataObject) {
@@ -310,6 +366,14 @@ export function socketReceiver(socket: Socket, client: any, io: any) {
       respond(spells);
     }
   );
+  socket.on(EmitTypes.GET_INITIAL_ROLLS, async function(sessionId: string, respond: any) {
+    weapon_of_logging.debug({
+      message: "retrieving initial roll data",
+      function: EmitTypes.GET_INITIAL_ROLLS,
+    });
+    const rolls = await dbCall.retrieveCollection(sessionId, collectionTypes.ROLLS)
+    respond(rolls);
+  })
   socket.on(EmitTypes.NEXT, async function (sessionId: string) {
     const [errorMsg, currentName, currentStatuses, currentId] = await turnOrder(
       sessionId,
