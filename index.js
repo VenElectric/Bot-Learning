@@ -176,6 +176,9 @@ exports.client.on("interactionCreate", (interaction) => __awaiter(void 0, void 0
         });
     }
 }));
+// app.get('/', function(req:any, res:any) {
+//   res.sendFile(__dirname + '/index.html');
+// });
 server.listen(port, () => {
     console.log(`Listening on port ${port}!`);
 });

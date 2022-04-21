@@ -23,6 +23,10 @@ exports.separateArrays = separateArrays;
 function addSingle(item, sessionId, collection) {
     return __awaiter(this, void 0, void 0, function* () {
         let errorMsg;
+        console.log("in this function");
+        console.log(item);
+        console.log(sessionId);
+        console.log(collection);
         initRef
             .doc(sessionId)
             .collection(collection)

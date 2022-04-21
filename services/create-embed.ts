@@ -35,6 +35,8 @@ export function spellEmbed(embedArray: SpellObject[]) {
   return embed;
 }
 
+
+// too much spacing
 export function statusEmbed(character: string, statusArray: StatusEffect[]) {
   const embed = new MessageEmbed();
   embed.setTitle(`Current Turn: ${character}`);

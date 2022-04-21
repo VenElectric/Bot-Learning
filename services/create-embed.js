@@ -33,6 +33,7 @@ function spellEmbed(embedArray) {
     return embed;
 }
 exports.spellEmbed = spellEmbed;
+// too much spacing
 function statusEmbed(character, statusArray) {
     const embed = new MessageEmbed();
     embed.setTitle(`Current Turn: ${character}`);

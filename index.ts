@@ -206,6 +206,10 @@ client.on("interactionCreate", async (interaction: BaseCommandInteraction) => {
   }
 });
 
+// app.get('/', function(req:any, res:any) {
+//   res.sendFile(__dirname + '/index.html');
+// });
+
 server.listen(port, () => {
   console.log(`Listening on port ${port}!`);
 });

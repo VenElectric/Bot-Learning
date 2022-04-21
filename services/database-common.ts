@@ -21,6 +21,10 @@ export async function addSingle(
   collection: collectionTypes
 ) {
   let errorMsg: any;
+  console.log("in this function")
+  console.log(item)
+  console.log(sessionId)
+  console.log(collection)
   initRef
     .doc(sessionId)
     .collection(collection)
