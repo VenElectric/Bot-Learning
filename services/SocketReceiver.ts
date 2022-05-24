@@ -136,20 +136,29 @@ export function socketReceiver(socket: Socket, client: any, io: any) {
   socket.on(
     EmitTypes.DELETE_ONE_ROLL,
     async function (data: { docId: string; sessionId: string }) {
-      await dbCall.deleteSingle(data.docId, data.sessionId, collectionTypes.ROLLS);
-        socket.broadcast
+      await dbCall.deleteSingle(
+        data.docId,
+        data.sessionId,
+        collectionTypes.ROLLS
+      );
+      socket.broadcast
         .to(data.sessionId)
         .emit(EmitTypes.DELETE_ONE_ROLL, data.docId);
     }
   );
-  socket.on(EmitTypes.DISCORD_ROLL, function(data: {payload: DiceRoll, comment: string, sessionId: string}) {
-    const finalRoll = addBash(data.payload.output, "green");
-    const finalComment = addBash(data.comment, "blue");
+  socket.on(
+    EmitTypes.DISCORD_ROLL,
+    function (data: { payload: DiceRoll; comment: string; sessionId: string }) {
+      const finalRoll = addBash(data.payload.output, "green");
+      const finalComment = addBash(data.comment, "blue");
 
-    channelSend(client,{content: `Roll Results: ${finalRoll} ${finalComment}`}, data.sessionId)
-
-
-  })
+      channelSend(
+        client,
+        { content: `Roll Results: ${finalRoll} ${finalComment}` },
+        data.sessionId
+      );
+    }
+  );
   socket.on(
     EmitTypes.CREATE_NEW_INITIATIVE,
     async function (data: InitiativeSocketDataObject) {
@@ -366,14 +375,20 @@ export function socketReceiver(socket: Socket, client: any, io: any) {
       respond(spells);
     }
   );
-  socket.on(EmitTypes.GET_INITIAL_ROLLS, async function(sessionId: string, respond: any) {
-    weapon_of_logging.debug({
-      message: "retrieving initial roll data",
-      function: EmitTypes.GET_INITIAL_ROLLS,
-    });
-    const rolls = await dbCall.retrieveCollection(sessionId, collectionTypes.ROLLS)
-    respond(rolls);
-  })
+  socket.on(
+    EmitTypes.GET_INITIAL_ROLLS,
+    async function (sessionId: string, respond: any) {
+      weapon_of_logging.debug({
+        message: "retrieving initial roll data",
+        function: EmitTypes.GET_INITIAL_ROLLS,
+      });
+      const rolls = await dbCall.retrieveCollection(
+        sessionId,
+        collectionTypes.ROLLS
+      );
+      respond(rolls);
+    }
+  );
   socket.on(EmitTypes.NEXT, async function (sessionId: string) {
     const [errorMsg, currentName, currentStatuses, currentId] = await turnOrder(
       sessionId,
@@ -612,6 +627,7 @@ export function socketReceiver(socket: Socket, client: any, io: any) {
           function: EmitTypes.UPDATE_RECORD_SPELL,
           docId: data.payload.id,
         });
+        console.log(data.sessionId);
         socket.broadcast
           .to(data.sessionId)
           .emit(EmitTypes.UPDATE_RECORD_SPELL, data.payload);

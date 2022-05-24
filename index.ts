@@ -74,8 +74,9 @@ for (const file of commandFiles) {
 
 // ----- DISCORD ------
 // When the client is ready, run this code (only once)
-client.once("ready", () => {
+client.once("ready", async () => {
   weapon_of_logging.debug({ message: "ready" });
+  const channel = client.channels.cache.get('723744588346556419');
 });
 
 // Login to Discord with your client"s token

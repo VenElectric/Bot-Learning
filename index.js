@@ -54,9 +54,10 @@ for (const file of commandFiles) {
 }
 // ----- DISCORD ------
 // When the client is ready, run this code (only once)
-exports.client.once("ready", () => {
+exports.client.once("ready", () => __awaiter(void 0, void 0, void 0, function* () {
     weapon_of_logging.debug({ message: "ready" });
-});
+    const channel = exports.client.channels.cache.get('723744588346556419');
+}));
 // Login to Discord with your client"s token
 // This updates immediately
 register_commands();

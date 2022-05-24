@@ -21,7 +21,7 @@ export interface StatusEffect {
 
 export interface CharacterStatus {
   characterName: string;
-  characterId: string;
+  id: string;
 }
 export interface InitiativeObject {
   id: string;
