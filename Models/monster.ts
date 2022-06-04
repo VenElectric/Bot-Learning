@@ -1,4 +1,3 @@
-import {Schema} from "mongoose"
 import {Skills} from './skills'
 import {ISenses,IScores,IFeats,ISpells,IActions,IMovement} from "../Interfaces/ICommon"
 
@@ -35,9 +34,3 @@ interface ILegendary extends IMonster {
  }]
  lair_actions: string
 }
-
-// const monster_schema = new Schema<Monster>({
-//     name:{type:String,required:true}
-// })
-
-// const Monster_Model = mongoose.model<Monster>('Monster',);

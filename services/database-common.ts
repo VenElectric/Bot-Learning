@@ -21,10 +21,6 @@ export async function addSingle(
   collection: collectionTypes
 ) {
   let errorMsg: any;
-  console.log("in this function")
-  console.log(item)
-  console.log(sessionId)
-  console.log(collection)
   initRef
     .doc(sessionId)
     .collection(collection)
@@ -39,7 +35,6 @@ export async function addSingle(
     })
     .catch((error: any) => {
       // error handling
-      console.trace(error);
       if (error instanceof Error) {
         weapon_of_logging.alert({
           message: error.message,
@@ -212,7 +207,6 @@ export async function retrieveCollection(
     message: "collection retrieved",
     function: "retrieveCollection",
   });
-  // weapon_of_logging.info("retrieveCollection", "complete",databaseList,sessionId)
   return Promise.resolve(databaseList);
 }
 
@@ -240,6 +234,11 @@ export async function retrieveRecord(
   }
 }
 
+// test this
+function validateNumber(value: number){
+ return typeof(value) === "number" && value > 0
+}
+
 export async function updateSession(
   sessionId: string,
   onDeck?: number,
@@ -247,7 +246,6 @@ export async function updateSession(
   sessionSize?: number
 ) {
   let errorMsg: any;
-  // check if doc exists
   try {
     if (onDeck) {
       initRef.doc(sessionId).set({ onDeck: onDeck }, { merge: true });
@@ -284,12 +282,11 @@ export async function getSession(
 ): Promise<[isSorted: boolean, onDeck: number, sessionSize: number]> {
   // check if doc + items exist
   let snapshot = await initRef.doc(sessionId).get();
-  //@ts-ignore
+
   let isSorted;
-  //@ts-ignore
   let onDeck;
-  //@ts-ignore
   let sessionSize;
+
   try {
     if (snapshot.data() != undefined) {
       isSorted = snapshot.data().isSorted;
@@ -355,6 +352,7 @@ export async function deleteCollection(
   const docSnapshot = await docRef.collection(collectionType).get();
   const batch = db.batch();
 
+  // use update session to change values
   if (collectionType === collectionTypes.INITIATIVE) {
     docRef
       .set({ isSorted: false, onDeck: 0, sessionSize: 0 }, { merge: true })

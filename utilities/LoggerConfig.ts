@@ -1,5 +1,4 @@
 const Transport = require("winston-transport");
-const util = require("util");
 const winston = require("winston");
 const { db } = require("../services/firebase-setup");
 const { firestore } = require("firebase-admin");
@@ -33,7 +32,7 @@ class LogEntriesTransport extends Transport {
       client.channels
         .fetch(process.env.MY_DISCORD)
         .then((channel: any) => {
-          channel.send(`Critical Error Occurred. Please check logs`);
+          channel.send(`${info.function}: ${info.message}`);
         })
         .catch((error: any) => {
           logger.info(error.message);

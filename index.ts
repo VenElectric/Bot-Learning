@@ -1,6 +1,5 @@
 import {
   BaseCommandInteraction,
-  Guild,
   Message,
   SelectMenuInteraction,
 } from "discord.js";
@@ -11,23 +10,14 @@ const express = require("express");
 const http = require("http");
 const app = express();
 const server = http.createServer(app);
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 5000;
 const { register_commands } = require("./deploy-commands");
-import {
-  commandDescriptions,
-  initiativeCollection,
-  spellCollection,
-} from "./services/constants";
-import {
-  retrieveCollection,
-  getSession,
-  addSingle,
-} from "./services/database-common";
-import { finalizeInitiative } from "./services/initiative";
-import { InitiativeObject } from "./Interfaces/GameSessionTypes";
-import { EmitTypes } from "./Interfaces/ServerCommunicationTypes";
+import { commandDescriptions } from "./services/constants";
 import { Socket } from "socket.io";
-import { socketReceiver } from "./services/SocketReceiver";
+import initiativeSocket from "./services/sockets/initiative";
+import spellSocket from "./services/sockets/spells";
+import loggingSocket from "./services/sockets/logging";
+import rollSocket from "./services/sockets/roll";
 const weapon_of_logging = require("./utilities/LoggerConfig").logger;
 
 require("dotenv").config();
@@ -73,35 +63,29 @@ for (const file of commandFiles) {
 }
 
 // ----- DISCORD ------
-// When the client is ready, run this code (only once)
 client.once("ready", async () => {
   weapon_of_logging.debug({ message: "ready" });
-  const channel = client.channels.cache.get('723744588346556419');
 });
 
-// Login to Discord with your client"s token
-
-// This updates immediately
 register_commands();
 client.login(token);
 
 let isBlocked = false;
 
 process.on("unhandledRejection", (error) => {
-  if (error instanceof Error){
-  if (!isBlocked){
-    client.channels.fetch(process.env.MY_DISCORD).then((channel: any) => {
-      channel.send(`Unhandled Rejection ${error.message} `);})
-    isBlocked = true
-    setTimeout(() => {
-      isBlocked = false;
-      console.log(isBlocked)
-    },300000);
+  if (error instanceof Error) {
+    if (!isBlocked) {
+      client.channels.fetch(process.env.MY_DISCORD).then((channel: any) => {
+        channel.send(`Unhandled Rejection ${error.message} `);
+      });
+      isBlocked = true;
+      setTimeout(() => {
+        isBlocked = false;
+      }, 300000);
+    } else {
+      return;
+    }
   }
-  else {
-    return;
-  }
-}
 });
 
 io.on("connection", (socket: Socket) => {
@@ -109,13 +93,17 @@ io.on("connection", (socket: Socket) => {
     socket.join(room);
     weapon_of_logging.info({ message: "room joined", function: "create" });
   });
-  socketReceiver(socket, client, io);
+  initiativeSocket(socket, client, io);
+  spellSocket(socket,client,io);
+  rollSocket(socket,client,io);
+  loggingSocket(socket);
 });
 
 client.on("messageCreate", async (message: Message) => {
   const regex = new RegExp(/(\/|\/[a-z]|\/[A-Z]|r)*\s*([d|D])([\d])+/);
-  const numreg = new RegExp(/([-+]?[0-9]*\.?[0-9]+[\/\+\-\*])+([-+]?[0-9]*\.?[0-9]+)/);
-  // const prefix = new RegExp(/\/[a-z]|\/|[r|R]/);
+  const numreg = new RegExp(
+    /([-+]?[0-9]*\.?[0-9]+[\/\+\-\*])+([-+]?[0-9]*\.?[0-9]+)/
+  );
   const rollcom = client.commands.get("roll");
   const mathcom = client.commands.get("maths");
   if (message.author.bot) return;
@@ -206,10 +194,6 @@ client.on("interactionCreate", async (interaction: BaseCommandInteraction) => {
     });
   }
 });
-
-// app.get('/', function(req:any, res:any) {
-//   res.sendFile(__dirname + '/index.html');
-// });
 
 server.listen(port, () => {
   console.log(`Listening on port ${port}!`);

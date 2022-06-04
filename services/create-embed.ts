@@ -7,7 +7,6 @@ import {
   SpellObject,
   StatusEffect,
 } from "../Interfaces/GameSessionTypes";
-import { EmitTypes } from "../Interfaces/ServerCommunicationTypes";
 import { escapeChar } from "./constants";
 
 export function initiativeEmbed(embedArray: InitiativeObject[]) {

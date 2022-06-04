@@ -1,6 +1,6 @@
 import { db } from "./firebase-setup";
 const initRef = db.collection("sessions");
-import { InitiativeObject, StatusEffect } from "../Interfaces/GameSessionTypes";
+import { InitiativeObject } from "../Interfaces/GameSessionTypes";
 import { DiceRoll } from "@dice-roller/rpg-dice-roller";
 import {
   updatecollectionRecord,
@@ -250,7 +250,7 @@ export async function updateAllInitiative(
   isSorted: boolean,
   sessionSize: number
 ) {
-  // todo loggin and error handling
+ 
   let errorMsg = await updateSession(sessionId, onDeck, isSorted, sessionSize);
   if (errorMsg instanceof Error) {
     weapon_of_logging.alert({
@@ -338,7 +338,7 @@ export function nextInitiative(onDeck: number, sessionLength: number) {
   if (onDeck == sessionLength) {
     newOnDeck = 1;
     previous = onDeck - 1;
-    //logging
+
     weapon_of_logging.debug({
       message: "onDeck == sessionLength",
       function: "nextInitiative",
@@ -347,7 +347,7 @@ export function nextInitiative(onDeck: number, sessionLength: number) {
   if (onDeck == 1) {
     newOnDeck = onDeck + 1;
     previous = sessionLength;
-    //logging
+    
     weapon_of_logging.debug({
       message: "onDeck == 1",
       function: "nextInitiative",
@@ -356,7 +356,7 @@ export function nextInitiative(onDeck: number, sessionLength: number) {
   if (onDeck < sessionLength && onDeck != 1) {
     newOnDeck = onDeck + 1;
     previous = onDeck - 1;
-    //logging
+    
     weapon_of_logging.debug({
       message: "onDeck < sessionLength && onDeck != 1",
       function: "nextInitiative",
@@ -504,7 +504,6 @@ async function nextpreviousDatabase(
       });
     }
     errorMsg = error;
-    // error logging
   }
 
   return [errorMsg, currentName, currentStatuses, currentId];

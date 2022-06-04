@@ -2,7 +2,7 @@ const { SlashCommandBuilder } = require("@discordjs/builders");
 const { v4: uuidv4 } = require("uuid");
 import { addSingle } from "../services/database-common";
 import { collectionTypes } from "../Interfaces/ServerCommunicationTypes";
-const weapon_of_logging = require("../utilities/LoggerConfig").logger
+const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 import { io } from "../index";
 import { EmitTypes } from "../Interfaces/ServerCommunicationTypes";
 
@@ -41,20 +41,20 @@ module.exports = {
         .setRequired(true)
     ),
   async execute(interaction: any) {
-    let sessionId = interaction.channel.id;
-    let name = interaction.options.getString("charactername");
+    const sessionId = interaction.channel.id;
+    const name = interaction.options.getString("charactername");
     let initiativeRoll = interaction.options.getInteger("initiativeroll");
-    let initiativeModifier =
+    const initiativeModifier =
       interaction.options.getInteger("initiativemodifier");
-    let isNpc = interaction.options.getBoolean("isnpc");
-    let isNat20 = interaction.options.getBoolean("isnat20");
-    
+    const isNpc = interaction.options.getBoolean("isnpc");
+    const isNat20 = interaction.options.getBoolean("isnat20");
+
     if (isNat20) {
       initiativeRoll += 100;
     }
 
     try {
-      let options = {
+      const options = {
         id: uuidv4(),
         characterName: name as string,
         initiative: initiativeRoll + initiativeModifier,
@@ -64,35 +64,52 @@ module.exports = {
         statusEffects: [],
         isNpc: isNpc,
       };
-      weapon_of_logging.debug({message: "Grabbing initial values for character", function:"addchar"});
+      weapon_of_logging.debug({
+        message: "Grabbing initial values for character",
+        function: "addchar",
+      });
 
-      let errorMsg = await addSingle(
+      const errorMsg = await addSingle(
         options,
         sessionId,
         collectionTypes.INITIATIVE
       );
 
-      if (errorMsg instanceof Error){
+      if (errorMsg instanceof Error) {
         weapon_of_logging.alert(
           errorMsg.name,
           errorMsg.message,
           errorMsg.stack,
           options
         );
+      } else {
+        weapon_of_logging.debug({
+          message: "Grabbing initial values for character",
+          function: "addchar",
+        });
       }
-      else {
-        weapon_of_logging.debug({message: "Grabbing initial values for character", function:"addchar"})
-      }
-     
-      let replyString = `Your character, ${name}, has been added with an initiative of ${initiativeRoll} + ${initiativeModifier} = ${
+
+      const replyString = `Your character, ${name}, has been added with an initiative of ${initiativeRoll} + ${initiativeModifier} = ${
         initiativeRoll + initiativeModifier
       }. You can edit this on the website component using the /link command. \n Any rolled nat 20's have 100 added on for sorting purposes.`;
-      weapon_of_logging.info({message: `Replying to interaction: ${replyString}`, function:"addchar"});
-      io.to(interaction.channel.id).emit(EmitTypes.CREATE_NEW_INITIATIVE,options)
+
+      weapon_of_logging.info({
+        message: `Replying to interaction: ${replyString}`,
+        function: "addchar",
+      });
+
+      io.to(interaction.channel.id).emit(
+        EmitTypes.CREATE_NEW_INITIATIVE,
+        options
+      );
+
       await interaction.reply(replyString);
     } catch (error) {
       if (error instanceof Error) {
-          weapon_of_logging.alert({message:error.message,function:"addchar"});
+        weapon_of_logging.alert({
+          message: error.message,
+          function: "addchar",
+        });
       }
     }
   },
