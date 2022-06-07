@@ -1,6 +1,4 @@
-//@ts-ignore
 const { db } = require("./firebase-setup");
-import { writeBatch, doc, collection } from "firebase/firestore";
 const { v4: uuidv4 } = require("uuid");
 const initRef = db.collection("sessions");
 import { collectionTypes } from "../Interfaces/ServerCommunicationTypes";
@@ -44,13 +42,13 @@ export async function addSingle(
       errorMsg = error;
     });
 
-  return Promise.resolve(errorMsg);
+  return errorMsg
 }
 
 export function deleteSingle(
   itemId: string,
   sessionId: string,
-  collection: string
+  collection: collectionTypes
 ) {
   // check if doc exists
   let errorMsg: any;
@@ -75,12 +73,12 @@ export function deleteSingle(
         });
       }
     });
-  return Promise.resolve(errorMsg);
+  return errorMsg
 }
 
 export function updateCollectionItem(
   value: any,
-  collection: string,
+  collection: collectionTypes,
   docId: string,
   sessionId: string,
   valueName: string
@@ -140,7 +138,7 @@ export async function updateCollection(
 export function updatecollectionRecord(
   // check if doc/collection exists
   item: InitiativeObject | SpellObject | RollObject,
-  collection: string,
+  collection: collectionTypes,
   docId: string,
   sessionId: string
 ) {
@@ -172,12 +170,12 @@ export function updatecollectionRecord(
 
       errorMsg = error;
     });
-  return Promise.resolve(errorMsg);
+  return errorMsg
 }
 
 export async function retrieveCollection(
   sessionId: string,
-  collection: string
+  collection: collectionTypes
 ): Promise<InitiativeObject[] | SpellObject[]> {
   let databaseList: any = [];
   try {
@@ -207,7 +205,7 @@ export async function retrieveCollection(
     message: "collection retrieved",
     function: "retrieveCollection",
   });
-  return Promise.resolve(databaseList);
+  return databaseList
 }
 
 export async function retrieveRecord(
@@ -274,7 +272,7 @@ export async function updateSession(
     message: "updateSession set",
     function: "updatesession",
   });
-  return Promise.resolve(errorMsg);
+  return errorMsg
 }
 
 export async function getSession(
@@ -327,7 +325,7 @@ export async function getSession(
     }
   }
 
-  return Promise.resolve([isSorted, onDeck, sessionSize]);
+  return [isSorted, onDeck, sessionSize]
 }
 
 export async function deleteSession(sessionId: string) {

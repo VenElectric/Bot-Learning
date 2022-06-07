@@ -1,9 +1,4 @@
-import {
-  BaseCommandInteraction,
-  Message,
-  SelectMenuInteraction,
-} from "discord.js";
-
+import { BaseApplicationCommandData, BaseCommandInteraction, Message, SelectMenuInteraction } from "discord.js";
 const fs = require("fs");
 const { Client, Collection, Intents, MessageEmbed } = require("discord.js");
 const express = require("express");
@@ -12,12 +7,12 @@ const app = express();
 const server = http.createServer(app);
 const port = process.env.PORT || 5000;
 const { register_commands } = require("./deploy-commands");
-import { commandDescriptions } from "./services/constants";
-import { Socket } from "socket.io";
 import initiativeSocket from "./services/sockets/initiative";
 import spellSocket from "./services/sockets/spells";
 import loggingSocket from "./services/sockets/logging";
 import rollSocket from "./services/sockets/roll";
+import { commandDescriptions } from "./services/constants";
+import { Socket } from "socket.io";
 const weapon_of_logging = require("./utilities/LoggerConfig").logger;
 
 require("dotenv").config();

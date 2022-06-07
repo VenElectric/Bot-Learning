@@ -7,7 +7,7 @@ import {
   getSession,
   updateSession,
 } from "./database-common";
-import { initiativeCollection } from "./constants";
+import { collectionTypes } from "../Interfaces/ServerCommunicationTypes";
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 const { MessageEmbed } = require("discord.js");
 const cemoj = ":bow_and_arrow:";
@@ -262,7 +262,7 @@ export async function updateAllInitiative(
   for (let record of initiativeList) {
     let errorMsg2 = updatecollectionRecord(
       record,
-      initiativeCollection,
+      collectionTypes.INITIATIVE,
       record.id,
       sessionId
     );

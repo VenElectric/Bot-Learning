@@ -1,8 +1,5 @@
 
 
-export const spellCollection = "spells";
-export const initiativeCollection = "initiative";
-
 export const webComponent = "www.dungeon-bot.app"
 export const devWeb = "localhost:8080"
 
