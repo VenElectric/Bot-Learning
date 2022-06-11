@@ -4,6 +4,8 @@ import { RollObject } from "../../Interfaces/GameSessionTypes";
 import {
   EmitTypes,
   collectionTypes,
+  topLevelCollections,
+  secondLevelCollections,
 } from "../../Interfaces/ServerCommunicationTypes";
 import { addBash } from "../parse";
 import * as db from "../database-common";
@@ -33,7 +35,7 @@ export default function rollSocket(socket: Socket, client: any, io: any) {
         message: `adding roll ${data.rollData.id}`,
         function: EmitTypes.CREATE_NEW_ROLL,
       });
-      await db.addSingle(data.rollData, data.sessionId, collectionTypes.ROLLS);
+      await db.addSingle(data.rollData, data.sessionId, topLevelCollections.SESSIONS, secondLevelCollections.ROLLS);
 
       socket.broadcast
         .to(data.sessionId)

@@ -5,6 +5,7 @@ import { retrieveCollection, getSession } from "../services/database-common";
 const weapon_of_logging = require("../utilities/LoggerConfig").logger
 import { InitiativeObject } from "../Interfaces/GameSessionTypes";
 import { initiativeEmbed } from "../services/create-embed";
+import {secondLevelCollections, collectionTypes} from "../Interfaces/ServerCommunicationTypes";
 // import { webComponent, devWeb } from "../services/constants"
 // const { hyperlink } = require('@discordjs/builders');
 
@@ -17,7 +18,7 @@ module.exports = {
     try {
       let newList = (await retrieveCollection(
         sessionId,
-        "initiative"
+        collectionTypes.INITIATIVE
       )) as InitiativeObject[];
       weapon_of_logging.info(
         {message: "getting initiative records", function:"listinitiative"}

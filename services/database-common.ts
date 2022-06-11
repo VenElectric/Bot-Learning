@@ -1,7 +1,11 @@
 const { db } = require("./firebase-setup");
 const { v4: uuidv4 } = require("uuid");
 const initRef = db.collection("sessions");
-import { collectionTypes } from "../Interfaces/ServerCommunicationTypes";
+import {
+  collectionTypes,
+  topLevelCollections,
+  secondLevelCollections,
+} from "../Interfaces/ServerCommunicationTypes";
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 import {
   InitiativeObject,
@@ -9,25 +13,48 @@ import {
   CharacterStatus,
   RollObject,
 } from "../Interfaces/GameSessionTypes";
+import { CharacterSheetObj } from "../Interfaces/DND5e/CharacterSheet";
 
 export function separateArrays(characterIds: CharacterStatus[][]) {
   return { target: characterIds[1], source: characterIds[0] };
 }
+
+type RecordObject = InitiativeObject | SpellObject | RollObject | CharacterSheetObj;
+
+// Top Level -> Top Level ID -> Secondary Level -> Secondary Level ID
+export function dbConstructor(
+  topCollection: topLevelCollections,
+  topID: string,
+  secondCollection: secondLevelCollections,
+  secondLevelID?: string
+) {
+  let dbRef = db
+    .collection(topCollection)
+    .doc(topID)
+    .collection(secondCollection);
+
+  if (secondLevelID !== undefined) {
+    dbRef = dbRef.doc(secondLevelID);
+  }
+
+  return dbRef;
+}
+
 export async function addSingle(
-  item: InitiativeObject | SpellObject | RollObject,
-  sessionId: string,
-  collection: collectionTypes
+  item: RecordObject,
+  topLevelID: string,
+  topLevelCollection: topLevelCollections,
+  secondLevelCollection: secondLevelCollections,
 ) {
   let errorMsg: any;
-  initRef
-    .doc(sessionId)
-    .collection(collection)
-    .doc(item.id)
+
+  const dbRef = dbConstructor(topLevelCollection,topLevelID, secondLevelCollection, item.id)
+  dbRef
     .set(item)
     .then(() => {
       errorMsg = false;
       weapon_of_logging.info({
-        message: `added item to collection ${collection}`,
+        message: `added item to collection ${secondLevelCollection}`,
         function: "addSingle",
       });
     })
@@ -42,8 +69,40 @@ export async function addSingle(
       errorMsg = error;
     });
 
-  return errorMsg
+  return errorMsg;
 }
+
+// export async function addSingle(
+//   item: InitiativeObject | SpellObject | RollObject,
+//   sessionId: string,
+//   collection: collectionTypes
+// ) {
+//   let errorMsg: any;
+//   initRef
+//     .doc(sessionId)
+//     .collection(collection)
+//     .doc(item.id)
+//     .set(item)
+//     .then(() => {
+//       errorMsg = false;
+//       weapon_of_logging.info({
+//         message: `added item to collection ${collection}`,
+//         function: "addSingle",
+//       });
+//     })
+//     .catch((error: any) => {
+//       // error handling
+//       if (error instanceof Error) {
+//         weapon_of_logging.alert({
+//           message: error.message,
+//           function: "addSingle",
+//         });
+//       }
+//       errorMsg = error;
+//     });
+
+//   return errorMsg;
+// }
 
 export function deleteSingle(
   itemId: string,
@@ -73,7 +132,7 @@ export function deleteSingle(
         });
       }
     });
-  return errorMsg
+  return errorMsg;
 }
 
 export function updateCollectionItem(
@@ -119,7 +178,7 @@ export async function updateCollection(
       .collection("sessions")
       .doc(sessionId)
       .collection(collectionType);
-      const batch = db.batch();
+    const batch = db.batch();
     for (const record of payload) {
       const recordRef = docRef.doc(record.id);
       batch.set(recordRef, record);
@@ -170,7 +229,7 @@ export function updatecollectionRecord(
 
       errorMsg = error;
     });
-  return errorMsg
+  return errorMsg;
 }
 
 export async function retrieveCollection(
@@ -205,7 +264,7 @@ export async function retrieveCollection(
     message: "collection retrieved",
     function: "retrieveCollection",
   });
-  return databaseList
+  return databaseList;
 }
 
 export async function retrieveRecord(
@@ -233,8 +292,8 @@ export async function retrieveRecord(
 }
 
 // test this
-function validateNumber(value: number){
- return typeof(value) === "number" && value > 0
+function validateNumber(value: number) {
+  return typeof value === "number" && value > 0;
 }
 
 export async function updateSession(
@@ -272,7 +331,7 @@ export async function updateSession(
     message: "updateSession set",
     function: "updatesession",
   });
-  return errorMsg
+  return errorMsg;
 }
 
 export async function getSession(
@@ -325,7 +384,7 @@ export async function getSession(
     }
   }
 
-  return [isSorted, onDeck, sessionSize]
+  return [isSorted, onDeck, sessionSize];
 }
 
 export async function deleteSession(sessionId: string) {

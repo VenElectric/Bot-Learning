@@ -9,6 +9,8 @@ import {
 import {
   collectionTypes,
   EmitTypes,
+  topLevelCollections,
+  secondLevelCollections
 } from "../../Interfaces/ServerCommunicationTypes";
 import { LoggingTypes } from "../../Interfaces/LoggingTypes";
 

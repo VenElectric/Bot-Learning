@@ -27,4 +27,8 @@ function delete_character(){
     
 }
 
+async function getCharacterList(userId: string){
+   await initRef.doc(userId).collection()
+}
+
 export {}

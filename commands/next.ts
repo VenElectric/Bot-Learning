@@ -11,11 +11,6 @@ import {
   EmitTypes,
 } from "../Interfaces/ServerCommunicationTypes";
 import { retrieveRecord } from "../services/database-common";
-import { resortInitiative } from "../services/initiative";
-import {
-  isInitiativeObject,
-  isInitiativeObjectArray,
-} from "../utilities/TypeChecking";
 
 module.exports = {
   data: new SlashCommandBuilder()

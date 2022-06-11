@@ -1,7 +1,7 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { v4: uuidv4 } = require("uuid");
 import { addSingle } from "../services/database-common";
-import { collectionTypes } from "../Interfaces/ServerCommunicationTypes";
+import { collectionTypes, topLevelCollections, secondLevelCollections } from "../Interfaces/ServerCommunicationTypes";
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 import { io } from "../index";
 import { EmitTypes } from "../Interfaces/ServerCommunicationTypes";
@@ -72,7 +72,8 @@ module.exports = {
       const errorMsg = await addSingle(
         options,
         sessionId,
-        collectionTypes.INITIATIVE
+        topLevelCollections.SESSIONS,
+        secondLevelCollections.INITIATIVE
       );
 
       if (errorMsg instanceof Error) {
@@ -114,5 +115,3 @@ module.exports = {
     }
   },
 };
-
-export {};

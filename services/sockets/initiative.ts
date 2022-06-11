@@ -1,5 +1,5 @@
 import { Socket } from "socket.io";
-import { EmitTypes, collectionTypes } from "../../Interfaces/ServerCommunicationTypes";
+import { EmitTypes, collectionTypes, secondLevelCollections,topLevelCollections } from "../../Interfaces/ServerCommunicationTypes";
 import { InitiativeSocketDataArray, InitiativeSocketDataObject } from "./types";
 import * as db from "../database-common";
 import * as init from "../../services/initiative";
@@ -60,7 +60,8 @@ export default function initiativeSocket(socket: Socket, client: any, io: any) {
           finalMessage = await db.addSingle(
             data.payload,
             data.sessionId,
-            collectionTypes.INITIATIVE
+            topLevelCollections.SESSIONS,
+            secondLevelCollections.INITIATIVE
           );
           db.updateSession(data.sessionId, undefined, false);
           socket.broadcast

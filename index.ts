@@ -1,5 +1,10 @@
-import { BaseApplicationCommandData, BaseCommandInteraction, Message, SelectMenuInteraction } from "discord.js";
-const fs = require("fs");
+import {
+  BaseApplicationCommandData,
+  BaseCommandInteraction,
+  Message,
+  SelectMenuInteraction,
+} from "discord.js";
+const fs = require("node:fs");
 const { Client, Collection, Intents, MessageEmbed } = require("discord.js");
 const express = require("express");
 const http = require("http");
@@ -13,7 +18,12 @@ import loggingSocket from "./services/sockets/logging";
 import rollSocket from "./services/sockets/roll";
 import { commandDescriptions } from "./services/constants";
 import { Socket } from "socket.io";
+import {Request, Response} from "express";
 const weapon_of_logging = require("./utilities/LoggerConfig").logger;
+const path = require("node:path")
+
+console.log(process.cwd())
+
 
 require("dotenv").config();
 
@@ -46,12 +56,13 @@ export const client = new Client({
 
 client.commands = new Collection();
 
-const commandFiles = fs
-  .readdirSync("./commands")
-  .filter((file: any) => file.endsWith(".js"));
+const commandsPath = path.join(__dirname, 'commands');
+const commandFiles = fs.readdirSync(commandsPath).filter((file: any) => file.endsWith('.js'));
+
 
 for (const file of commandFiles) {
-  const command = require(`./commands/${file}`);
+  const filePath = path.join(commandsPath, file);
+	const command = require(filePath);
   // Set a new item in the Collection
   // With the key as the command name and the value as the exported module
   client.commands.set(command.data.name, command);
@@ -59,6 +70,7 @@ for (const file of commandFiles) {
 
 // ----- DISCORD ------
 client.once("ready", async () => {
+  console.log("Ready")
   weapon_of_logging.debug({ message: "ready" });
 });
 
@@ -89,10 +101,15 @@ io.on("connection", (socket: Socket) => {
     weapon_of_logging.info({ message: "room joined", function: "create" });
   });
   initiativeSocket(socket, client, io);
-  spellSocket(socket,client,io);
-  rollSocket(socket,client,io);
+  spellSocket(socket, client, io);
+  rollSocket(socket, client, io);
   loggingSocket(socket);
 });
+
+enum eventTypes {
+  messageCreate = "messageCreate"
+}
+
 
 client.on("messageCreate", async (message: Message) => {
   const regex = new RegExp(/(\/|\/[a-z]|\/[A-Z]|r)*\s*([d|D])([\d])+/);
@@ -123,7 +140,6 @@ client.on("messageCreate", async (message: Message) => {
 // Menu interactions
 client.on("interactionCreate", async (interaction: SelectMenuInteraction) => {
   if (!interaction.isSelectMenu()) return;
-  let sessionId = interaction.channel ? interaction.channel.id : "";
   try {
     if (interaction.customId === "helpmenu") {
       await interaction.deferUpdate();
@@ -135,7 +151,7 @@ client.on("interactionCreate", async (interaction: SelectMenuInteraction) => {
           false
         )
         .setImage(commandDescriptions[`${interaction.values[0]}`].image);
-
+          console.log(helpEmbed)
       await interaction.editReply({
         embeds: [helpEmbed],
         components: [],
@@ -165,7 +181,6 @@ client.on("interactionCreate", async (interaction: SelectMenuInteraction) => {
 
 // Command Interactions
 client.on("interactionCreate", async (interaction: BaseCommandInteraction) => {
-  let sessionId = interaction.channel ? interaction.channel.id : "";
   if (!interaction.isCommand()) {
     return;
   }
@@ -189,6 +204,29 @@ client.on("interactionCreate", async (interaction: BaseCommandInteraction) => {
     });
   }
 });
+
+app.get(
+  "/api/users/character",
+  async (req: Request, res: Response) => {
+    console.log(req.body.data);
+
+    res.json("test");
+  }
+);
+
+app.get(
+  "/api/users/character/list",
+  async (req: Request, res: Response) => {
+    console.log(req.body.data);
+
+    res.json("test");
+  }
+);
+
+app.post(
+  "/api/users/character",
+  async (req: Request, res: Response) => {}
+);
 
 server.listen(port, () => {
   console.log(`Listening on port ${port}!`);

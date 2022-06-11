@@ -12,6 +12,7 @@ module.exports = {
     try {
       // split into an array
       let args;
+      if(message.content.match(/https:/)) return;
       if(message.content[0].match(/^(\/|[a-z])/)){
         args = message.content.trim().replace("/","").split(" ");
         weapon_of_logging.debug({message: `roller args regex ${args}`, function:"roll"});

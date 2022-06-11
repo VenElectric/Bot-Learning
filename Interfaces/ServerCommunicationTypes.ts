@@ -37,3 +37,18 @@ export enum collectionTypes {
   LOGGING = "logging",
   ROLLS = "rolls",
 }
+
+// todo: rename collectionTypes in all files to secondLevelCollections
+
+export enum secondLevelCollections {
+  INITIATIVE = "initiative",
+  SPELLS = "spells",
+  LOGGING = "logging",
+  ROLLS = "rolls",
+  CHARACTERS = "characters"
+}
+
+export enum topLevelCollections {
+  USERS = "users",
+  SESSIONS = "sessions"
+}

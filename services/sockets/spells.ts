@@ -2,6 +2,8 @@ import { Socket } from "socket.io";
 import {
   EmitTypes,
   collectionTypes,
+  topLevelCollections,
+  secondLevelCollections
 } from "../../Interfaces/ServerCommunicationTypes";
 import {
   SpellSocketDataArray,
@@ -54,7 +56,8 @@ export default function spellSocket(socket: Socket, client: any, io: any) {
       finalMessage = await db.addSingle(
         spellRecord,
         data.sessionId,
-        collectionTypes.SPELLS
+        topLevelCollections.SESSIONS,
+        secondLevelCollections.SPELLS
       );
       weapon_of_logging.info({
         message: `Spell successfully added`,

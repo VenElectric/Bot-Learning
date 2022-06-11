@@ -3,7 +3,7 @@ const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 import { addSingle } from "../services/database-common";
 import { v4 as uuidv4 } from "uuid";
 import { DiceRoll } from "@dice-roller/rpg-dice-roller";
-import { collectionTypes } from "../Interfaces/ServerCommunicationTypes";
+import { collectionTypes, secondLevelCollections, topLevelCollections } from "../Interfaces/ServerCommunicationTypes";
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -37,7 +37,8 @@ module.exports = {
     addSingle(
       { rollName: rollName, id: String(uuidv4()), rollValue: customRoll },
       interaction.channel.id,
-      collectionTypes.ROLLS
+      topLevelCollections.SESSIONS,
+      secondLevelCollections.ROLLS
     );
     weapon_of_logging.debug({
       message: "send to discord channel test",
