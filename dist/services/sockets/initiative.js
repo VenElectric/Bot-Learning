@@ -30,7 +30,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const ServerCommunicationTypes_1 = require("../../Interfaces/ServerCommunicationTypes");
 const db = __importStar(require("../database-common"));
-const init = __importStar(require("../../services/initiative"));
+const init = __importStar(require("../initiative"));
 const create_embed_1 = require("../create-embed");
 const initiative_1 = require("../initiative");
 const util_1 = require("./util");
