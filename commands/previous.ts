@@ -7,7 +7,7 @@ const {
 import { retrieveRecord } from "../services/database-common";
 import { io } from "../index";
 import {
-  collectionTypes,
+  secondLevelCollections,
   EmitTypes,
 } from "../Interfaces/ServerCommunicationTypes";
 import { statusEmbed } from "../services/create-embed";
@@ -30,7 +30,7 @@ module.exports = {
       function: "next",
     });
     setTimeout(async () => {
-      let record = await retrieveRecord(currentId, interaction.channel.id, collectionTypes.INITIATIVE)
+      let record = await retrieveRecord(currentId, interaction.channel.id, secondLevelCollections.INITIATIVE)
       io.to(interaction.channel.id).emit(EmitTypes.NEXT, record);
     }, 300);
     await interaction.reply({ embeds: [statuses] });

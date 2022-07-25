@@ -1,7 +1,7 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const { v4: uuidv4 } = require("uuid");
 import { addSingle } from "../services/database-common";
-import { collectionTypes, topLevelCollections, secondLevelCollections } from "../Interfaces/ServerCommunicationTypes";
+import { topLevelCollections, secondLevelCollections } from "../Interfaces/ServerCommunicationTypes";
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 import { io } from "../index";
 import { EmitTypes } from "../Interfaces/ServerCommunicationTypes";
@@ -83,6 +83,7 @@ module.exports = {
           errorMsg.stack,
           options
         );
+        throw new Error(errorMsg.message);
       } else {
         weapon_of_logging.debug({
           message: "Grabbing initial values for character",

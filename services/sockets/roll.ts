@@ -3,7 +3,6 @@ import { Socket } from "socket.io";
 import { RollObject } from "../../Interfaces/GameSessionTypes";
 import {
   EmitTypes,
-  collectionTypes,
   topLevelCollections,
   secondLevelCollections,
 } from "../../Interfaces/ServerCommunicationTypes";
@@ -23,7 +22,7 @@ export default function rollSocket(socket: Socket, client: any, io: any) {
       });
       const rolls = await db.retrieveCollection(
         sessionId,
-        collectionTypes.ROLLS
+        secondLevelCollections.ROLLS
       );
       respond(rolls);
     }
@@ -51,7 +50,7 @@ export default function rollSocket(socket: Socket, client: any, io: any) {
       });
       await db.updatecollectionRecord(
         data.rollData,
-        collectionTypes.ROLLS,
+        secondLevelCollections.ROLLS,
         data.rollData.id,
         data.sessionId
       );
@@ -64,7 +63,7 @@ export default function rollSocket(socket: Socket, client: any, io: any) {
   socket.on(
     EmitTypes.DELETE_ONE_ROLL,
     async function (data: { docId: string; sessionId: string }) {
-      await db.deleteSingle(data.docId, data.sessionId, collectionTypes.ROLLS);
+      await db.deleteSingle(data.docId, data.sessionId, secondLevelCollections.ROLLS);
       socket.broadcast
         .to(data.sessionId)
         .emit(EmitTypes.DELETE_ONE_ROLL, data.docId);

@@ -3,7 +3,7 @@ const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 import { addSingle } from "../services/database-common";
 import { v4 as uuidv4 } from "uuid";
 import { DiceRoll } from "@dice-roller/rpg-dice-roller";
-import { collectionTypes, secondLevelCollections, topLevelCollections } from "../Interfaces/ServerCommunicationTypes";
+import { secondLevelCollections, topLevelCollections } from "../Interfaces/ServerCommunicationTypes";
 
 module.exports = {
   data: new SlashCommandBuilder()

@@ -2,7 +2,6 @@ const { db } = require("./firebase-setup");
 const { v4: uuidv4 } = require("uuid");
 const initRef = db.collection("sessions");
 import {
-  collectionTypes,
   topLevelCollections,
   secondLevelCollections,
 } from "../Interfaces/ServerCommunicationTypes";
@@ -75,7 +74,7 @@ export async function addSingle(
 // export async function addSingle(
 //   item: InitiativeObject | SpellObject | RollObject,
 //   sessionId: string,
-//   collection: collectionTypes
+//   collection: secondLevelCollections
 // ) {
 //   let errorMsg: any;
 //   initRef
@@ -107,7 +106,7 @@ export async function addSingle(
 export function deleteSingle(
   itemId: string,
   sessionId: string,
-  collection: collectionTypes
+  collection: secondLevelCollections
 ) {
   // check if doc exists
   let errorMsg: any;
@@ -137,7 +136,7 @@ export function deleteSingle(
 
 export function updateCollectionItem(
   value: any,
-  collection: collectionTypes,
+  collection: secondLevelCollections,
   docId: string,
   sessionId: string,
   valueName: string
@@ -170,7 +169,7 @@ export function updateCollectionItem(
 
 export async function updateCollection(
   sessionId: string,
-  collectionType: collectionTypes,
+  collectionType: secondLevelCollections,
   payload: SpellObject[] | InitiativeObject[]
 ) {
   try {
@@ -197,7 +196,7 @@ export async function updateCollection(
 export function updatecollectionRecord(
   // check if doc/collection exists
   item: InitiativeObject | SpellObject | RollObject,
-  collection: collectionTypes,
+  collection: secondLevelCollections,
   docId: string,
   sessionId: string
 ) {
@@ -234,7 +233,7 @@ export function updatecollectionRecord(
 
 export async function retrieveCollection(
   sessionId: string,
-  collection: collectionTypes
+  collection: secondLevelCollections
 ): Promise<InitiativeObject[] | SpellObject[]> {
   let databaseList: any = [];
   try {
@@ -270,7 +269,7 @@ export async function retrieveCollection(
 export async function retrieveRecord(
   docId: string,
   sessionId: string,
-  collectionType: collectionTypes
+  collectionType: secondLevelCollections
 ) {
   try {
     const record = await initRef
@@ -389,8 +388,8 @@ export async function getSession(
 
 export async function deleteSession(sessionId: string) {
   try {
-    await deleteCollection(sessionId, collectionTypes.INITIATIVE);
-    await deleteCollection(sessionId, collectionTypes.SPELLS);
+    await deleteCollection(sessionId, secondLevelCollections.INITIATIVE);
+    await deleteCollection(sessionId, secondLevelCollections.SPELLS);
   } catch (error) {
     if (error instanceof Error) {
       weapon_of_logging.alert({
@@ -403,14 +402,14 @@ export async function deleteSession(sessionId: string) {
 
 export async function deleteCollection(
   sessionId: string,
-  collectionType: collectionTypes
+  collectionType: secondLevelCollections
 ) {
   const docRef = db.collection("sessions").doc(sessionId);
   const docSnapshot = await docRef.collection(collectionType).get();
   const batch = db.batch();
 
   // use update session to change values
-  if (collectionType === collectionTypes.INITIATIVE) {
+  if (collectionType === secondLevelCollections.INITIATIVE) {
     docRef
       .set({ isSorted: false, onDeck: 0, sessionSize: 0 }, { merge: true })
       .then(() => {

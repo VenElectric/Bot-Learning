@@ -7,7 +7,6 @@ import {
   RollObject,
 } from "../../Interfaces/GameSessionTypes";
 import {
-  collectionTypes,
   EmitTypes,
   topLevelCollections,
   secondLevelCollections

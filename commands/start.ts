@@ -6,7 +6,7 @@ import { InitiativeObject } from "../Interfaces/GameSessionTypes";
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 import { io } from "../index";
 import {
-  collectionTypes,
+  secondLevelCollections,
   EmitTypes,
 } from "../Interfaces/ServerCommunicationTypes";
 import { retrieveCollection } from "../services/database-common";
@@ -57,7 +57,7 @@ module.exports = {
       setTimeout(() => {
         io.to(interaction.channel.id).emit(EmitTypes.UPDATE_ALL_INITIATIVE, {
           payload: newList,
-          collectionType: collectionTypes.INITIATIVE,
+          collectionType: secondLevelCollections.INITIATIVE,
           isSorted: true,
         });
         io.to(interaction.channel.id).emit(EmitTypes.ROUND_START)

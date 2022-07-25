@@ -1,11 +1,11 @@
 import { Socket } from "socket.io";
-import { EmitTypes, collectionTypes, secondLevelCollections,topLevelCollections } from "../../Interfaces/ServerCommunicationTypes";
+import { EmitTypes, secondLevelCollections,topLevelCollections } from "../../Interfaces/ServerCommunicationTypes";
 import { InitiativeSocketDataArray, InitiativeSocketDataObject } from "./types";
 import * as db from "../database-common";
 import * as init from "../../services/initiative";
 import { InitiativeObject, InitiativeObjectEnums, SpellObject } from "../../Interfaces/GameSessionTypes";
-import { statusEmbed, spellEmbed } from "../create-embed";
-import { turnOrder, resortInitiative, initiativeEmbed } from "../initiative";
+import { statusEmbed, spellEmbed, initiativeEmbed } from "../create-embed";
+import { turnOrder, resortInitiative } from "../initiative";
 import { channelSend } from "./util";
 
 const weapon_of_logging = require("../../utilities/LoggerConfig").logger;
@@ -24,7 +24,7 @@ export default function initiativeSocket(socket: Socket, client: any, io: any) {
           });
           initiative = (await db.retrieveCollection(
             sessionId,
-            collectionTypes.INITIATIVE
+            secondLevelCollections.INITIATIVE
           )) as InitiativeObject[];
           [isSorted, onDeck, sessionSize] = await db.getSession(sessionId);
     
@@ -83,7 +83,7 @@ export default function initiativeSocket(socket: Socket, client: any, io: any) {
             let finalMessage = await db.deleteSingle(
               data.docId,
               data.sessionId,
-              collectionTypes.INITIATIVE
+              secondLevelCollections.INITIATIVE
             );
             if (finalMessage instanceof Error) {
               weapon_of_logging.alert({
@@ -124,7 +124,7 @@ export default function initiativeSocket(socket: Socket, client: any, io: any) {
         EmitTypes.DELETE_ALL_INITIATIVE,
         async function (sessionId: string) {
           try {
-            await db.deleteCollection(sessionId, collectionTypes.INITIATIVE);
+            await db.deleteCollection(sessionId, secondLevelCollections.INITIATIVE);
           } catch (error) {
             if (error instanceof Error) {
               weapon_of_logging.alert({
@@ -162,7 +162,7 @@ export default function initiativeSocket(socket: Socket, client: any, io: any) {
           let record = await db.retrieveRecord(
             currentId,
             sessionId,
-            collectionTypes.INITIATIVE
+            secondLevelCollections.INITIATIVE
           );
     
           weapon_of_logging.info({
@@ -191,7 +191,7 @@ export default function initiativeSocket(socket: Socket, client: any, io: any) {
           let record = await db.retrieveRecord(
             currentId,
             sessionId,
-            collectionTypes.INITIATIVE
+            secondLevelCollections.INITIATIVE
           );
     
           weapon_of_logging.info({
@@ -207,7 +207,7 @@ export default function initiativeSocket(socket: Socket, client: any, io: any) {
       socket.on(EmitTypes.RESORT, async function (sessionId: string, respond: any) {
         let initiativeList = (await db.retrieveCollection(
           sessionId,
-          collectionTypes.INITIATIVE
+          secondLevelCollections.INITIATIVE
         )) as InitiativeObject[];
         try {
           initiativeList = init.resortInitiative(initiativeList);
@@ -251,12 +251,11 @@ export default function initiativeSocket(socket: Socket, client: any, io: any) {
               });
               db.updateCollectionItem(
                 newObject.toUpdate,
-                collectionTypes.INITIATIVE,
+                secondLevelCollections.INITIATIVE,
                 newObject.docId,
                 data.sessionId,
                 data.ObjectType
               );
-              console.log(data.toUpdate);
               socket.broadcast
                 .to(data.sessionId)
                 .emit(EmitTypes.UPDATE_ITEM_INITIATIVE, {
@@ -287,7 +286,7 @@ export default function initiativeSocket(socket: Socket, client: any, io: any) {
           try {
             await db.updatecollectionRecord(
               data.payload,
-              collectionTypes.INITIATIVE,
+              secondLevelCollections.INITIATIVE,
               data.payload.id,
               data.sessionId
             );
@@ -325,13 +324,13 @@ export default function initiativeSocket(socket: Socket, client: any, io: any) {
           try {
             await db.updateCollection(
               data.sessionId,
-              collectionTypes.INITIATIVE,
+              secondLevelCollections.INITIATIVE,
               data.payload
             );
             setTimeout(async () => {
               let initiativeList = await db.retrieveCollection(
                 data.sessionId,
-                collectionTypes.INITIATIVE
+                secondLevelCollections.INITIATIVE
               ) as InitiativeObject[];
                 if (data.isSorted !== undefined) {
                   if (data.isSorted) {
@@ -406,7 +405,7 @@ export default function initiativeSocket(socket: Socket, client: any, io: any) {
           try {
             let initiativeList = await db.retrieveCollection(
               sessionId,
-              collectionTypes.INITIATIVE
+              secondLevelCollections.INITIATIVE
             ) as InitiativeObject[];
             weapon_of_logging.debug({
               message: "starting round start, initiative retrieved",
@@ -432,7 +431,7 @@ export default function initiativeSocket(socket: Socket, client: any, io: any) {
               socket.broadcast.to(sessionId).emit(EmitTypes.ROUND_START);
               socket.broadcast.to(sessionId).emit(EmitTypes.UPDATE_ALL_INITIATIVE, {
                 payload: initiativeList,
-                collectionType: collectionTypes.INITIATIVE,
+                collectionType: secondLevelCollections.INITIATIVE,
                 isSorted: true,
               });
               respond(initiativeList);
@@ -460,11 +459,11 @@ export default function initiativeSocket(socket: Socket, client: any, io: any) {
         EmitTypes.DISCORD_INITIATIVE,
         async function (data: {
           sessionId: string;
-          collectionType: collectionTypes;
+          collectionType: secondLevelCollections;
         }) {
           let sortedList: InitiativeObject[];
           try {
-            if (data.collectionType === collectionTypes.INITIATIVE) {
+            if (data.collectionType === secondLevelCollections.INITIATIVE) {
               let newList = (await db.retrieveCollection(
                 data.sessionId,
                 data.collectionType
@@ -489,7 +488,7 @@ export default function initiativeSocket(socket: Socket, client: any, io: any) {
     
               channelSend(client, { embeds: [initEmbed] }, data.sessionId);
             }
-            if (data.collectionType === collectionTypes.SPELLS) {
+            if (data.collectionType === secondLevelCollections.SPELLS) {
               let newList = (await db.retrieveCollection(
                 data.sessionId,
                 data.collectionType

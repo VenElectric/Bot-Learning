@@ -5,7 +5,7 @@ const {
 const { db } = require("../services/firebase-setup");
 import { initiativeEmbed } from "../services/create-embed";
 import {InitiativeObject} from "../Interfaces/GameSessionTypes";
-import { collectionTypes, EmitTypes } from "../Interfaces/ServerCommunicationTypes";
+import { secondLevelCollections, EmitTypes } from "../Interfaces/ServerCommunicationTypes";
 import { retrieveCollection } from "../services/database-common";
 const weapon_of_logging = require("../utilities/LoggerConfig").logger
 import { io } from "../index";
@@ -23,7 +23,7 @@ module.exports = {
         .get();
 
       let isSorted = snapshot.data().isSorted
-      let initiativeList = await retrieveCollection(interaction.channel.id, collectionTypes.INITIATIVE) as InitiativeObject[];
+      let initiativeList = await retrieveCollection(interaction.channel.id, secondLevelCollections.INITIATIVE) as InitiativeObject[];
       weapon_of_logging.info({message: "successfully retrieved session data", function:"resort"});
       if (snapshot.data().isSorted) {
         newList = await finalizeInitiative(

@@ -7,7 +7,7 @@ import {
   getSession,
   updateSession,
 } from "./database-common";
-import { collectionTypes } from "../Interfaces/ServerCommunicationTypes";
+import { secondLevelCollections } from "../Interfaces/ServerCommunicationTypes";
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 const { MessageEmbed } = require("discord.js");
 const cemoj = ":bow_and_arrow:";
@@ -130,20 +130,6 @@ function rerollDuplicates(
   });
   return initiativeList;
 }
-
-export function initiativeEmbed(initiativeList: InitiativeObject[]) {
-  let embedFields = [];
-
-  for (let item of initiativeList) {
-    embedFields.push({
-      name: `${item.characterName}`,
-      value: `${item.isCurrent ? cemoj : bemoj}`,
-      inline: false,
-    });
-  }
-
-  return new MessageEmbed().setTitle("Initiative").addFields(embedFields);
-}
 //@ts-ignore
 export function firstsortInitiave(initiativeList: InitiativeObject[]) {
   // now the sorting
@@ -262,7 +248,7 @@ export async function updateAllInitiative(
   for (let record of initiativeList) {
     let errorMsg2 = updatecollectionRecord(
       record,
-      collectionTypes.INITIATIVE,
+      secondLevelCollections.INITIATIVE,
       record.id,
       sessionId
     );

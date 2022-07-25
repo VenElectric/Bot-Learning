@@ -29,11 +29,3 @@ export const SkillsList: {
   stealth: { name: "Stealth", ability: AbilityAbbr.dex },
   survival: { name: "Survival", ability: AbilityAbbr.wis },
 };
-
-export interface SkillObj {
-  isProficient: boolean;
-  modifier: string;
-  name: string;
-  miscBonus: number;
-  // bonus calculated in ui?
-}

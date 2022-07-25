@@ -1,9 +1,8 @@
 import { Socket } from "socket.io";
 import {
   EmitTypes,
-  collectionTypes,
+  secondLevelCollections,
   topLevelCollections,
-  secondLevelCollections
 } from "../../Interfaces/ServerCommunicationTypes";
 import {
   SpellSocketDataArray,
@@ -30,7 +29,7 @@ export default function spellSocket(socket: Socket, client: any, io: any) {
       });
       spells = await db.retrieveCollection(
         sessionId,
-        collectionTypes.SPELLS
+        secondLevelCollections.SPELLS
       );
 
       if (spells instanceof Error) {
@@ -84,7 +83,7 @@ export default function spellSocket(socket: Socket, client: any, io: any) {
         let finalMessage = await db.deleteSingle(
           data.docId,
           data.sessionId,
-          collectionTypes.SPELLS
+          secondLevelCollections.SPELLS
         );
         if (finalMessage instanceof Error) {
           weapon_of_logging.alert({
@@ -102,7 +101,7 @@ export default function spellSocket(socket: Socket, client: any, io: any) {
 
   socket.on(EmitTypes.DELETE_ALL_SPELL, async function (sessionId: string) {
     try {
-      await db.deleteCollection(sessionId, collectionTypes.SPELLS);
+      await db.deleteCollection(sessionId, secondLevelCollections.SPELLS);
     } catch (error) {
       if (error instanceof Error) {
         weapon_of_logging.alert({
@@ -118,7 +117,7 @@ export default function spellSocket(socket: Socket, client: any, io: any) {
     async function (data: {
       toUpdate: any;
       docId: string;
-      collectionType: collectionTypes;
+      collectionType: secondLevelCollections;
       sessionId: string;
       ObjectType: SpellObjectEnums;
     }) {
@@ -130,7 +129,7 @@ export default function spellSocket(socket: Socket, client: any, io: any) {
         try {
           db.updateCollectionItem(
             data.toUpdate,
-            collectionTypes.SPELLS,
+            secondLevelCollections.SPELLS,
             data.docId,
             data.sessionId,
             data.ObjectType
@@ -169,12 +168,12 @@ export default function spellSocket(socket: Socket, client: any, io: any) {
         console.log(spellRecord);
         await db.updatecollectionRecord(
           spellRecord,
-          collectionTypes.SPELLS,
+          secondLevelCollections.SPELLS,
           data.payload.id,
           data.sessionId
         );
         weapon_of_logging.debug({
-          message: collectionTypes.SPELLS,
+          message: secondLevelCollections.SPELLS,
           function: EmitTypes.UPDATE_RECORD_SPELL,
           docId: data.payload.id,
         });
@@ -200,7 +199,7 @@ export default function spellSocket(socket: Socket, client: any, io: any) {
         let spellRecord = [...data.payload];
         await db.updateCollection(
           data.sessionId,
-          collectionTypes.SPELLS,
+          secondLevelCollections.SPELLS,
           spellRecord
         );
         socket.broadcast
@@ -221,7 +220,7 @@ export default function spellSocket(socket: Socket, client: any, io: any) {
     EmitTypes.DISCORD_SPELL,
     async function (data: {
       sessionId: string;
-      collectionType: collectionTypes;
+      collectionType: secondLevelCollections;
     }) {
       try {
         let newList = (await db.retrieveCollection(

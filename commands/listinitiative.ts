@@ -18,7 +18,7 @@ module.exports = {
     try {
       let newList = (await retrieveCollection(
         sessionId,
-        collectionTypes.INITIATIVE
+        secondLevelCollections.INITIATIVE
       )) as InitiativeObject[];
       weapon_of_logging.info(
         {message: "getting initiative records", function:"listinitiative"}
