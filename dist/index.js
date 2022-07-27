@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -25,7 +16,6 @@ const initiative_1 = __importDefault(require("./services/sockets/initiative"));
 const spells_1 = __importDefault(require("./services/sockets/spells"));
 const logging_1 = __importDefault(require("./services/sockets/logging"));
 const roll_1 = __importDefault(require("./services/sockets/roll"));
-const constants_1 = require("./services/constants");
 const weapon_of_logging = require("./utilities/LoggerConfig").logger;
 const path = require("node:path");
 console.log(process.cwd());
@@ -50,21 +40,39 @@ exports.client = new Client({
         Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
     ],
 });
-exports.client.commands = new Collection();
-const commandsPath = path.join(__dirname, 'commands');
-const commandFiles = fs.readdirSync(commandsPath).filter((file) => file.endsWith('.js'));
+// client.commands = new Collection();
+const commands = new Collection();
+const commandsPath = path.join(__dirname, "commands");
+const commandFiles = fs
+    .readdirSync(commandsPath)
+    .filter((file) => file.endsWith(".js"));
 for (const file of commandFiles) {
     const filePath = path.join(commandsPath, file);
     const command = require(filePath);
     // Set a new item in the Collection
     // With the key as the command name and the value as the exported module
-    exports.client.commands.set(command.data.name, command);
+    commands.set(command.data.name, command);
 }
+const eventsPath = path.join(__dirname, "events");
+const eventFiles = fs
+    .readdirSync(eventsPath)
+    .filter((file) => file.endsWith(".js"));
+for (const file of eventFiles) {
+    const filePath = path.join(eventsPath, file);
+    const event = require(filePath);
+    if (event.once) {
+        exports.client.once(event.name, (...args) => event.execute(commands, ...args));
+    }
+    else {
+        exports.client.on(event.name, (...args) => event.execute(commands, ...args));
+    }
+}
+exports.client.login(token);
 // ----- DISCORD ------
-exports.client.once("ready", () => __awaiter(void 0, void 0, void 0, function* () {
+exports.client.once("ready", async () => {
     console.log("Ready");
     weapon_of_logging.debug({ message: "ready" });
-}));
+});
 register_commands();
 exports.client.login(token);
 let isBlocked = false;
@@ -84,6 +92,30 @@ process.on("unhandledRejection", (error) => {
         }
     }
 });
+const registerSockets = new Collection();
+const socketsPath = path.join(__dirname, "sockets");
+const socketsFolders = fs.readdirSync(socketsPath);
+console.log(socketsFolders);
+for (const folder of socketsFolders) {
+    console.log(folder);
+    const filePath = path.join(socketsPath, folder);
+    const socketsFiles = fs
+        .readdirSync(filePath)
+        .filter((file) => file.endsWith(".js"));
+    for (const file of socketsFiles) {
+        const filePath = path.join(socketsPath, folder, file);
+        const socketEvent = require(filePath);
+        registerSockets.set(socketEvent.name, socketEvent);
+    }
+}
+// console.log(registerSockets)
+const onConnection = (socket) => {
+    for (const record of registerSockets) {
+        const socketRecord = registerSockets.get(record[0]);
+        socket.on(socketRecord.name, () => socketRecord.execute(exports.io, socket));
+    }
+};
+exports.io.on("connection", onConnection);
 exports.io.on("connection", (socket) => {
     socket.on("create", function (room) {
         socket.join(room);
@@ -94,75 +126,8 @@ exports.io.on("connection", (socket) => {
     (0, roll_1.default)(socket, exports.client, exports.io);
     (0, logging_1.default)(socket);
 });
-var eventTypes;
-(function (eventTypes) {
-    eventTypes["messageCreate"] = "messageCreate";
-})(eventTypes || (eventTypes = {}));
-exports.client.on("messageCreate", (message) => __awaiter(void 0, void 0, void 0, function* () {
-    const regex = new RegExp(/(\/|\/[a-z]|\/[A-Z]|r)*\s*([d|D])([\d])+/);
-    const numreg = new RegExp(/([-+]?[0-9]*\.?[0-9]+[\/\+\-\*])+([-+]?[0-9]*\.?[0-9]+)/);
-    const rollcom = exports.client.commands.get("roll");
-    const mathcom = exports.client.commands.get("maths");
-    if (message.author.bot)
-        return;
-    try {
-        if (message.content.match(regex)) {
-            rollcom.execute(message);
-        }
-        if (!message.content.match(regex) && message.content.match(numreg)) {
-            mathcom.execute(message);
-        }
-    }
-    catch (error) {
-        if (error instanceof Error) {
-            weapon_of_logging.alert({
-                message: error.message,
-                function: "messagecreate",
-            });
-            return;
-        }
-    }
-}));
-// Menu interactions
-exports.client.on("interactionCreate", (interaction) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    if (!interaction.isSelectMenu())
-        return;
-    try {
-        if (interaction.customId === "helpmenu") {
-            yield interaction.deferUpdate();
-            const helpEmbed = new MessageEmbed()
-                .setTitle(interaction.values[0])
-                .addField("\u200b", constants_1.commandDescriptions[`${interaction.values[0]}`].description, false)
-                .setImage(constants_1.commandDescriptions[`${interaction.values[0]}`].image);
-            console.log(helpEmbed);
-            yield interaction.editReply({
-                embeds: [helpEmbed],
-                components: [],
-            });
-        }
-        if (interaction.customId === "changechannel") {
-            let channelName = yield ((_a = interaction === null || interaction === void 0 ? void 0 : interaction.guild) === null || _a === void 0 ? void 0 : _a.channels.fetch(interaction.values[0]));
-            yield interaction.deferUpdate();
-            yield interaction.editReply({
-                content: `Your channel has been changed to ${channelName === null || channelName === void 0 ? void 0 : channelName.name}`,
-                components: [],
-            });
-        }
-    }
-    catch (error) {
-        if (error instanceof Error) {
-            weapon_of_logging.alert({
-                message: error.message,
-                function: "interactioncreate for menus",
-            });
-            return;
-        }
-    }
-    // help menu
-}));
 // Command Interactions
-exports.client.on("interactionCreate", (interaction) => __awaiter(void 0, void 0, void 0, function* () {
+exports.client.on("interactionCreate", async (interaction) => {
     if (!interaction.isCommand()) {
         return;
     }
@@ -171,7 +136,7 @@ exports.client.on("interactionCreate", (interaction) => __awaiter(void 0, void 0
         return;
     }
     try {
-        yield command.execute(interaction);
+        await command.execute(interaction);
     }
     catch (error) {
         if (error instanceof Error) {
@@ -181,20 +146,20 @@ exports.client.on("interactionCreate", (interaction) => __awaiter(void 0, void 0
                 function: "interactioncreate for slash commands",
             });
         }
-        yield interaction.reply({
+        await interaction.reply({
             content: "There was an error while executing this command!",
         });
     }
-}));
-app.get("/api/users/character", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+});
+app.get("/api/users/character", async (req, res) => {
     console.log(req.body.data);
     res.json("test");
-}));
-app.get("/api/users/character/list", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+});
+app.get("/api/users/character/list", async (req, res) => {
     console.log(req.body.data);
     res.json("test");
-}));
-app.post("/api/users/character", (req, res) => __awaiter(void 0, void 0, void 0, function* () { }));
+});
+app.post("/api/users/character", async (req, res) => { });
 server.listen(port, () => {
     console.log(`Listening on port ${port}!`);
 });

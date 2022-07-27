@@ -6,7 +6,7 @@
   "author": "Ven",
   "license": "ISC",
   "scripts": {
-    "serve": "npx tsc && npx nodemon ./dist/index.js"
+    "dev": "npx tsc && npx nodemon ./dist/index.js"
   },
   "dependencies": {
     "@babel/preset-env": "^7.16.7",

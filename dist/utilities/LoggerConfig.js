@@ -33,7 +33,12 @@ class LogEntriesTransport extends Transport {
             });
         }
         if (info.level) {
-            logger.log(String(info.level), Object.assign({ message: info.message, function: info.function, itemId: info.itemId }, info));
+            logger.log(String(info.level), {
+                message: info.message,
+                function: info.function,
+                itemId: info.itemId,
+                ...info
+            });
         }
         else {
             console.log(info);

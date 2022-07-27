@@ -18,15 +18,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const ServerCommunicationTypes_1 = require("../../Interfaces/ServerCommunicationTypes");
 const parse_1 = require("../parse");
@@ -34,48 +25,40 @@ const db = __importStar(require("../database-common"));
 const util_1 = require("./util");
 const weapon_of_logging = require("../../utilities/LoggerConfig").logger;
 function rollSocket(socket, client, io) {
-    socket.on(ServerCommunicationTypes_1.EmitTypes.GET_INITIAL_ROLLS, function (sessionId, respond) {
-        return __awaiter(this, void 0, void 0, function* () {
-            weapon_of_logging.debug({
-                message: "retrieving initial roll data",
-                function: ServerCommunicationTypes_1.EmitTypes.GET_INITIAL_ROLLS,
-            });
-            const rolls = yield db.retrieveCollection(sessionId, ServerCommunicationTypes_1.secondLevelCollections.ROLLS);
-            respond(rolls);
+    socket.on(ServerCommunicationTypes_1.EmitTypes.GET_INITIAL_ROLLS, async function (sessionId, respond) {
+        weapon_of_logging.debug({
+            message: "retrieving initial roll data",
+            function: ServerCommunicationTypes_1.EmitTypes.GET_INITIAL_ROLLS,
         });
+        const rolls = await db.retrieveCollection(sessionId, ServerCommunicationTypes_1.secondLevelCollections.ROLLS);
+        respond(rolls);
     });
-    socket.on(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_ROLL, function (data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            console.log(data);
-            weapon_of_logging.debug({
-                message: `adding roll ${data.rollData.id}`,
-                function: ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_ROLL,
-            });
-            yield db.addSingle(data.rollData, data.sessionId, ServerCommunicationTypes_1.topLevelCollections.SESSIONS, ServerCommunicationTypes_1.secondLevelCollections.ROLLS);
-            socket.broadcast
-                .to(data.sessionId)
-                .emit(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_ROLL, data.rollData);
+    socket.on(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_ROLL, async function (data) {
+        console.log(data);
+        weapon_of_logging.debug({
+            message: `adding roll ${data.rollData.id}`,
+            function: ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_ROLL,
         });
+        await db.addSingle(data.rollData, data.sessionId, ServerCommunicationTypes_1.topLevelCollections.SESSIONS, ServerCommunicationTypes_1.secondLevelCollections.ROLLS);
+        socket.broadcast
+            .to(data.sessionId)
+            .emit(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_ROLL, data.rollData);
     });
-    socket.on(ServerCommunicationTypes_1.EmitTypes.UPDATE_ROLL_RECORD, function (data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            weapon_of_logging.debug({
-                message: "updating roll",
-                function: ServerCommunicationTypes_1.EmitTypes.UPDATE_ROLL_RECORD,
-            });
-            yield db.updatecollectionRecord(data.rollData, ServerCommunicationTypes_1.secondLevelCollections.ROLLS, data.rollData.id, data.sessionId);
-            socket.broadcast
-                .to(data.sessionId)
-                .emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ROLL_RECORD, data.rollData);
+    socket.on(ServerCommunicationTypes_1.EmitTypes.UPDATE_ROLL_RECORD, async function (data) {
+        weapon_of_logging.debug({
+            message: "updating roll",
+            function: ServerCommunicationTypes_1.EmitTypes.UPDATE_ROLL_RECORD,
         });
+        await db.updatecollectionRecord(data.rollData, ServerCommunicationTypes_1.secondLevelCollections.ROLLS, data.rollData.id, data.sessionId);
+        socket.broadcast
+            .to(data.sessionId)
+            .emit(ServerCommunicationTypes_1.EmitTypes.UPDATE_ROLL_RECORD, data.rollData);
     });
-    socket.on(ServerCommunicationTypes_1.EmitTypes.DELETE_ONE_ROLL, function (data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield db.deleteSingle(data.docId, data.sessionId, ServerCommunicationTypes_1.secondLevelCollections.ROLLS);
-            socket.broadcast
-                .to(data.sessionId)
-                .emit(ServerCommunicationTypes_1.EmitTypes.DELETE_ONE_ROLL, data.docId);
-        });
+    socket.on(ServerCommunicationTypes_1.EmitTypes.DELETE_ONE_ROLL, async function (data) {
+        await db.deleteSingle(data.docId, data.sessionId, ServerCommunicationTypes_1.secondLevelCollections.ROLLS);
+        socket.broadcast
+            .to(data.sessionId)
+            .emit(ServerCommunicationTypes_1.EmitTypes.DELETE_ONE_ROLL, data.docId);
     });
     socket.on(ServerCommunicationTypes_1.EmitTypes.DISCORD_ROLL, function (data) {
         const finalRoll = (0, parse_1.addBash)(data.payload.output, "green");
