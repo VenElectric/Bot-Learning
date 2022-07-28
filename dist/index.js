@@ -1,7 +1,4 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.client = exports.io = void 0;
 const fs = require("node:fs");
@@ -12,13 +9,9 @@ const app = express();
 const server = http.createServer(app);
 const port = process.env.PORT || 5000;
 const { register_commands } = require("./deploy-commands");
-const initiative_1 = __importDefault(require("./services/sockets/initiative"));
-const spells_1 = __importDefault(require("./services/sockets/spells"));
-const logging_1 = __importDefault(require("./services/sockets/logging"));
-const roll_1 = __importDefault(require("./services/sockets/roll"));
 const weapon_of_logging = require("./utilities/LoggerConfig").logger;
 const path = require("node:path");
-console.log(process.cwd());
+const db = require("./services/database-common");
 require("dotenv").config();
 const token = process.env.DISCORD_TOKEN;
 exports.io = require("socket.io")(server, {
@@ -95,62 +88,67 @@ process.on("unhandledRejection", (error) => {
 const registerSockets = new Collection();
 const socketsPath = path.join(__dirname, "sockets");
 const socketsFolders = fs.readdirSync(socketsPath);
-console.log(socketsFolders);
 for (const folder of socketsFolders) {
-    console.log(folder);
+    if (folder.includes("util"))
+        continue;
     const filePath = path.join(socketsPath, folder);
     const socketsFiles = fs
         .readdirSync(filePath)
         .filter((file) => file.endsWith(".js"));
     for (const file of socketsFiles) {
+        if (file.includes("types"))
+            continue;
         const filePath = path.join(socketsPath, folder, file);
         const socketEvent = require(filePath);
         registerSockets.set(socketEvent.name, socketEvent);
     }
 }
-// console.log(registerSockets)
 const onConnection = (socket) => {
+    socket.on("create", function (room) {
+        socket.join(room);
+        console.log(room);
+        weapon_of_logging.info({ message: "room joined", function: "create" });
+    });
     for (const record of registerSockets) {
         const socketRecord = registerSockets.get(record[0]);
-        socket.on(socketRecord.name, () => socketRecord.execute(exports.io, socket));
+        socket.on(socketRecord.name, (...args) => socketRecord.execute(exports.io, socket, exports.client, ...args));
     }
 };
 exports.io.on("connection", onConnection);
-exports.io.on("connection", (socket) => {
-    socket.on("create", function (room) {
-        socket.join(room);
-        weapon_of_logging.info({ message: "room joined", function: "create" });
-    });
-    (0, initiative_1.default)(socket, exports.client, exports.io);
-    (0, spells_1.default)(socket, exports.client, exports.io);
-    (0, roll_1.default)(socket, exports.client, exports.io);
-    (0, logging_1.default)(socket);
-});
+// io.on("connection", (socket: Socket) => {
+//   socket.on("create", function (room: any) {
+//     socket.join(room);
+//     weapon_of_logging.info({ message: "room joined", function: "create" });
+//   });
+//   // initiativeSocket(socket, client, io);
+//   spellSocket(socket, client, io);
+//   rollSocket(socket, client, io);
+//   loggingSocket(socket);
+// });
 // Command Interactions
-exports.client.on("interactionCreate", async (interaction) => {
-    if (!interaction.isCommand()) {
-        return;
-    }
-    const command = exports.client.commands.get(interaction.commandName);
-    if (!command) {
-        return;
-    }
-    try {
-        await command.execute(interaction);
-    }
-    catch (error) {
-        if (error instanceof Error) {
-            console.log(error);
-            weapon_of_logging.warning({
-                message: error.message,
-                function: "interactioncreate for slash commands",
-            });
-        }
-        await interaction.reply({
-            content: "There was an error while executing this command!",
-        });
-    }
-});
+// client.on("interactionCreate", async (interaction: BaseCommandInteraction) => {
+//   if (!interaction.isCommand()) {
+//     return;
+//   }
+//   const command = client.commands.get(interaction.commandName);
+//   if (!command) {
+//     return;
+//   }
+//   try {
+//     await command.execute(interaction);
+//   } catch (error) {
+//     if (error instanceof Error) {
+//       console.log(error);
+//       weapon_of_logging.warning({
+//         message: error.message,
+//         function: "interactioncreate for slash commands",
+//       });
+//     }
+//     await interaction.reply({
+//       content: "There was an error while executing this command!",
+//     });
+//   }
+// });
 app.get("/api/users/character", async (req, res) => {
     console.log(req.body.data);
     res.json("test");

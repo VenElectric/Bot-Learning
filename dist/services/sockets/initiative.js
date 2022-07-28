@@ -119,7 +119,7 @@ function initiativeSocket(socket, client, io) {
         socket.broadcast.to(sessionId).emit(ServerCommunicationTypes_1.EmitTypes.DELETE_ALL_INITIATIVE);
     });
     socket.on(ServerCommunicationTypes_1.EmitTypes.NEXT, async function (sessionId) {
-        const [errorMsg, currentName, currentStatuses, currentId] = await (0, initiative_1.turnOrder)(sessionId, init.initiativeFunctionTypes.NEXT);
+        const [errorMsg, currentName, currentStatuses, currentId] = await (0, initiative_1.turnOrder)(sessionId, ServerCommunicationTypes_1.EmitTypes.NEXT);
         weapon_of_logging.debug({
             message: "next turn and statuses retrieved",
             function: ServerCommunicationTypes_1.EmitTypes.NEXT,
@@ -147,7 +147,7 @@ function initiativeSocket(socket, client, io) {
         }, 300);
     });
     socket.on(ServerCommunicationTypes_1.EmitTypes.PREVIOUS, async function (sessionId) {
-        const [errorMsg, currentName, currentStatuses, currentId] = await (0, initiative_1.turnOrder)(sessionId, init.initiativeFunctionTypes.PREVIOUS);
+        const [errorMsg, currentName, currentStatuses, currentId] = await (0, initiative_1.turnOrder)(sessionId, ServerCommunicationTypes_1.EmitTypes.PREVIOUS);
         if (errorMsg instanceof Error) {
             weapon_of_logging.alert({
                 message: errorMsg.message,

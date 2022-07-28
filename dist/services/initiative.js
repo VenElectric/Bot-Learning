@@ -351,7 +351,7 @@ async function turnOrder(sessionId, functionType) {
     let currentName;
     let currentStatuses;
     let currentId;
-    if (functionType == initiativeFunctionTypes.NEXT) {
+    if (functionType == ServerCommunicationTypes_1.EmitTypes.NEXT) {
         if (onDeck != 0) {
             weapon_of_logging.debug({
                 message: "starting next function",
@@ -362,7 +362,7 @@ async function turnOrder(sessionId, functionType) {
                 await nextpreviousDatabase(sessionId, previous, onDeck, newOnDeck);
         }
     }
-    if (functionType == initiativeFunctionTypes.PREVIOUS) {
+    if (functionType == ServerCommunicationTypes_1.EmitTypes.PREVIOUS) {
         weapon_of_logging.debug({
             message: "starting previous function",
             function: "turnOrder",

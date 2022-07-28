@@ -5,7 +5,7 @@ const database_common_1 = require("../../services/database-common");
 const weapon_of_logging = require("../../utilities/LoggerConfig").logger;
 module.exports = {
     name: ServerCommunicationTypes_1.EmitTypes.DELETE_ALL_INITIATIVE,
-    async execute(io, socket) {
+    async execute(io, socket, client) {
         socket.on(ServerCommunicationTypes_1.EmitTypes.DELETE_ALL_INITIATIVE, async function (sessionId) {
             try {
                 await (0, database_common_1.deleteCollection)(sessionId, ServerCommunicationTypes_1.secondLevelCollections.INITIATIVE);

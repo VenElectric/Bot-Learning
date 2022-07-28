@@ -31,8 +31,8 @@ var EmitTypes;
     EmitTypes["DISCORD_ROLL"] = "DISCORD_ROLL";
     EmitTypes["REMOVE_STATUS_EFFECT"] = "REMOVE_STATUS_EFFECT";
     EmitTypes["ADD_STATUS_EFFECT"] = "ADD_STATUS_EFFECT";
-    EmitTypes["DISCORD_SPELL"] = "DISCORD_SPELL";
     EmitTypes["DISCORD_INITIATIVE"] = "DISCORD_INITIATIVE";
+    EmitTypes["DISCORD_SPELLS"] = "DISCORD_SPELLS";
 })(EmitTypes = exports.EmitTypes || (exports.EmitTypes = {}));
 var collectionTypes;
 (function (collectionTypes) {

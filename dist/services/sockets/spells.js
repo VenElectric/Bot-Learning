@@ -169,7 +169,7 @@ function spellSocket(socket, client, io) {
             }
         }
     });
-    socket.on(ServerCommunicationTypes_1.EmitTypes.DISCORD_SPELL, async function (data) {
+    socket.on(ServerCommunicationTypes_1.EmitTypes.DISCORD_SPELLS, async function (data) {
         try {
             let newList = (await db.retrieveCollection(data.sessionId, data.collectionType));
             weapon_of_logging.info({
