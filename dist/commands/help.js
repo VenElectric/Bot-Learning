@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const { SlashCommandBuilder } = require("@discordjs/builders");
-const { MessageActionRow, MessageSelectMenu } = require("discord.js");
+const { ActionRowBuilder, SelectMenuBuilder } = require("discord.js");
 const constants_1 = require("../services/constants");
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 const wait = require('util').promisify(setTimeout);
@@ -10,7 +10,7 @@ module.exports = {
         .setName("help")
         .setDescription("Get help with commands"),
     async execute(interaction) {
-        const row = new MessageActionRow().addComponents(new MessageSelectMenu()
+        const row = new ActionRowBuilder().addComponents(new SelectMenuBuilder()
             .setCustomId("helpmenu")
             .setPlaceholder("Nothing selected")
             .addOptions(constants_1.helpMenu));

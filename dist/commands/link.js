@@ -12,5 +12,6 @@ module.exports = {
         let url = `${process.env.HOST_URL}/session/${interaction.channel.id}`;
         weapon_of_logging.debug({ message: process.env.HOST_URL, function: "link" });
         await interaction.reply(`Here is the URL for your session: ${url} \nThis URL is specific to this channel. If you need to change the session to a different text channel then please use the /changechannel slash command.`);
+        console.log("replying interaction");
     },
 };

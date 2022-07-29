@@ -8,7 +8,6 @@ module.exports = {
         .setName("ping")
         .setDescription("Replies with Pong!"),
     async execute(interaction) {
-        weapon_of_logging.alert({ message: "send to discord channel test", function: "ping" });
-        interaction.reply("Pong");
+        console.log("pong!");
     },
 };

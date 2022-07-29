@@ -1,7 +1,7 @@
 "use strict";
 const fs = require("fs");
 const { REST } = require("@discordjs/rest");
-const { Routes } = require("discord-api-types/v9");
+const { Routes } = require('discord.js');
 const path = require("path");
 require("dotenv").config();
 const clientId = process.env.CLIENT_ID;
@@ -17,9 +17,10 @@ async function register_commands() {
         const command = require(filePath);
         commands.push(command.data.toJSON());
     }
-    const rest = new REST({ version: "9" }).setToken(process.env.DISCORD_TOKEN);
+    const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
     switch (process.env.ENVIRONMENT) {
         case "DEVELOPMENT":
+            console.log("development");
             await rest
                 .put(Routes.applicationGuildCommands(clientId, guildID), {
                 body: commands,
@@ -28,6 +29,7 @@ async function register_commands() {
                 .catch(console.error);
             break;
         default:
+            console.log("default");
             await rest
                 .put(Routes.applicationCommands(clientId), { body: commands })
                 .then(() => console.log("Successfully registered application commands."))

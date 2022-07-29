@@ -1,15 +1,11 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
 const Transport = require("winston-transport");
 const winston = require("winston");
 const { v4: uuidv4 } = require("uuid");
-const Logger = require("le_node");
-const index_1 = require("../index");
+const { Logtail } = require("@logtail/node");
 require("dotenv").config();
-const logger = new Logger({
-    token: process.env.LOG_ENTRIES,
-});
-class LogEntriesTransport extends Transport {
+const logger = new Logtail(process.env.LOG_TAIL);
+class LogTailTransport extends Transport {
     constructor(options) {
         super(options);
         this.params = options.params || ["level", "message", "function", "itemId"];
@@ -22,21 +18,12 @@ class LogEntriesTransport extends Transport {
         if (result) {
             throw new Error(`Parameters in a log can not be null.`);
         }
-        if (info.level === "alert") {
-            index_1.client.channels
-                .fetch(process.env.MY_DISCORD)
-                .then((channel) => {
-                channel.send(`${info.function}: ${info.message}`);
-            })
-                .catch((error) => {
-                logger.info(error.message);
-            });
-        }
         if (info.level) {
-            logger.log(String(info.level), {
-                message: info.message,
+            String(info.level);
+            logger.log(info.message, info.level, {
                 function: info.function,
                 itemId: info.itemId,
+                meta: info.meta,
                 ...info
             });
         }
@@ -56,7 +43,7 @@ const weapon_of_logging = winston.createLogger({
     format: winston.format.json(),
     defaultMeta: { service: "dungeon-bot" },
     transports: [
-        new LogEntriesTransport({
+        new LogTailTransport({
             params: ["level", "message", "function", "itemId"],
             level: "debug",
         }),

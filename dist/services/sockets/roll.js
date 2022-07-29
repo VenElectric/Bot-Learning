@@ -34,7 +34,6 @@ function rollSocket(socket, client, io) {
         respond(rolls);
     });
     socket.on(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_ROLL, async function (data) {
-        console.log(data);
         weapon_of_logging.debug({
             message: `adding roll ${data.rollData.id}`,
             function: ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_ROLL,

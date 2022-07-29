@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const discord_js_1 = require("discord.js");
+const { MessageEmbed } = require("discord.js");
 const constants_1 = require("../services/constants");
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 module.exports = {
@@ -9,10 +9,11 @@ module.exports = {
     async execute(commands, interaction) {
         if (!interaction.isSelectMenu())
             return;
+        console.log("selectMenu");
         try {
             if (interaction.customId === "helpmenu") {
                 await interaction.deferUpdate();
-                const helpEmbed = new discord_js_1.MessageEmbed()
+                const helpEmbed = new MessageEmbed()
                     .setTitle(interaction.values[0])
                     .addField("\u200b", constants_1.commandDescriptions[`${interaction.values[0]}`].description, false)
                     .setImage(constants_1.commandDescriptions[`${interaction.values[0]}`].image);
