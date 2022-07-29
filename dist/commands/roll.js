@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const { SlashCommandBuilder } = require("@discordjs/builders");
+const { SlashCommandBuilder } = require("discord.js");
 const parse_1 = require("../services/parse");
 const rpg_dice_roller_1 = require("@dice-roller/rpg-dice-roller");
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
@@ -8,6 +8,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName("roll")
         .setDescription("Roll a dice!"),
+    description: `Type any dXX (d10, d20, d4, d8, d100, etc. etc.) and roll the dice. No / necessary. You can add a comment after as well! Example: d20+5 To Hit`,
     async execute(commands, interaction) {
         try {
             // split into an array

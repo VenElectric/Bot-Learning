@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const { SlashCommandBuilder } = require("@discordjs/builders");
+const { SlashCommandBuilder } = require("discord.js");
 const { finalizeInitiative } = require("../services/initiative");
 const { db } = require("../services/firebase-setup");
 const { initiativeEmbed } = require("../services/create-embed");
@@ -11,6 +11,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName("start")
         .setDescription("Start Initiative and reset turn order."),
+    description: `Start rounds and sort initiative. Use this if you are just starting initiative or if you want to restart from the top of the initiative order.`,
     async execute(interaction) {
         try {
             let initiativeSnap = await db

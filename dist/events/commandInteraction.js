@@ -13,7 +13,7 @@ module.exports = {
         }
         try {
             console.log("executing");
-            await command.execute(interaction);
+            await command.execute(commands, interaction);
         }
         catch (error) {
             if (error instanceof Error) {
@@ -23,9 +23,9 @@ module.exports = {
                     function: "interactioncreate for slash commands",
                 });
             }
-            // await interaction.reply({
-            //   content: "There was an error while executing this command!",
-            // });
+            await interaction.reply({
+                content: "There was an error while executing this command!",
+            });
         }
     },
 };

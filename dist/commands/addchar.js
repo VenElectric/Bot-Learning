@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const { SlashCommandBuilder } = require("@discordjs/builders");
+const { SlashCommandBuilder } = require("discord.js");
 const { v4: uuidv4 } = require("uuid");
 const database_common_1 = require("../services/database-common");
 const ServerCommunicationTypes_1 = require("../Interfaces/ServerCommunicationTypes");
@@ -31,6 +31,14 @@ module.exports = {
         .setName("isnat20")
         .setDescription("Rolled a Nat 20?")
         .setRequired(true)),
+    description: `This allows you to add your PC to the initiative list.
+  All options are required. \n
+  Name is the name of your character. \n
+  Initiative is the result of the d20 roll with your initiative modifier added. \n 
+  Initiative Modifier is the modifier on your character sheet used for your initiative. \n
+  NPC marks whether the character you are adding is a PC (false) or an NPC (true) \n
+  Nat 20 lets the bot know if you rolled a Nat 20 for your initiative roll. This adds 100 to your total so you are placed at the top of the initiative order. \n
+  Click on the parameter 'Name', 'Initiative Modifier', 'Initiative', NPC, or Nat 20 to enter in that parameter and press the 'tab' button to confirm your submission.`,
     async execute(interaction) {
         const sessionId = interaction.channel.id;
         const name = interaction.options.getString("charactername");

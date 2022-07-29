@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const { SlashCommandBuilder } = require("@discordjs/builders");
+const { SlashCommandBuilder } = require("discord.js");
 const { MessageEmbed } = require("discord.js");
 const parse_1 = require("../services/parse");
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
@@ -25,6 +25,12 @@ module.exports = {
         .setName("rollamount")
         .setDescription("Number of PC/NPC dice rolls to be collected.")
         .setRequired(true)),
+    description: `__**Run Command**__ \nWhen you run this command, both a tag and the number of rolls to be collected is required.\n \n For instance, if you have three NPCs and two Player Characters that need to roll for initiative, you could type the following: 
+    \n ***\u005C[collectrolls tag: init rollamount 5]*** \n This collects roll from 5 characters. \n 
+    To enter the command and parameters, type in \u0005collectrolls and press enter. Then enter in the tag name and press the tab key. Then enter in the roll ammount (**numbers only!**) and hit tab again. Then press the enter key to submit.
+    \n __**Collecting Rolls**__ \n Comment character names if you are rolling for multiple characters. \n \n Example: Tom has two characters: Gandalf the Wizard and his sidekick bard, Bilbo. \n
+    Tom would roll twice using: \n \`\`\`ini\n[d20 init Bilbo]\`\`\` \n and then \n \`\`\`ini\n[d20 init Gandalf]\`\`\`
+    The tag lets the bot know what rolls to collect. It is case sensitive!`,
     async execute(interaction) {
         const tag = interaction.options.getString("tag");
         const rollAmount = interaction.options.getInteger("rollamount");

@@ -1,12 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
-const { SlashCommandBuilder } = require("@discordjs/builders");
+const { SlashCommandBuilder } = require("discord.js");
 const { MessageActionRow, MessageSelectMenu } = require("discord.js");
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("changechannel")
         .setDescription("Change the channel of your game session."),
+    description: `Select a guild channel (this guild only) from the drop-down list to change your session to.`,
     async execute(interaction) {
         let menuChannels = [];
         try {

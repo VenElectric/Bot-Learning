@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.consentCardEmbed = exports.rollEmbed = exports.statusEmbed = exports.spellEmbed = exports.initiativeEmbed = void 0;
-const { EmbedBuilder } = require("discord.js");
+const { EmbedBuilder, AttachmentBuilder } = require("discord.js");
 const cemoj = ":bow_and_arrow:";
 const bemoj = ":black_medium_square:";
 const constants_1 = require("./constants");
@@ -52,12 +52,13 @@ async function rollEmbed(embedArray, tag) {
 }
 exports.rollEmbed = rollEmbed;
 function consentCardEmbed(color, userName) {
-    // ,interaction.user.username
-    //.setImage .setImage('https://i.imgur.com/AfFp7pu.png')
-    return new EmbedBuilder()
-        .setTitle(color.name)
+    const file = new AttachmentBuilder(`./dist/images/${color.value}.png`).setDescription(color.name);
+    const embed = new EmbedBuilder()
+        .setTitle(`${color.name} being flagged by ${userName}`)
         .setColor(color.value)
-        .setDescription(`${color.name} being flagged by ${userName}`)
+        .setDescription(color.description)
+        .setImage(`attachment://${color.value}.png`)
         .setTimestamp();
+    return { "embed": embed, "file": file };
 }
 exports.consentCardEmbed = consentCardEmbed;

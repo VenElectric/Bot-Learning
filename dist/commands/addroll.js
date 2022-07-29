@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const parse_1 = require("../services/parse");
-const { SlashCommandBuilder } = require("@discordjs/builders");
+const { SlashCommandBuilder } = require("discord.js");
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
+// todo change this to a context menu
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("addroll")

@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
-const { SlashCommandBuilder } = require("@discordjs/builders");
+const { SlashCommandBuilder } = require("discord.js");
 const { turnOrder, initiativeFunctionTypes, } = require("../services/initiative");
 const database_common_1 = require("../services/database-common");
 const index_1 = require("../index");
@@ -11,6 +11,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName("previous")
         .setDescription("Move Turn Order Backwards"),
+    description: `Move the initiative order back.`,
     async execute(interaction) {
         let [errorMsg, currentTurn, currentStatuses, currentId] = await turnOrder(interaction.channel.id, initiativeFunctionTypes.PREVIOUS);
         const statuses = (0, create_embed_1.statusEmbed)(currentTurn, currentStatuses);

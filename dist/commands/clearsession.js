@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const { SlashCommandBuilder } = require("@discordjs/builders");
+const { SlashCommandBuilder } = require("discord.js");
 const { db } = require("../services/firebase-setup");
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 const ServerCommunicationTypes_1 = require("../Interfaces/ServerCommunicationTypes");
@@ -10,6 +10,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName("clearsessionlist")
         .setDescription("Clear all initiative and spells for this session."),
+    description: `Remove all initiative records (names, initiative, modifiers) and spell effects. No turning back from this!`,
     async execute(interaction) {
         try {
             let sessionId = interaction.channel.id;

@@ -10,6 +10,7 @@ const server = http.createServer(app);
 const port = process.env.PORT || 5000;
 const { register_commands } = require("./deploy-commands");
 const discord_js_1 = require("discord.js");
+const SelectMenuItemsCreation_1 = require("./services/SelectMenuItemsCreation");
 const weapon_of_logging = require("./utilities/LoggerConfig").logger;
 const path = require("node:path");
 require("dotenv").config();
@@ -35,6 +36,7 @@ const client = new Client({
     ],
     partials: [discord_js_1.Partials.Channel],
 });
+// setup commands
 const commands = new Collection();
 const commandsPath = path.join(__dirname, "commands");
 const commandFiles = fs
@@ -47,6 +49,7 @@ for (const file of commandFiles) {
     // With the key as the command name and the value as the exported module
     commands.set(command.data.name, command);
 }
+// setup events
 const eventsPath = path.join(__dirname, "events");
 const eventFiles = fs
     .readdirSync(eventsPath)
@@ -61,39 +64,7 @@ for (const file of eventFiles) {
         client.on(event.name, (...args) => event.execute(commands, ...args));
     }
 }
-// ----- DISCORD ------
-client.once("ready", async () => {
-    console.log("Ready");
-    weapon_of_logging.debug({ message: "ready" });
-});
-register_commands();
-client.login(token);
-let isBlocked = false;
-process.on("unhandledRejection", (error) => {
-    if (error instanceof Error) {
-        if (!isBlocked) {
-            client.channels.fetch(process.env.MY_DISCORD).then((channel) => {
-                channel.send(`Unhandled Rejection ${error.message} `);
-            });
-            isBlocked = true;
-            setTimeout(() => {
-                isBlocked = false;
-            }, 300000);
-        }
-        else {
-            return;
-        }
-    }
-});
-process.on("uncaughtException", async (err) => {
-    console.error("Uncaught Promise Exception:\n", err);
-});
-process.on("uncaughtExceptionMonitor", async (err) => {
-    console.error("Uncaught Promise Exception (Monitor):\n", err);
-});
-// process.on("multipleResolves", async (type, promise, reason) => {
-//   console.error("Multiple Resolves:\n", type, promise, reason);
-// });
+// setup socket IO server and events
 const registerSockets = new Collection();
 const socketsPath = path.join(__dirname, "sockets");
 const socketsFolders = fs.readdirSync(socketsPath);
@@ -121,15 +92,39 @@ const onConnection = (socket) => {
     }
 };
 exports.io.on("connection", onConnection);
-// app.get("/api/users/character", async (req: Request, res: Response) => {
-//   console.log(req.body.data);
-//   res.json("test");
-// });
-// app.get("/api/users/character/list", async (req: Request, res: Response) => {
-//   console.log(req.body.data);
-//   res.json("test");
-// });
-// app.post("/api/users/character", async (req: Request, res: Response) => {});
+// Register and create necessary items
+// Login
+client.once("ready", async () => {
+    console.log("Ready");
+    weapon_of_logging.debug({ message: "ready" });
+});
+register_commands();
+(0, SelectMenuItemsCreation_1.initCollection)(commands);
+client.login(token);
+// Error catching 
+let isBlocked = false;
+process.on("unhandledRejection", (error) => {
+    if (error instanceof Error) {
+        if (!isBlocked) {
+            client.channels.fetch(process.env.MY_DISCORD).then((channel) => {
+                channel.send(`Unhandled Rejection ${error.message} `);
+            });
+            isBlocked = true;
+            setTimeout(() => {
+                isBlocked = false;
+            }, 300000);
+        }
+        else {
+            return;
+        }
+    }
+});
+process.on("uncaughtException", async (err) => {
+    console.error("Uncaught Promise Exception:\n", err);
+});
+process.on("uncaughtExceptionMonitor", async (err) => {
+    console.error("Uncaught Promise Exception (Monitor):\n", err);
+});
 server.listen(port, () => {
     console.log(`Listening on port ${port}!`);
 });

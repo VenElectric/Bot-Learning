@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 // get session embed (initiative list in table format)
-const { SlashCommandBuilder } = require("@discordjs/builders");
+const { SlashCommandBuilder } = require("discord.js");
 const initiative_1 = require("../services/initiative");
 const database_common_1 = require("../services/database-common");
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
@@ -12,7 +12,8 @@ const ServerCommunicationTypes_1 = require("../Interfaces/ServerCommunicationTyp
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("listinitiative")
-        .setDescription("Create an embed that shows initiative"),
+        .setDescription("Create an embed with the current initiative list."),
+    description: 'Create an embed with the current initiative list.',
     async execute(interaction) {
         let sessionId = interaction.channel.id;
         try {

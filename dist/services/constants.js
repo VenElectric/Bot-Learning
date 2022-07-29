@@ -4,67 +4,68 @@ exports.commandDescriptions = exports.helpMenu = exports.ConsentCards = exports.
 exports.webComponent = "www.dungeon-bot.app";
 exports.devWeb = "localhost:8080";
 exports.escapeChar = "\u200b";
+// todo add in custom message for description
 exports.ConsentCards = {
-    GREEN: { name: "Green", value: "#1FE774" },
-    RED: { name: "Red", value: "#DF3737" },
-    YELLOW: { name: "Yellow", value: "#FFFF00" },
-    WHITE: { name: "White", value: "#FFFFFF" },
-    BLUE: { name: "Blue", value: "0056FF" },
+    GREEN: { name: "Green", value: "1FE774", description: "The player is OK with this conversation." },
+    RED: { name: "Red", value: "DF3737", description: "The player is asking for the session to STOP." },
+    YELLOW: { name: "Yellow", value: "FFFF00", description: "The player is asking to tread carefully or move on from this conversation and/or topic." },
+    WHITE: { name: "White", value: "FFFFFF", description: "The player is asking for a turn to speak." },
+    BLUE: { name: "Blue", value: "0056FF", description: "The player is asking for a snack/toilet/etc break." },
 };
 exports.helpMenu = [
     {
         label: "addchar",
-        description: "",
+        description: "Add a character",
         value: "addchar",
     },
     {
         label: "changechannel",
-        description: "",
+        description: "Change session channel",
         value: "changechannel",
     },
     {
         label: "clearsession",
-        description: "",
+        description: "Clear spells and initiative",
         value: "clearsession",
     },
     {
         label: "link",
-        description: "",
+        description: "Get the link to your session.",
         value: "link",
     },
     {
         label: "maths",
-        description: "",
+        description: "1+1 = 2",
         value: "maths",
     },
     {
         label: "previous",
-        description: "",
+        description: "Previous initiative",
         value: "previous",
     },
     {
         label: "next",
-        description: "",
+        description: "Next Initiative",
         value: "next",
     },
     {
         label: "resort",
-        description: "",
+        description: "Resort intiative",
         value: "resort",
     },
     {
-        label: "dice roll",
-        description: "",
-        value: "dice roll",
+        label: "roll",
+        description: "Roll Dice: d20+3",
+        value: "roll",
     },
     {
         label: "start",
-        description: "",
+        description: "Start initiative rounds.",
         value: "start",
     },
     {
         label: "collectrolls",
-        description: "",
+        description: "Collect rolls from players.",
         value: "collectrolls",
     },
 ];
@@ -112,7 +113,7 @@ exports.commandDescriptions = {
         description: `Start rounds and sort initiative. Use this if you are just starting initiative or if you want to restart from the top of the initiative order.`,
         image: "",
     },
-    "dice roll": {
+    "roll": {
         description: `Type any dXX (d10, d20, d4, d8, d100, etc. etc.) and roll the dice. No / necessary. You can add a comment after as well! Example: d20+5 To Hit`,
         image: "",
     },
