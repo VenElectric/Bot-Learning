@@ -1,31 +1,63 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 const { SlashCommandBuilder } = require("discord.js");
-const { turnOrder, initiativeFunctionTypes, } = require("../services/initiative");
-const database_common_1 = require("../services/database-common");
-const index_1 = require("../index");
 const ServerCommunicationTypes_1 = require("../Interfaces/ServerCommunicationTypes");
-const create_embed_1 = require("../services/create-embed");
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("previous")
         .setDescription("Move Turn Order Backwards"),
     description: `Move the initiative order back.`,
-    async execute(interaction) {
-        let [errorMsg, currentTurn, currentStatuses, currentId] = await turnOrder(interaction.channel.id, initiativeFunctionTypes.PREVIOUS);
-        const statuses = (0, create_embed_1.statusEmbed)(currentTurn, currentStatuses);
-        if (errorMsg instanceof Error) {
-            weapon_of_logging.alert({ message: errorMsg.message, function: "next" });
-        }
-        weapon_of_logging.info({
-            message: "previous turn success",
-            function: "next",
+    execute(commands, sonic, interaction) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (interaction.channel == null)
+                return;
+            if (interaction.command == null)
+                return;
+            const commandName = interaction.command.name;
+            const sessionId = interaction.channel.id;
+            try {
+                sonic.emit("getInit", (init) => __awaiter(this, void 0, void 0, function* () {
+                    const { isSorted, next, previous, sessionSize } = yield init.getSession(sessionId);
+                    sonic.log("calculating next and previous", sonic.debug, commandName, next, previous);
+                    const initiativeList = (yield init.retrieveCollection(sessionId));
+                    const sortedList = yield init.resort(initiativeList);
+                    const oldNextIndex = sonic.findIndexById(sortedList, next);
+                    const oldPreviousIndex = sonic.findIndexById(sortedList, previous);
+                    const oldNextNum = sortedList[oldNextIndex].roundOrder;
+                    const oldPreviosNum = sortedList[oldPreviousIndex].roundOrder;
+                    const newNextNum = (yield init.calcBackwards(oldNextNum, sessionSize));
+                    const newPreviousNum = (yield init.calcBackwards(oldPreviosNum, sessionSize));
+                    sonic.log("next and previous calculated", sonic.debug, commandName, {
+                        newNext: newNextNum,
+                        newPrev: newPreviousNum,
+                        next: sortedList[newNextNum].id,
+                        prev: sortedList[newPreviousNum].id,
+                    });
+                    init.setNext(sortedList[newNextNum].id, sessionId);
+                    init.setPrevious(sortedList[newPreviousNum].id, sessionId);
+                    sonic.emit("getDiscordClient", (client) => __awaiter(this, void 0, void 0, function* () {
+                        const statuses = client.statusEmbed(sortedList[oldPreviousIndex].characterName, sortedList[oldPreviousIndex].statusEffects);
+                        sonic.log("creating embed", sonic.debug, commandName);
+                        sonic.emit("getIO", (ioC) => __awaiter(this, void 0, void 0, function* () {
+                            ioC.io.to(sessionId).emit(ServerCommunicationTypes_1.EmitTypes.PREVIOUS, sortedList[newNextNum]);
+                            sonic.log("emitting previous", sonic.debug, commandName);
+                        }));
+                        yield interaction.reply({ embeds: [statuses] });
+                    }));
+                }));
+            }
+            catch (error) {
+                sonic.onError(error, commandName);
+            }
         });
-        setTimeout(async () => {
-            let record = await (0, database_common_1.retrieveRecord)(currentId, interaction.channel.id, ServerCommunicationTypes_1.secondLevelCollections.INITIATIVE);
-            index_1.io.to(interaction.channel.id).emit(ServerCommunicationTypes_1.EmitTypes.NEXT, record);
-        }, 300);
-        await interaction.reply({ embeds: [statuses] });
     },
 };

@@ -48,3 +48,42 @@
 
     // console.log(`Created thread: ${thread.name}`);
     // await interaction.reply()
+
+    try {
+      console.log(interaction.member.guild.voiceStates.voiceStates)
+      // const voiceChannel = await interaction.client.channels.fetch("723744588346556420")
+      const player = createAudioPlayer({
+        behaviors: {
+          noSubscriber: NoSubscriberBehavior.Pause,
+        },
+      });
+      const connection = joinVoiceChannel({
+        channelId: "723744588346556420",
+        guildId: "723744588346556416",
+        adapterCreator: interaction.guild.voiceAdapterCreator,
+      });
+
+      // Subscribe the connection to the audio player (will play audio on the voice connection)
+
+      // subscription could be undefined if the connection is destroyed!
+
+      const resource = createAudioResource("./src/Sounds/AC_Bell_Dong.wav");
+      player.play(resource);
+      const subscription = connection.subscribe(player);
+      if (subscription) {
+        // Unsubscribe after 5 seconds (stop playing audio on the voice connection)
+        setTimeout(() => subscription.unsubscribe(), 10000);
+      }
+      console.log("pong!");
+      setTimeout(() => {
+        player.stop();
+      }, 10000);
+
+      player.on('error', (error:any) => {
+        console.error(`Error: ${error.message} with resource ${error.resource.metadata.title}`);
+        player.stop();
+        subscription.unsubscribe();
+      });
+    } catch (error) {
+      console.log(error);
+    }

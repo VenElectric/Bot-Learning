@@ -18,30 +18,41 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const ServerCommunicationTypes_1 = require("../../Interfaces/ServerCommunicationTypes");
 const weapon_of_logging = require("../../utilities/LoggerConfig").logger;
 module.exports = {
     name: ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_SPELL,
-    async execute(io, socket, client, data) {
-        const { addSingle } = await Promise.resolve().then(() => __importStar(require("../../services/database-common")));
-        let finalMessage;
-        const spellRecord = { ...data.payload };
-        finalMessage = await addSingle(spellRecord, data.sessionId, ServerCommunicationTypes_1.topLevelCollections.SESSIONS, ServerCommunicationTypes_1.secondLevelCollections.SPELLS);
-        weapon_of_logging.info({
-            message: `Spell successfully added`,
-            function: ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_SPELL,
-            docId: data.payload.id,
-        });
-        socket.broadcast
-            .to(data.sessionId)
-            .emit(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_SPELL, data.payload);
-        if (finalMessage instanceof Error) {
-            weapon_of_logging.alert({
-                message: finalMessage.message,
+    execute(io, socket, client, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { addSingle } = yield Promise.resolve().then(() => __importStar(require("../../services/database-common")));
+            let finalMessage;
+            const spellRecord = Object.assign({}, data.payload);
+            finalMessage = yield addSingle(spellRecord, data.sessionId, ServerCommunicationTypes_1.topLevelCollections.SESSIONS, ServerCommunicationTypes_1.secondLevelCollections.SPELLS);
+            weapon_of_logging.info({
+                message: `Spell successfully added`,
                 function: ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_SPELL,
                 docId: data.payload.id,
             });
-        }
+            socket.broadcast
+                .to(data.sessionId)
+                .emit(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_SPELL, data.payload);
+            if (finalMessage instanceof Error) {
+                weapon_of_logging.alert({
+                    message: finalMessage.message,
+                    function: ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_SPELL,
+                    docId: data.payload.id,
+                });
+            }
+        });
     }
 };

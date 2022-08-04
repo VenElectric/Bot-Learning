@@ -37,7 +37,7 @@ function parseRoll(msg) {
             comment += msg[i] + ' ';
         }
     }
-    return { comment: comment, rollex: rollex };
+    return { comment: comment, roll: rollex };
 }
 exports.parseRoll = parseRoll;
 function addBash(item, color) {

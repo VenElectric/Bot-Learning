@@ -5,11 +5,11 @@ const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 module.exports = {
     name: "messageCreate",
     once: false,
-    execute(commands, interaction) {
-        const diceRegex = new RegExp(/^(\/|\/[a-z]|\/[A-Z]|r)*\s*(\d)*\s*([d|D])([\d])+/);
-        const mathRegex = new RegExp(/^([-+]?[0-9]*\.?[0-9]+[\/\+\-\*])+([-+]?[0-9]*\.?[0-9]+)/);
+    execute(commands, sonic, interaction) {
         if (interaction.author.bot)
             return;
+        const diceRegex = new RegExp(/^(\/|\/[a-z]|\/[A-Z]|r)*\s*(\d)*\s*([d|D])([\d])+/);
+        const mathRegex = new RegExp(/^([-+]?[0-9]*\.?[0-9]+[\/\+\-\*])+([-+]?[0-9]*\.?[0-9]+)/);
         if (!interaction.content.match(diceRegex) && !interaction.content.match(mathRegex))
             return;
         const rollcom = commands.get("roll");

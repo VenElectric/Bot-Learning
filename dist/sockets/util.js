@@ -12,3 +12,17 @@ function channelSend(client, item, sessionId) {
     });
 }
 exports.channelSend = channelSend;
+function testWrap(fn) {
+    fn.prototype.fName = fn.name;
+    console.log(fn.prototype.fName);
+    return (...args) => {
+        console.log(...args);
+        fn(...args);
+    };
+}
+function insideFunction(...args) {
+    console.log(insideFunction.prototype.fName);
+    console.log(args);
+}
+const testFunc = testWrap(insideFunction);
+testFunc("my test");

@@ -1,14 +1,16 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const Transport = require("winston-transport");
 const winston = require("winston");
 const { v4: uuidv4 } = require("uuid");
-const { Logtail } = require("@logtail/node");
+const node_1 = require("@logtail/node");
 require("dotenv").config();
-const logger = new Logtail(process.env.LOG_TAIL);
+const logKey = process.env.LOG_TAIL;
+const logger = new node_1.Logtail(logKey);
 class LogTailTransport extends Transport {
     constructor(options) {
         super(options);
-        this.params = options.params || ["level", "message", "function", "itemId"];
+        this.params = options.params || ["level", "message", "function"];
     }
     log(info, callback) {
         setImmediate(() => {
@@ -20,15 +22,10 @@ class LogTailTransport extends Transport {
         }
         if (info.level) {
             String(info.level);
-            logger.log(info.message, info.level, {
-                function: info.function,
-                itemId: info.itemId,
-                meta: info.meta,
-                ...info
-            });
+            logger.log(info.message, info.level, Object.assign({ function: info.function }, info));
         }
         else {
-            console.log(info);
+            logger.log(info);
         }
         callback();
     }
@@ -44,7 +41,7 @@ const weapon_of_logging = winston.createLogger({
     defaultMeta: { service: "dungeon-bot" },
     transports: [
         new LogTailTransport({
-            params: ["level", "message", "function", "itemId"],
+            params: ["level", "message", "function"],
             level: "debug",
         }),
     ],

@@ -18,18 +18,29 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const ServerCommunicationTypes_1 = require("../../Interfaces/ServerCommunicationTypes");
 const db = __importStar(require("../../services/database-common"));
 const weapon_of_logging = require("../../utilities/LoggerConfig").logger;
 module.exports = {
     name: ServerCommunicationTypes_1.EmitTypes.GET_INITIAL_ROLLS,
-    async execute(io, socket, client, sessionId, respond) {
-        weapon_of_logging.debug({
-            message: "retrieving initial roll data",
-            function: ServerCommunicationTypes_1.EmitTypes.GET_INITIAL_ROLLS,
+    execute(io, socket, client, sessionId, respond) {
+        return __awaiter(this, void 0, void 0, function* () {
+            weapon_of_logging.debug({
+                message: "retrieving initial roll data",
+                function: ServerCommunicationTypes_1.EmitTypes.GET_INITIAL_ROLLS,
+            });
+            const rolls = yield db.retrieveCollection(sessionId, ServerCommunicationTypes_1.secondLevelCollections.ROLLS);
+            respond(rolls);
         });
-        const rolls = await db.retrieveCollection(sessionId, ServerCommunicationTypes_1.secondLevelCollections.ROLLS);
-        respond(rolls);
     },
 };

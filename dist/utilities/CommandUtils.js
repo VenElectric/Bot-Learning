@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateInitiativeObject = void 0;
 const { v4: uuidv4 } = require("uuid");
 function generateInitiativeObject(name, initiative, modifier, isNpc) {
-    const options = {
+    return {
         id: uuidv4(),
         characterName: name,
         initiative: initiative + modifier,

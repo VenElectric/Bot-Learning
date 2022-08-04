@@ -33,6 +33,7 @@ var EmitTypes;
     EmitTypes["ADD_STATUS_EFFECT"] = "ADD_STATUS_EFFECT";
     EmitTypes["DISCORD_INITIATIVE"] = "DISCORD_INITIATIVE";
     EmitTypes["DISCORD_SPELLS"] = "DISCORD_SPELLS";
+    EmitTypes["RESET_ONDECK"] = "RESET_ONDECK";
 })(EmitTypes = exports.EmitTypes || (exports.EmitTypes = {}));
 var collectionTypes;
 (function (collectionTypes) {
