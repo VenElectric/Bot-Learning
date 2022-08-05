@@ -11,7 +11,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const { SlashCommandBuilder } = require("discord.js");
 const parse_1 = require("../services/parse");
-const { logRoll, dice } = require("../utilities/RollDice");
 const weapon_of_logging = require("../utilities/LoggerConfig").logger;
 module.exports = {
     data: new SlashCommandBuilder()
@@ -55,38 +54,31 @@ module.exports = {
                 const name = user.nickname || interaction.author.username;
                 // roll the roll
                 // make sure that the format is dXX rather than DXX.
-                let myroll = dice.roll(String(parsed.roll).toLowerCase());
-                logRoll(myroll, name, comment, interaction.channel.id);
-                if (!myroll) {
-                    throw new Error("invalid dice roll");
-                }
-                // spice up the text with some formatting
-                let finalroll = (0, parse_1.addBash)(myroll, "green");
-                let finalcomment = (0, parse_1.addBash)(comment, "blue");
-                // if no comment, then don't include the finalcomment var. if comment, then include the entire text.
-                if (comment != "") {
-                    // "Roll Results: " + finalcomment + finalroll
-                    weapon_of_logging.debug({
-                        interaction: `replying with comment Roll: ${finalroll} Comment: ${finalcomment}`,
-                        function: "roll",
-                    });
-                    yield interaction.reply("Roll Results: " + finalcomment + finalroll);
-                }
-                else {
-                    weapon_of_logging.info({
-                        interaction: `replying without comment Roll: ${finalroll}`,
-                        function: "roll",
-                    });
-                    yield interaction.reply("Roll Results: " + finalroll);
-                }
+                sonic.emit("getDice", (roller) => __awaiter(this, void 0, void 0, function* () {
+                    const myRoll = roller.roll(String(parsed.roll).toLowerCase());
+                    roller.logRoll(myRoll, name, comment, interaction.channel.id);
+                    if (!myRoll) {
+                        throw new Error("invalid dice roll");
+                    }
+                    // spice up the text with some formatting
+                    const finalroll = (0, parse_1.addBash)(myRoll, "green");
+                    const finalcomment = (0, parse_1.addBash)(comment, "blue");
+                    // if no comment, then don't include the finalcomment var. if comment, then include the entire text.
+                    if (comment != "") {
+                        // "Roll Results: " + finalcomment + finalroll
+                        sonic.log(`replying with comment Roll: ${finalroll} Comment: ${finalcomment}`, sonic.debug, "roll");
+                        yield interaction.reply("Roll Results: " + finalcomment + finalroll);
+                    }
+                    else {
+                        sonic.log(`replying without comment Roll: ${finalroll}`, sonic.debug, "roll");
+                        yield interaction.reply("Roll Results: " + finalroll);
+                    }
+                }));
             }
             catch (error) {
                 if (error instanceof Error) {
                     console.log(error);
-                    weapon_of_logging.warning({
-                        interaction: error.message,
-                        function: "roll",
-                    });
+                    sonic.onError(error, "roll", interaction.content);
                 }
                 yield interaction.reply("There was an error with the dice roll. Please try again with the correct dice format.");
             }
