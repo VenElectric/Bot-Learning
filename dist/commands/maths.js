@@ -18,9 +18,7 @@ module.exports = {
     description: `Do some basic math. 1+1 = ? \n You can also send a math equation without using the slash command.`,
     execute(commands, sonic, interaction) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (interaction.command == null)
-                return;
-            const commandName = interaction.command.name;
+            const commandName = "maths";
             try {
                 if (interaction.content.match(diceRegex)) {
                     const rollCom = commands.get("roll");

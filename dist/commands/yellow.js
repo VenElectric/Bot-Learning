@@ -17,13 +17,14 @@ module.exports = {
         .setDescription("Use if you are feeling uncomfortable and need things to slow down."),
     description: "Use if you are feeling uncomfortable and need things to slow down.",
     execute(ccommands, sonic, interaction) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            if (interaction.command == null)
-                return;
-            const commandName = interaction.command.name;
+            const commandName = interaction.commandName;
+            const user = yield ((_a = interaction === null || interaction === void 0 ? void 0 : interaction.guild) === null || _a === void 0 ? void 0 : _a.members.fetch(interaction.user.id));
+            const name = (user === null || user === void 0 ? void 0 : user.nickname) || interaction.user.username;
             try {
                 sonic.emit("getDiscordClient", (client) => __awaiter(this, void 0, void 0, function* () {
-                    const { embed, file } = client.consentCardEmbed(ConsentCards.YELLOW, interaction.user.username);
+                    const { embed, file } = client.consentCardEmbed(ConsentCards.YELLOW, name);
                     yield interaction.reply({
                         content: "@here",
                         embeds: [embed],

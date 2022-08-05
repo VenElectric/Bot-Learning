@@ -17,12 +17,12 @@ module.exports = {
         try {
             if (interaction.content.match(mathRegex)) {
                 if (mathcom) {
-                    mathcom.execute(commands, interaction);
+                    mathcom.execute(commands, sonic, interaction);
                 }
             }
             if (interaction.content.match(diceRegex)) {
                 if (rollcom) {
-                    rollcom.execute(commands, interaction);
+                    rollcom.execute(commands, sonic, interaction);
                 }
             }
         }

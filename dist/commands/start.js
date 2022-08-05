@@ -20,21 +20,21 @@ module.exports = {
         return __awaiter(this, void 0, void 0, function* () {
             if (interaction.channel == null)
                 return;
-            if (interaction.command == null)
-                return;
-            const commandName = interaction.command.name;
+            const commandName = interaction.commandName;
             const sessionId = interaction.channel.id;
             try {
                 sonic.emit("getInit", (init) => __awaiter(this, void 0, void 0, function* () {
                     const initiativeList = (yield init.retrieveCollection(sessionId));
-                    const sortedList = init.roundStart(initiativeList);
+                    const sortedList = yield init.roundStart(initiativeList);
                     const sessionSize = sortedList.length;
                     const nextId = sortedList[1].id;
                     const prevId = sortedList[sessionSize - 1].id;
+                    console.log(sortedList, "roundstart");
                     init.setNext(nextId, sessionId);
                     init.setPrevious(prevId, sessionId);
                     init.setisSorted(true, sessionId);
                     init.setsessionSize(sessionSize, sessionId);
+                    init.updateCollection(sessionId, sortedList);
                     sonic.emit("getDiscordClient", (client) => __awaiter(this, void 0, void 0, function* () {
                         const embed = client.initiativeEmbed(sortedList);
                         sonic.emit("getIO", (ioC) => __awaiter(this, void 0, void 0, function* () {

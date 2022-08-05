@@ -38,20 +38,22 @@ class Initiative extends DataBase_1.default {
         return initiativeList;
     }
     roundStart(initiativeList) {
-        let dupes = this.findDuplicates(initiativeList);
-        if (dupes.length > 0) {
-            initiativeList = this.rerollDuplicates(dupes, initiativeList);
-            this.log("Duplicates Taken Care Of", this.info, this.roundStart.name);
-        }
-        else {
-            this.log("No Duplicates Detected", this.debug, this.roundStart.name);
-        }
-        initiativeList = this.resetisCurrent(initiativeList);
-        this.log("Reset isCurrent Variable => False", this.debug, this.roundStart.name);
-        initiativeList = this.firstSort(initiativeList);
-        this.log("finished sort", this.info, this.roundStart.name);
-        //UPDATE ALL INITIATIVE AFTER CALLING THIS
-        return initiativeList;
+        return __awaiter(this, void 0, void 0, function* () {
+            let dupes = this.findDuplicates(initiativeList);
+            if (dupes.length > 0) {
+                initiativeList = this.rerollDuplicates(dupes, initiativeList);
+                this.log("Duplicates Taken Care Of", this.info, this.roundStart.name);
+            }
+            else {
+                this.log("No Duplicates Detected", this.debug, this.roundStart.name);
+            }
+            initiativeList = this.resetisCurrent(initiativeList);
+            this.log("Reset isCurrent Variable => False", this.debug, this.roundStart.name);
+            initiativeList = this.firstSort(initiativeList);
+            initiativeList[0].isCurrent = true;
+            this.log("finished sort", this.info, this.roundStart.name);
+            return initiativeList;
+        });
     }
     findDuplicates(initiativeList) {
         let dupes = [];
@@ -133,9 +135,9 @@ class Initiative extends DataBase_1.default {
     }
     resort(initiativeList) {
         initiativeList.sort((a, b) => {
-            return b.roundOrder - a.roundOrder;
+            return a.roundOrder - b.roundOrder;
         });
-        initiativeList = this.setRoundOrder(initiativeList);
+        console.log(initiativeList);
         this.log("resort complete", this.info, this.resort.name);
         return initiativeList;
     }
@@ -236,6 +238,9 @@ class Initiative extends DataBase_1.default {
                 this.onError(error, this.setPrevious.name, ...arguments);
             }
         });
+    }
+    findIndexByRoundOrder(dataArray, value) {
+        return dataArray.map((dataObject) => dataObject.roundOrder).indexOf(value);
     }
 }
 exports.default = Initiative;

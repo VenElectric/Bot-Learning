@@ -20,35 +20,38 @@ module.exports = {
         return __awaiter(this, void 0, void 0, function* () {
             if (interaction.channel == null)
                 return;
-            if (interaction.command == null)
-                return;
-            const commandName = interaction.command.name;
+            const commandName = interaction.commandName;
             const sessionId = interaction.channel.id;
             try {
                 sonic.emit("getInit", (init) => __awaiter(this, void 0, void 0, function* () {
                     const { isSorted, next, previous, sessionSize } = yield init.getSession(sessionId);
                     sonic.log("calculating next and previous", sonic.debug, commandName, next, previous);
                     const initiativeList = (yield init.retrieveCollection(sessionId));
-                    const sortedList = yield init.resort(initiativeList);
-                    const oldNextIndex = sonic.findIndexById(sortedList, next);
+                    let sortedList = init.resort(initiativeList);
+                    sortedList = init.resetisCurrent(sortedList);
+                    const newCurrent = sonic.findIndexById(sortedList, next);
                     const oldPreviousIndex = sonic.findIndexById(sortedList, previous);
-                    const oldNextNum = sortedList[oldNextIndex].roundOrder;
+                    const newCurrentNum = sortedList[newCurrent].roundOrder;
                     const oldPreviosNum = sortedList[oldPreviousIndex].roundOrder;
-                    const newNextNum = (yield init.calcForward(oldNextNum, sessionSize));
+                    const newNextNum = (yield init.calcForward(newCurrentNum, sessionSize));
                     const newPreviousNum = (yield init.calcForward(oldPreviosNum, sessionSize));
+                    const newNextIndex = init.findIndexByRoundOrder(sortedList, newNextNum);
+                    const newPrevIndex = init.findIndexByRoundOrder(sortedList, newPreviousNum);
+                    sortedList[newCurrent].isCurrent = true;
                     sonic.log("next and previous calculated", sonic.debug, commandName, {
                         newNext: newNextNum,
                         newPrev: newPreviousNum,
-                        next: sortedList[newNextNum].id,
-                        prev: sortedList[newPreviousNum].id,
+                        next: sortedList[newNextIndex].id,
+                        prev: sortedList[newPrevIndex].id,
                     });
-                    init.setNext(sortedList[newNextNum].id, sessionId);
-                    init.setPrevious(sortedList[newPreviousNum].id, sessionId);
+                    yield init.setNext(sortedList[newNextIndex].id, sessionId);
+                    yield init.setPrevious(sortedList[newPrevIndex].id, sessionId);
+                    init.updateCollection(sessionId, sortedList);
                     sonic.emit("getDiscordClient", (client) => __awaiter(this, void 0, void 0, function* () {
-                        const statuses = client.statusEmbed(sortedList[oldNextIndex].characterName, sortedList[oldNextIndex].statusEffects);
+                        const statuses = client.statusEmbed(sortedList[newCurrent].characterName, sortedList[newCurrent].statusEffects);
                         sonic.log("creating embed", sonic.debug, commandName);
                         sonic.emit("getIO", (ioC) => __awaiter(this, void 0, void 0, function* () {
-                            ioC.io.to(sessionId).emit(ServerCommunicationTypes_1.EmitTypes.NEXT, sortedList[newNextNum]);
+                            ioC.io.to(sessionId).emit(ServerCommunicationTypes_1.EmitTypes.NEXT, sortedList[newCurrent]);
                             sonic.log("emitting next", sonic.debug, commandName);
                         }));
                         yield interaction.reply({ embeds: [statuses] });

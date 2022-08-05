@@ -28,9 +28,7 @@ module.exports = {
         return __awaiter(this, void 0, void 0, function* () {
             if (interaction.channel == null)
                 return;
-            if (interaction.command == null)
-                return;
-            const commandName = interaction.command.name;
+            const commandName = interaction.commandName;
             sonic.log("evaluating...", sonic.info, commandName);
             const armorClass = interaction.options.getInteger("armorclass", true);
             const attackBonus = interaction.options.getInteger("attackbonus", true);

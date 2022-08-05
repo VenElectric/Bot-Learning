@@ -17,13 +17,14 @@ module.exports = {
         .setDescription("Use if you need to interject or ask a question."),
     description: "Use if you need to interject or ask a question.",
     execute(ccommands, sonic, interaction) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            if (interaction.command == null)
-                return;
-            const commandName = interaction.command.name;
+            const commandName = interaction.commandName;
+            const user = yield ((_a = interaction === null || interaction === void 0 ? void 0 : interaction.guild) === null || _a === void 0 ? void 0 : _a.members.fetch(interaction.user.id));
+            const name = (user === null || user === void 0 ? void 0 : user.nickname) || interaction.user.username;
             try {
                 sonic.emit("getDiscordClient", (client) => __awaiter(this, void 0, void 0, function* () {
-                    const { embed, file } = client.consentCardEmbed(ConsentCards.WHITE, interaction.user.username);
+                    const { embed, file } = client.consentCardEmbed(ConsentCards.WHITE, name);
                     yield interaction.reply({
                         content: "@here",
                         embeds: [embed],

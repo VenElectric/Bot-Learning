@@ -20,9 +20,7 @@ module.exports = {
         return __awaiter(this, void 0, void 0, function* () {
             if (interaction.channel == null)
                 return;
-            if (interaction.command == null)
-                return;
-            const commandName = interaction.command.name;
+            const commandName = interaction.commandName;
             const sessionId = interaction.channel.id;
             try {
                 sonic.emit("getInit", (init) => __awaiter(this, void 0, void 0, function* () {

@@ -38,12 +38,14 @@ exports.sonic.init();
 exports.redisStore = new RedisStore_1.default(exports.sonic);
 exports.redisStore.init();
 exports.clientClass = new DiscordClient_1.default(exports.sonic);
+exports.clientClass.init();
 exports.initDB = new Initiative_1.default(exports.sonic);
 exports.dice = new Dice_1.default(exports.sonic);
 exports.spell = new Spells_1.default(exports.sonic);
-exports.clientClass.init();
+// remove these. sonic should only be retrieving them.
 exports.client = exports.clientClass.getClient();
 exports.commands = exports.clientClass.getCommands();
+// remove this. make sure nowhere is using it :)
 (0, SelectMenuItemsCreation_1.initCollection)(exports.commands);
 exports.ioClass = new index_2.default(server, exports.sonic);
 exports.ioClass.init();

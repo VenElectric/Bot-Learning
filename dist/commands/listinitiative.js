@@ -22,14 +22,12 @@ module.exports = {
         return __awaiter(this, void 0, void 0, function* () {
             if (interaction.channel == null)
                 return;
-            if (interaction.command == null)
-                return;
-            const commandName = interaction.command.name;
+            const commandName = interaction.commandName;
             const sessionId = interaction.channel.id;
             try {
                 sonic.emit("getInit", (init) => __awaiter(this, void 0, void 0, function* () {
                     const newList = yield init.retrieveCollection(sessionId);
-                    const sortedList = yield init.resort(newList);
+                    const sortedList = init.resort(newList);
                     sonic.emit("getDiscordClient", (client) => __awaiter(this, void 0, void 0, function* () {
                         const initEmbed = client.initiativeEmbed(sortedList);
                         sonic.log("embed created for initiative", sonic.debug, commandName);

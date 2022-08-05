@@ -18,9 +18,7 @@ module.exports = {
     description: "Use this card if you need to stop the session immediately/boundaries were passed.",
     execute(commands, sonic, interaction) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (interaction.command == null)
-                return;
-            const commandName = interaction.command.name;
+            const commandName = interaction.commandName;
             try {
                 sonic.emit("getDiscordClient", (client) => __awaiter(this, void 0, void 0, function* () {
                     const { embed, file } = client.consentCardEmbed(ConsentCards.RED, interaction.user.username);

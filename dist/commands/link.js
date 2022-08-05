@@ -21,9 +21,7 @@ module.exports = {
         return __awaiter(this, void 0, void 0, function* () {
             if (interaction.channel == null)
                 return;
-            if (interaction.command == null)
-                return;
-            const commandName = interaction.command.name;
+            const commandName = interaction.commandName;
             const sessionId = interaction.channel.id;
             let url = `${process.env.HOST_URL}/session/${sessionId}`;
             sonic.log("sending url link for session", sonic.debug, commandName);

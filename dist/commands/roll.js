@@ -18,7 +18,7 @@ module.exports = {
         .setName("roll")
         .setDescription("Roll a dice!"),
     description: `Type any dXX (d10, d20, d4, d8, d100, etc. etc.) and roll the dice. No / necessary. You can add a comment after as well! Example: d20+5 To Hit`,
-    execute(commands, interaction) {
+    execute(commands, sonic, interaction) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 // split into an array

@@ -48,10 +48,8 @@ module.exports = {
         return __awaiter(this, void 0, void 0, function* () {
             if (interaction.channel == null)
                 return;
-            if (interaction.command == null)
-                return;
             const sessionId = interaction.channel.id;
-            const commandName = interaction.command.name;
+            const commandName = interaction.commandName;
             const name = interaction.options.getString("charactername");
             let initiativeRoll = interaction.options.getInteger("initiativeroll");
             const initiativeModifier = interaction.options.getInteger("initiativemodifier");
@@ -63,7 +61,7 @@ module.exports = {
             const options = {
                 id: uuidv4(),
                 characterName: name,
-                initiative: initiativeRoll + initiativeModifier,
+                initiative: initiativeRoll,
                 initiativeModifier: initiativeModifier,
                 roundOrder: 0,
                 isCurrent: false,
@@ -78,7 +76,7 @@ module.exports = {
                         ioC.io.to(sessionId).emit(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_INITIATIVE, { payload: options, sessionId: sessionId });
                         ioC.io.to(sessionId).emit(ServerCommunicationTypes_1.EmitTypes.RESET_ONDECK, true);
                         sonic.log("Emits fired", sonic.info, commandName);
-                        const replyString = `Your character, ${name}, has been added with an initiative of ${initiativeRoll} + ${initiativeModifier} = ${initiativeRoll + initiativeModifier}. You can edit this on the website component using the /link command. \n Any rolled nat 20's have 100 added on for sorting purposes.`;
+                        const replyString = `Your character, ${name}, has been added with an initiative of ${initiativeRoll}. You can edit this on the website component using the /link command. \n Any rolled nat 20's have 100 added on for sorting purposes.`;
                         yield interaction.reply(replyString);
                     }));
                 }));

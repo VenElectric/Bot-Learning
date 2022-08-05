@@ -18,11 +18,7 @@ module.exports = {
     description: "Select an option from the menu to get more information about the command.",
     execute(commands, sonic, interaction) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (interaction.channel == null)
-                return;
-            if (interaction.command == null)
-                return;
-            const commandName = interaction.command.name;
+            const commandName = interaction.commandName;
             try {
                 sonic.emit("getDiscordClient", (client) => __awaiter(this, void 0, void 0, function* () {
                     const helpMenu = client.retrieveMenu(constants_1.menuTypes.HELP);
