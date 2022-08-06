@@ -17,11 +17,14 @@ module.exports = {
         .setDescription("Use this card if you need to stop the session immediately/boundaries were passed."),
     description: "Use this card if you need to stop the session immediately/boundaries were passed.",
     execute(commands, sonic, interaction) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const commandName = interaction.commandName;
+            const user = yield ((_a = interaction === null || interaction === void 0 ? void 0 : interaction.guild) === null || _a === void 0 ? void 0 : _a.members.fetch(interaction.user.id));
+            const name = (user === null || user === void 0 ? void 0 : user.nickname) || interaction.user.username;
             try {
                 sonic.emit("getDiscordClient", (client) => __awaiter(this, void 0, void 0, function* () {
-                    const { embed, file } = client.consentCardEmbed(ConsentCards.RED, interaction.user.username);
+                    const { embed, file } = client.consentCardEmbed(ConsentCards.RED, name);
                     yield interaction.reply({
                         content: "@here",
                         embeds: [embed],
