@@ -9,8 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const weapon_of_logging = require("../utilities/LoggerConfig").logger;
+const { SlashCommandBuilder } = require("discord.js");
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("getdicerolls")

@@ -55,8 +55,5 @@ class IOConnection extends BaseClass_1.default {
         this.initRegisterSockets();
         this.io.on("connection", this.onConnection);
     }
-    get() {
-        return this.io;
-    }
 }
 exports.default = IOConnection;

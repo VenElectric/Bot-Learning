@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.io = exports.ioClass = exports.commands = exports.client = exports.spell = exports.dice = exports.initDB = exports.clientClass = exports.redisStore = exports.sonic = void 0;
+exports.ioClass = exports.commands = exports.client = exports.spell = exports.dice = exports.initDB = exports.clientClass = exports.redisStore = exports.sonic = void 0;
 const express = require("express");
 const http = require("http");
 const app = express();
@@ -49,7 +49,6 @@ exports.commands = exports.clientClass.getCommands();
 (0, SelectMenuItemsCreation_1.initCollection)(exports.commands);
 exports.ioClass = new index_2.default(server, exports.sonic);
 exports.ioClass.init();
-exports.io = exports.ioClass.get();
 // Register and create necessary items
 // Login
 exports.client.once("ready", () => __awaiter(void 0, void 0, void 0, function* () {

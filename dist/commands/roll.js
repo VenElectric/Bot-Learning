@@ -26,30 +26,21 @@ module.exports = {
                     return;
                 if (interaction.content[0].match(/^(\/|[a-z])/)) {
                     args = interaction.content.trim().replace("/", "").split(" ");
-                    weapon_of_logging.debug({
-                        interaction: `roller args regex ${args}`,
-                        function: "roll",
-                    });
+                    sonic.log(`roller args regex ${args}`, sonic.debug, "roll");
                 }
                 else {
                     args = interaction.content.trim().split(/ +/);
-                    weapon_of_logging.debug({
-                        interaction: `roller args else ${args}`,
-                        function: "roll",
-                    });
+                    sonic.log(`roller args else ${args}`, sonic.debug, "roll");
                 }
                 // remove any unecessary characters I.E. / or /r or r if someone is using that as a command (other rollers use this, easier to take into account rather than retrain)
                 if (args[0].match(/\/[a-z]|\/|[r|R]/)) {
                     args.splice(0, 1);
                 }
                 // parse the roll from the comments
-                let parsed = (0, parse_1.parseRoll)(args);
+                let parsed = sonic.parseRoll(args);
                 // make sure no trailing spaces
                 let comment = parsed.comment.trim();
-                weapon_of_logging.debug({
-                    interaction: `parsed completed ${parsed}`,
-                    function: "roll",
-                });
+                sonic.log(`parsed completed ${parsed}`, sonic.info, "roll");
                 const user = yield interaction.guild.members.fetch(interaction.author.id);
                 const name = user.nickname || interaction.author.username;
                 // roll the roll
@@ -77,7 +68,6 @@ module.exports = {
             }
             catch (error) {
                 if (error instanceof Error) {
-                    console.log(error);
                     sonic.onError(error, "roll", interaction.content);
                 }
                 yield interaction.reply("There was an error with the dice roll. Please try again with the correct dice format.");

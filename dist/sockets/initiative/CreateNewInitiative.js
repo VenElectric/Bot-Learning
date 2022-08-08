@@ -10,28 +10,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const ServerCommunicationTypes_1 = require("../../Interfaces/ServerCommunicationTypes");
-const weapon_of_logging = require("../../utilities/LoggerConfig").logger;
 module.exports = {
     name: ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_INITIATIVE,
-    execute(io, socket, client, data) {
+    execute(socket, sonic, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { addSingle, updateSession, } = require("../../services/database-common");
-            let finalMessage;
-            weapon_of_logging.debug({
-                message: data.payload,
-                function: "Create new socket receiver",
-            });
-            finalMessage = yield addSingle(data.payload, data.sessionId, ServerCommunicationTypes_1.topLevelCollections.SESSIONS, ServerCommunicationTypes_1.secondLevelCollections.INITIATIVE);
-            updateSession(data.sessionId, undefined, false);
-            socket.broadcast
-                .to(data.sessionId)
-                .emit(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_INITIATIVE, data.payload);
-            if (finalMessage instanceof Error) {
-                weapon_of_logging.alert({
-                    message: finalMessage.message,
-                    function: ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_INITIATIVE,
-                    docId: data.payload.id,
-                });
+            try {
+                sonic.emit("getInit", (init) => __awaiter(this, void 0, void 0, function* () {
+                    yield init.addDoc(data.payload, data.sessionId);
+                    sonic.log("adding document for init", sonic.info, ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_INITIATIVE);
+                    yield init.setisSorted(false, data.sessionId);
+                    socket.broadcast
+                        .to(data.sessionId)
+                        .emit(ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_INITIATIVE, data.payload);
+                }));
+            }
+            catch (error) {
+                sonic.onError(error, ServerCommunicationTypes_1.EmitTypes.CREATE_NEW_INITIATIVE);
             }
         });
     },
